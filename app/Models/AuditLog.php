@@ -9,8 +9,13 @@ class AuditLog extends Model
     public $timestamps = false; // Only created_at, managed by DB default
 
     protected $fillable = [
-        'user_id', 'action', 'model_type', 'model_id',
-        'description', 'old_values', 'new_values', 'ip_address', 'created_at',
+        'user_id', 'user_name', 'user_role',
+        'action', 'module', 'model_type', 'model_id',
+        'description', 'old_values', 'new_values',
+        'status', 'failure_reason',
+        'ip_address', 'user_agent', 'browser', 'os', 'device_type',
+        'source', 'is_system_action', 'is_immutable',
+        'created_at',
     ];
 
     protected $casts = [
