@@ -33,8 +33,13 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Fix Apache MPM Conflict: Disable event/worker, enable prefork
-RUN a2dismod mpm_event mpm_worker || true
+# Fix Apache MPM Conflict: Hard Delete conflicting MPMs
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.load \
+    /etc/apache2/mods-enabled/mpm_event.conf \
+    /etc/apache2/mods-enabled/mpm_worker.load \
+    /etc/apache2/mods-enabled/mpm_worker.conf
+
+# Force Enable prefork
 RUN a2enmod mpm_prefork
 
 # Set Working Directory
