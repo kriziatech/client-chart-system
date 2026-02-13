@@ -43,7 +43,7 @@ WORKDIR /var/www/html
 COPY . /var/www/html
 
 # Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev
+RUN composer install --optimize-autoloader
 
 # Install NPM dependencies and build assets
 RUN npm install && npm run build
