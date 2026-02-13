@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — Krivia</title>
+    <title>Login — Interior Touch</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
@@ -122,7 +122,7 @@
             <div class="max-w-[560px]">
                 <div
                     class="badge-pill inline-flex px-4 py-1.5 rounded-full text-[10px] font-[800] tracking-[2px] mb-6 uppercase">
-                    Krivia: All-in-One Business Operating System
+                    Interior Touch: All-in-One Business Operating System
                 </div>
 
                 <h1 class="text-4xl lg:text-5xl font-[900] text-white leading-[1.1] mb-8 lg:text-left text-center">
@@ -131,7 +131,8 @@
                 </h1>
 
                 <p class="text-slate-400 text-lg lg:text-xl leading-relaxed mb-6 lg:text-left text-center">
-                    Krivia is an <span class="text-white font-black italic underline decoration-teal-500/50">All-in-One
+                    Interior Touch is an <span
+                        class="text-white font-black italic underline decoration-teal-500/50">All-in-One
                         Business Operating System</span> engineered to centralize project lifecycles, operational
                     finances, and organizational transparency.
                 </p>
@@ -259,7 +260,7 @@
                         </path>
                     </svg>
                 </div>
-                <h2 class="text-4xl font-[900] text-white tracking-tight mb-2 uppercase">Krivia</h2>
+                <h2 class="text-4xl font-[900] text-white tracking-tight mb-2 uppercase">Interior Touch</h2>
                 <p class="text-slate-400 text-xs font-bold uppercase tracking-[0.2em]">by Krizia Technologies</p>
             </div>
 

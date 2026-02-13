@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Progress Dispatch: {{ $client->first_name }} {{ $client->last_name }} | Krivia</title>
+    <title>Progress Dispatch: {{ $client->first_name }} {{ $client->last_name }} | Interior Touch</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
@@ -69,7 +69,7 @@
     <!-- Official Header -->
     <div class="border-b-[6px] border-slate-900 pb-12 mb-14 flex justify-between items-end">
         <div class="space-y-3">
-            <h1 class="text-5xl font-[900] uppercase tracking-tighter text-slate-900">Krivia</h1>
+            <h1 class="text-5xl font-[900] uppercase tracking-tighter text-slate-900">Interior Touch</h1>
             <div class="flex items-center gap-3">
                 <div class="h-4 w-1 bg-brand-600"></div>
                 <p class="text-[11px] font-[800] text-brand-600 uppercase tracking-[0.5em]">All-in-One Business
@@ -247,7 +247,7 @@
     <!-- Verification Footer -->
     <div
         class="mt-24 pt-8 border-t border-slate-100 flex justify-between items-center text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">
-        <p>© 2026 Krivia Structural Intel Node. All Rights Reserved.</p>
+        <p>© 2026 Interior Touch Structural Intel Node. All Rights Reserved.</p>
         <p>Verification Checksum: {{ hash('sha256', $client->id . now()) }}</p>
     </div>
 </body>

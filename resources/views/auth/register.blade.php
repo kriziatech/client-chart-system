@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register — Krivia</title>
+    <title>Register — Interior Touch</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
@@ -25,7 +25,7 @@
                     </path>
                 </svg>
             </div>
-            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Krivia</h1>
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Interior Touch</h1>
             <p class="text-slate-500 text-sm font-medium mt-1">All-in-One Business Operating System</p>
         </div>
 

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Krivia') }}</title>
+    <title>{{ config('app.name', 'Interior Touch') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -144,7 +144,8 @@
                     </svg>
                 </div>
                 <span x-show="sidebarOpen" x-transition.opacity
-                    class="font-bold text-base tracking-tight whitespace-nowrap text-ui-primary dark:text-white">Krivia</span>
+                    class="font-bold text-base tracking-tight whitespace-nowrap text-ui-primary dark:text-white">Interior
+                    Touch</span>
             </div>
         </div>
 
