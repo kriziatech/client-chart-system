@@ -247,7 +247,109 @@
 
         window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     }
+
+    let canvas, ctx, drawing = false;
+
+    function approveQuotation() {
+        document.getElementById('signatureModal').classList.remove('hidden');
+        document.getElementById('signatureModal').classList.add('flex');
+        initCanvas();
+    }
+
+    function closeModal() {
+        document.getElementById('signatureModal').classList.add('hidden');
+        document.getElementById('signatureModal').classList.remove('flex');
+    }
+
+    function initCanvas() {
+        canvas = document.getElementById('signaturePad');
+        ctx = canvas.getContext('2d');
+
+        // Handle resize/retina
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        ctx.scale(ratio, ratio);
+
+        ctx.strokeStyle = '#023E8A';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+
+        const getPos = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: (e.clientX || e.touches[0].clientX) - rect.left,
+                y: (e.clientY || e.touches[0].clientY) - rect.top
+            };
+        };
+
+        const start = (e) => { drawing = true; draw(e); };
+        const end = () => { drawing = false; ctx.beginPath(); };
+        const draw = (e) => {
+            if (!drawing) return;
+            e.preventDefault();
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+        };
+
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('touchstart', start);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('mouseup', end);
+        canvas.addEventListener('touchend', end);
+    }
+
+    function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function submitSignature() {
+        const signatureData = canvas.toDataURL('image/png');
+        const form = document.getElementById('approvalForm');
+        document.getElementById('signatureInput').value = signatureData;
+        form.submit();
+    }
 </script>
+
+<!-- Signature Modal -->
+<div id="signatureModal"
+    class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+    <div
+        class="bg-white dark:bg-dark-surface w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden border border-ui-border">
+        <div class="p-10">
+            <h3 class="text-2xl font-black text-ui-primary dark:text-white tracking-tight mb-2">Authorize Proposal</h3>
+            <p class="text-sm text-ui-muted mb-8">Please provide your digital endorsement below to initialize
+                mobilization.</p>
+
+            <div class="bg-slate-50 dark:bg-dark-bg rounded-2xl border-2 border-dashed border-ui-border p-4">
+                <canvas id="signaturePad" class="w-full h-48 bg-transparent cursor-crosshair touch-none"></canvas>
+            </div>
+
+            <div class="flex items-center justify-between mt-6">
+                <button type="button" onclick="clearSignature()"
+                    class="text-[10px] font-black uppercase text-rose-500 hover:underline tracking-widest">Clear
+                    Canvas</button>
+                <div class="flex gap-3">
+                    <button onclick="closeModal()"
+                        class="px-6 py-3 text-xs font-black uppercase tracking-widest text-ui-muted hover:text-ui-primary transition-colors">Abort</button>
+                    <button onclick="submitSignature()"
+                        class="px-8 py-3 bg-brand-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all active:scale-95">Confirm
+                        & Sign</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="approvalForm" action="{{ route('quotations.updateStatus', $quotation) }}" method="POST" class="hidden">
+    @csrf @method('PATCH')
+    <input type="hidden" name="status" value="approved">
+    <input type="hidden" name="signature_data" id="signatureInput">
+</form>
 
 <style>
     @font-face {

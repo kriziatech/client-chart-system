@@ -8,7 +8,8 @@
     <title>{{ config('app.name', 'Interior Touch') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
     <script>
@@ -16,47 +17,52 @@
             darkMode: 'class',
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
                     colors: {
                         brand: {
-                            50: 'var(--brand-50)',
-                            100: 'var(--brand-100)',
-                            200: 'var(--brand-200)',
-                            300: 'var(--brand-300)',
-                            400: 'var(--brand-400)',
-                            500: 'var(--brand-500)',
-                            600: 'var(--brand-600)',
-                            700: 'var(--brand-700)',
-                            800: 'var(--brand-800)',
-                            900: 'var(--brand-900)',
-                            950: 'var(--brand-950)',
+                            50: '#F0F5FF',
+                            100: '#E1E9FF',
+                            200: '#C8D7FF',
+                            300: '#A4BCFF',
+                            400: '#7594FF',
+                            500: '#4F70FA', // Modern Professional Blue
+                            600: '#3D56D6',
+                            700: '#3144B0',
+                            800: '#2C398E',
+                            900: '#283273',
+                            950: '#171C44',
                         },
                         ui: {
                             bg: '#F8FAFC',
                             surface: '#FFFFFF',
-                            border: '#E2E8F0',
-                            muted: '#64748B',
-                            primary: '#071952',
-                            danger: '#D00000',
-                            success: '#088395',
+                            border: '#F1F5F9',
+                            muted: '#94A3B8',
+                            primary: '#0F172A',
+                            danger: '#EF4444',
+                            success: '#10B981',
                             warning: '#F59E0B'
                         },
                         dark: {
-                            bg: '#040D2B',
-                            surface: '#071952',
-                            border: '#074E66',
-                            muted: '#EBF4F6'
+                            bg: '#0F172A',
+                            surface: '#1E293B',
+                            border: '#334155',
+                            muted: '#94A3B8'
                         }
                     },
                     spacing: {
                         '18': '4.5rem',
                     },
                     borderRadius: {
-                        'xl': '12px',
-                        '2xl': '16px',
+                        'xl': '14px',
+                        '2xl': '20px',
+                        '3xl': '24px',
                     },
                     boxShadow: {
-                        'premium': '0 4px 12px rgba(0,0,0,0.05)',
-                        'premium-hover': '0 8px 24px rgba(0,0,0,0.08)',
+                        'premium': '0 10px 30px -10px rgba(0,0,0,0.04), 0 4px 12px -4px rgba(0,0,0,0.02)',
+                        'premium-hover': '0 20px 40px -15px rgba(0,0,0,0.08), 0 8px 20px -6px rgba(0,0,0,0.04)',
                     }
                 }
             }
@@ -154,10 +160,10 @@
             @auth
             <x-nav-link href="{{ route('dashboard') }}" :active="Request::is('dashboard')"
                 icon="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                label="Dashboard" />
+                label="Workspace Overview" />
             <x-nav-link href="{{ route('clients.index') }}" :active="Request::is('clients*')"
                 icon="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                label="Projects" />
+                label="Workspaces" />
 
             <x-nav-link href="{{ route('chat.index') }}" :active="Request::is('chat*')"
                 icon="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"

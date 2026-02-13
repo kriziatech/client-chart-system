@@ -6,13 +6,15 @@
     <!-- Header Area -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-            <h1 class="text-[28px] font-bold tracking-[-0.3px] text-ui-primary dark:text-white">Workspace Overview</h1>
-            <p class="text-sm text-ui-muted dark:text-dark-muted mt-0.5 font-medium">Monitoring site efficiency across
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-display">Workspace Overview
+            </h1>
+            <p class="text-[15px] text-slate-500 dark:text-dark-muted mt-1 font-medium">Monitoring site efficiency
+                across
                 {{ $totalProjects }} active projects.</p>
         </div>
         <div class="flex items-center gap-3">
             <button
-                class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-surface border border-ui-border dark:border-dark-border rounded-xl text-[13px] font-semibold text-ui-primary dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-premium">
+                class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border rounded-xl text-[13px] font-semibold text-slate-700 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-premium">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
@@ -22,12 +24,12 @@
             </button>
             @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
             <a href="{{ route('clients.create') }}"
-                class="flex items-center gap-2 px-6 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-[13px] font-bold transition-all shadow-lg shadow-brand-500/20 transform active:scale-95">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                class="flex items-center gap-2.5 px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl text-[13px] font-bold transition-all shadow-xl shadow-brand-500/20 transform active:scale-95">
+                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                         d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
-                New Project
+                New Workspace
             </a>
             @endif
         </div>
@@ -38,7 +40,7 @@
         <x-stat-card label="Total Revenue" value="₹{{ number_format($totalRevenue) }}"
             trend="{{ round($revenueGrowth, 1) }}" :trendUp="$revenueGrowth >= 0" :sparkline="$sparklineQuery"
             icon="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0" />
-        <x-stat-card label="Active Projects" value="{{ $totalProjects }}" trend="5.2" :trendUp="true"
+        <x-stat-card label="Active Workspaces" value="{{ $totalProjects }}" trend="5.2" :trendUp="true"
             icon="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         <x-stat-card label="Success Rate"
             value="{{ $totalQuoted > 0 ? round($totalApproved/$totalQuoted*100, 1) : 0 }}%" trend="2.1" :trendUp="true"
@@ -51,11 +53,12 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Chart -->
         <div
-            class="lg:col-span-2 bg-white dark:bg-dark-surface p-7 rounded-2xl border border-ui-border dark:border-dark-border shadow-premium transition-all">
+            class="lg:col-span-2 bg-white dark:bg-dark-surface p-7 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium transition-all">
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h3 class="text-xl font-bold tracking-tight text-ui-primary dark:text-white">Project Growth</h3>
-                    <p class="text-sm text-ui-muted dark:text-dark-muted font-medium">New project registration trends
+                    <h3 class="text-xl font-bold tracking-tight text-slate-800 dark:text-white font-display">Workspace
+                        Growth</h3>
+                    <p class="text-sm text-slate-500 dark:text-dark-muted font-medium">New workspace registration trends
                         over time</p>
                 </div>
                 <select
@@ -71,10 +74,11 @@
 
         <!-- Task Distribution -->
         <div
-            class="bg-white dark:bg-dark-surface p-7 rounded-2xl border border-ui-border dark:border-dark-border shadow-premium flex flex-col">
+            class="bg-white dark:bg-dark-surface p-7 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium flex flex-col">
             <div class="mb-4">
-                <h3 class="text-xl font-bold tracking-tight text-ui-primary dark:text-white">Workload Distribution</h3>
-                <p class="text-sm text-ui-muted dark:text-dark-muted font-medium">Current tasks by status</p>
+                <h3 class="text-xl font-bold tracking-tight text-slate-800 dark:text-white font-display">Workload
+                    Distribution</h3>
+                <p class="text-sm text-slate-500 dark:text-dark-muted font-medium">Current tasks by status</p>
             </div>
             <div class="relative flex-grow flex flex-col items-center justify-center min-h-[220px]">
                 <canvas id="tasksChart"></canvas>
@@ -102,13 +106,15 @@
 
     <!-- Datagrid Section -->
     <div
-        class="bg-white dark:bg-dark-surface rounded-2xl border border-ui-border dark:border-dark-border shadow-premium overflow-hidden">
+        class="bg-white dark:bg-dark-surface rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
         <div
-            class="px-7 py-5 border-b border-ui-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/20">
+            class="px-7 py-6 border-b border-slate-50 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/20">
             <div>
-                <h3 class="text-lg font-bold tracking-tight text-ui-primary dark:text-white">Active Project Portfolios
-                </h3>
-                <p class="text-sm text-ui-muted dark:text-dark-muted">Manage and track live site performance</p>
+                <h3 class="text-xl font-bold tracking-tight text-slate-800 dark:text-white font-display">Active
+                    Workspace
+                    Portfolio</h3>
+                <p class="text-[15px] text-slate-500 dark:text-dark-muted font-medium">Manage and track live site
+                    performance</p>
             </div>
             <div class="flex items-center gap-3">
                 <div class="relative">
@@ -132,69 +138,98 @@
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left">
-                <thead class="bg-slate-50/50 dark:bg-slate-900/30">
+                <thead class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
                     <tr>
-                        <th class="px-7 py-3 text-[11px] font-bold uppercase tracking-widest text-ui-muted">Client
-                            Signature</th>
-                        <th class="px-7 py-3 text-[11px] font-bold uppercase tracking-widest text-ui-muted">Risk Profile
-                        </th>
-                        <th class="px-7 py-3 text-[11px] font-bold uppercase tracking-widest text-ui-muted">Timeline
-                            Status</th>
-                        <th class="px-7 py-3 text-[11px] font-bold uppercase tracking-widest text-ui-muted text-right">
+                        <th
+                            class="px-7 py-5 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                            Client Identity</th>
+                        <th
+                            class="px-7 py-5 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                            Current Stage</th>
+                        <th
+                            class="px-7 py-5 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                            Risk Profile</th>
+                        <th
+                            class="px-7 py-5 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                            Timeline</th>
+                        <th
+                            class="px-7 py-5 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
                             Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-ui-border">
+                <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
                     @forelse($recentProjects as $project)
-                    <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group">
-                        <td class="px-7 py-4">
+                    <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all duration-300 group">
+                        <td class="px-7 py-5">
                             <div class="flex items-center gap-4">
                                 <div
-                                    class="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center font-bold text-brand-600 group-hover:bg-brand-600 group-hover:text-white transition-all transform group-hover:scale-105">
-                                    {{ substr($project->first_name, 0, 1) }}
+                                    class="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-dark-bg flex items-center justify-center font-bold text-slate-400 border border-slate-200/50 dark:border-dark-border group-hover:bg-brand-500 group-hover:text-white group-hover:border-brand-500 transition-all transform group-hover:scale-105 font-display">
+                                    {{ substr($project->first_name, 0, 1) }}{{ substr($project->last_name, 0, 1) }}
                                 </div>
                                 <div>
-                                    <div class="font-bold text-ui-primary dark:text-white text-sm">{{
+                                    <div class="font-bold text-slate-900 dark:text-white text-[15px] font-display">{{
                                         $project->first_name }} {{ $project->last_name }}</div>
-                                    <div class="text-[11px] text-ui-muted font-mono tracking-tighter uppercase">ID:{{
+                                    <div class="text-[11px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">
+                                        {{
                                         $project->file_number }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-7 py-4">
+                        <td class="px-7 py-5">
+                            @php
+                            $currentStage = 'Pitching';
+                            $color = 'blue';
+                            if ($project->feedback || ($project->handover && $project->handover->status ===
+                            'Completed')) {
+                            $currentStage = 'Handover'; $color = 'purple';
+                            } elseif ($project->payments->count() > 0 || $project->paymentRequests->count() > 0) {
+                            $currentStage = 'Financial'; $color = 'emerald';
+                            } elseif ($project->tasks->count() > 0 || $project->dailyReports->count() > 0) {
+                            $currentStage = 'Execution'; $color = 'orange';
+                            } elseif ($project->quotations->where('status', 'approved')->count() > 0) {
+                            $currentStage = 'Planning'; $color = 'indigo';
+                            }
+                            @endphp
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-{{ $color }}-500 animate-pulse"></div>
+                                <span class="text-xs font-black text-{{ $color }}-600 uppercase tracking-widest">{{
+                                    $currentStage }}</span>
+                            </div>
+                        </td>
+                        <td class="px-7 py-5">
                             @php $risk = $project->risk_analysis; @endphp
                             <div class="flex items-center gap-2">
                                 <span
-                                    class="px-3 py-1 rounded-full text-[11px] font-bold uppercase shadow-sm
-                                    {{ $risk['level'] == 'High' ? 'bg-red-100 text-red-700' : ($risk['level'] == 'Medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700') }}">
-                                    {{ $risk['level'] }} Priority
+                                    class="px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-tight border shadow-sm
+                                    {{ $risk['level'] == 'High' ? 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-500/10 dark:border-rose-500/20' : ($risk['level'] == 'Medium' ? 'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-500/10 dark:border-amber-500/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20') }}">
+                                    {{ $risk['level'] }} Profile
                                 </span>
                             </div>
                         </td>
-                        <td class="px-7 py-4">
-                            <div class="flex flex-col gap-1.5">
-                                <span class="text-xs font-bold text-ui-primary dark:text-white">{{ $project->start_date
+                        <td class="px-7 py-5">
+                            <div class="flex flex-col gap-2">
+                                <span class="text-xs font-semibold text-slate-600 dark:text-slate-300">{{
+                                    $project->start_date
                                     ? $project->start_date->format('M d, Y') : 'Pending' }}</span>
-                                <div
-                                    class="w-24 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner">
-                                    <div class="bg-brand-600 h-full w-2/3 shadow-lg shadow-brand-500/20"></div>
+                                <div class="w-24 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <div class="bg-brand-500 h-full w-2/3 rounded-full"></div>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-7 py-4 text-right">
-                            <div class="flex items-center justify-end gap-2">
+                        <td class="px-7 py-5 text-right">
+                            <div class="flex items-center justify-end gap-2.5">
                                 <a href="{{ route('finance.analytics', $project) }}"
-                                    class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm"
-                                    title="Financial Analysis">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="w-10 h-10 flex items-center justify-center rounded-2xl bg-white dark:bg-slate-800 text-rose-500 border border-slate-100 dark:border-slate-700 hover:bg-rose-500 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm hover:shadow-rose-500/20"
+                                    title="Financial Analytics">
+                                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z">
                                         </path>
                                     </svg>
                                 </a>
                                 <a href="{{ route('clients.show', $project) }}"
-                                    class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-ui-muted hover:bg-brand-600 hover:text-white transition-all shadow-sm">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="w-10 h-10 flex items-center justify-center rounded-2xl bg-white dark:bg-slate-800 text-brand-500 border border-slate-100 dark:border-slate-700 hover:bg-brand-500 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm hover:shadow-brand-500/20">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                             d="M9 5l7 7-7 7"></path>
                                     </svg>
@@ -215,77 +250,153 @@
                 </tbody>
             </table>
         </div>
+        <!-- Secondary Intelligence Feed -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Recent Logistics/Materials -->
+            <div
+                class="bg-white dark:bg-dark-surface p-8 rounded-[2.5rem] border border-ui-border shadow-premium overflow-hidden relative">
+                <div class="absolute -top-12 -right-12 w-48 h-48 bg-brand-500/5 rounded-full blur-3xl"></div>
+                <h3 class="text-lg font-black text-ui-primary dark:text-white uppercase tracking-tight mb-6">Logistics
+                    Signal</h3>
+                <div class="space-y-4 relative">
+                    @forelse($recentMaterials as $material)
+                    <div
+                        class="flex items-center justify-between p-4 bg-slate-50 dark:bg-dark-bg rounded-2xl border border-ui-border hover:border-brand-300 transition-all group">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-white dark:bg-dark-surface flex items-center justify-center border border-ui-border text-brand-500 shadow-sm group-hover:scale-110 transition-transform">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[13px] font-black text-ui-primary dark:text-white">{{
+                                    $material->inventoryItem->name }}</p>
+                                <p class="text-[10px] text-ui-muted font-bold uppercase tracking-widest mt-0.5">{{
+                                    $material->client->first_name }}'s Workspace</p>
+                            </div>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 bg-white dark:bg-dark-surface rounded-lg text-[9px] font-black uppercase tracking-widest text-brand-600 border border-ui-border">
+                            {{ $material->status }}
+                        </span>
+                    </div>
+                    @empty
+                    <p class="text-xs text-ui-muted font-bold text-center py-10 uppercase tracking-widest">No recent
+                        procurement</p>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Recent Quotations -->
+            <div
+                class="bg-white dark:bg-dark-surface p-8 rounded-[2.5rem] border border-ui-border shadow-premium overflow-hidden relative">
+                <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl"></div>
+                <h3 class="text-lg font-black text-ui-primary dark:text-white uppercase tracking-tight mb-6">Proposal
+                    Pipeline</h3>
+                <div class="space-y-4 relative">
+                    @forelse($recentQuotations as $quote)
+                    <div
+                        class="flex items-center justify-between p-4 bg-slate-50 dark:bg-dark-bg rounded-2xl border border-ui-border hover:border-indigo-300 transition-all group">
+                        <div class="flex items-center gap-4">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-white dark:bg-dark-surface flex items-center justify-center border border-ui-border text-indigo-500 shadow-sm group-hover:scale-110 transition-transform">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-[13px] font-black text-ui-primary dark:text-white">{{
+                                    $quote->quotation_number }}</p>
+                                <p class="text-[10px] text-ui-muted font-bold uppercase tracking-widest mt-0.5">₹{{
+                                    number_format($quote->total_amount) }} • {{ $quote->client->first_name }}</p>
+                            </div>
+                        </div>
+                        <span
+                            class="px-2.5 py-1 bg-white dark:bg-dark-surface rounded-lg text-[9px] font-black uppercase tracking-widest {{ $quote->status === 'approved' ? 'text-emerald-600' : 'text-indigo-600' }} border border-ui-border">
+                            {{ $quote->status }}
+                        </span>
+                    </div>
+                    @empty
+                    <p class="text-xs text-ui-muted font-bold text-center py-10 uppercase tracking-widest">No active
+                        proposals</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const isDark = document.documentElement.classList.contains('dark');
-        const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(15, 23, 42, 0.05)';
-        const textColor = isDark ? '#94A3B8' : '#64748B';
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(15, 23, 42, 0.05)';
+            const textColor = isDark ? '#94A3B8' : '#64748B';
 
-        const ctxProjects = document.getElementById('projectsChart').getContext('2d');
-        const grad = ctxProjects.createLinearGradient(0, 0, 0, 300);
-        grad.addColorStop(0, 'rgba(0, 180, 216, 0.2)');
-        grad.addColorStop(1, 'rgba(0, 180, 216, 0)');
+            const ctxProjects = document.getElementById('projectsChart').getContext('2d');
+            const grad = ctxProjects.createLinearGradient(0, 0, 0, 300);
+            grad.addColorStop(0, 'rgba(0, 180, 216, 0.2)');
+            grad.addColorStop(1, 'rgba(0, 180, 216, 0)');
 
-        new Chart(ctxProjects, {
-            type: 'line',
-            data: {
-                labels: @json($months),
-                datasets: [{
-                    label: 'New Projects',
-                    data: @json($projectCounts),
-                    borderColor: '#00B4D8',
-                    backgroundColor: grad,
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 5,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#00B4D8',
-                    pointBorderWidth: 2,
-                    pointHoverRadius: 7
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: {
-                        grid: { color: gridColor, borderDash: [4, 4] },
-                        ticks: { color: textColor, font: { weight: '600', size: 10 } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: textColor, font: { weight: '600', size: 10 } }
+            new Chart(ctxProjects, {
+                type: 'line',
+                data: {
+                    labels: @json($months),
+                    datasets: [{
+                        label: 'New Workspaces',
+                        data: @json($projectCounts),
+                        borderColor: '#00B4D8',
+                        backgroundColor: grad,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#00B4D8',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            grid: { color: gridColor, borderDash: [4, 4] },
+                            ticks: { color: textColor, font: { weight: '600', size: 10 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: textColor, font: { weight: '600', size: 10 } }
+                        }
                     }
                 }
-            }
-        });
+            });
 
-        const ctxTasks = document.getElementById('tasksChart').getContext('2d');
-        new Chart(ctxTasks, {
-            type: 'doughnut',
-            data: {
-                labels: @json($taskLabels),
-                datasets: [{
-                    data: @json($taskData),
-                    backgroundColor: ['#03045E', '#0077B6', '#00B4D8', '#90E0EF'],
-                    borderWidth: 5,
-                    borderColor: isDark ? '#03045E' : '#fff',
-                    hoverOffset: 15
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '80%',
-                plugins: { legend: { display: false } }
-            }
+            const ctxTasks = document.getElementById('tasksChart').getContext('2d');
+            new Chart(ctxTasks, {
+                type: 'doughnut',
+                data: {
+                    labels: @json($taskLabels),
+                    datasets: [{
+                        data: @json($taskData),
+                        backgroundColor: ['#03045E', '#0077B6', '#00B4D8', '#90E0EF'],
+                        borderWidth: 5,
+                        borderColor: isDark ? '#03045E' : '#fff',
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '80%',
+                    plugins: { legend: { display: false } }
+                }
+            });
         });
-    });
-</script>
-@endsection
+    </script>
+    @endsection

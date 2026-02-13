@@ -13,10 +13,10 @@
         <!-- File Number -->
         <div class="space-y-2">
             <label class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">File
-                Number <span class="text-rose-500">*</span></label>
+                Number <span class="text-brand-500 font-normal italic">(Auto-generates if empty)</span></label>
             <input type="text" name="file_number" value="{{ old('file_number', $client->file_number ?? '') }}"
                 class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white dark:focus:bg-dark-surface transition-all placeholder:text-slate-400 @error('file_number') ring-2 ring-rose-500/20 border-rose-500 @enderror"
-                placeholder="e.g. IT-2024-001" required>
+                placeholder="Leave blank for: IT-{{ now()->format('dmy') }}-001">
             @error('file_number') <p class="text-[10px] text-rose-500 font-bold mt-1 italic">{{ $message }}</p>
             @enderror
         </div>
@@ -134,10 +134,10 @@
                     <td class="px-2 py-2">
                         @if($item->id)<input type="hidden" name="checklist_items[{{ $index }}][id]"
                             value="{{ $item->id }}">@endif
-                        <input type="text" name="checklist_items[{{ $index }}][name]" value="{{ old("
-                            checklist_items.$index.name", $item->name) }}"
-                        class="w-full border-gray-300 rounded focus:ring-teal-500 focus:border-teal-500"
-                        placeholder="e.g. Civil Work" required>
+                        <input type="text" name="checklist_items[{{ $index }}][name]"
+                            value="{{ old('checklist_items.' . $index . '.name', $item->name) }}"
+                            class="w-full border-gray-300 rounded focus:ring-teal-500 focus:border-teal-500"
+                            placeholder="e.g. Civil Work" required>
                     </td>
                     <td class="px-2 py-2 text-center">
                         <input type="checkbox" name="checklist_items[{{ $index }}][is_checked]" value="1"
@@ -224,9 +224,11 @@
                         value="{{ $comment->initials }}" class="border rounded w-full p-1"></td>
                 <td class="p-2"><input type="text" name="comments[{{$index}}][comment]" value="{{ $comment->comment }}"
                         class="border rounded w-full p-1"></td>
-                <td class="p-2 text-center"><button type="button" onclick="this.closest('tr').remove()"
-                        class="text-red-500 hover:text-red-700">&times;</button></td>
-                <input type="hidden" name="comments[{{$index}}][id]" value="{{ $comment->id }}">
+                <td class="p-2 text-center">
+                    <button type="button" onclick="this.closest('tr').remove()"
+                        class="text-red-500 hover:text-red-700">&times;</button>
+                    <input type="hidden" name="comments[{{$index}}][id]" value="{{ $comment->id }}">
+                </td>
             </tr>
             @empty
             <!-- Initial Empty Row if new -->
@@ -266,9 +268,11 @@
                         class="border rounded w-full p-1"></td>
                 <td class="p-2"><input type="text" name="payments[{{$index}}][purpose]" value="{{ $payment->purpose }}"
                         class="border rounded w-full p-1"></td>
-                <td class="p-2 text-center"><button type="button" onclick="this.closest('tr').remove()"
-                        class="text-red-500 hover:text-red-700">&times;</button></td>
-                <input type="hidden" name="payments[{{$index}}][id]" value="{{ $payment->id }}">
+                <td class="p-2 text-center">
+                    <button type="button" onclick="this.closest('tr').remove()"
+                        class="text-red-500 hover:text-red-700">&times;</button>
+                    <input type="hidden" name="payments[{{$index}}][id]" value="{{ $payment->id }}">
+                </td>
             </tr>
             @empty
             @endforelse
@@ -300,18 +304,19 @@
                 <tr class="border-b" id="task-row-{{ $index }}">
                     <td class="px-2 py-2">
                         <input type="hidden" name="tasks[{{ $index }}][id]" value="{{ $task->id }}">
-                        <input type="text" name="tasks[{{ $index }}][description]" value="{{ old("
-                            tasks.$index.description", $task->description) }}" class="w-full border-gray-300 rounded
+                        <input type="text" name="tasks[{{ $index }}][description]"
+                            value="{{ old('tasks.' . $index . '.description', $task->description) }}" class="w-full border-gray-300 rounded
                         focus:ring-teal-500 focus:border-teal-500" placeholder="Task details" required>
                     </td>
                     <td class="px-2 py-2">
-                        <input type="text" name="tasks[{{ $index }}][assigned_to]" value="{{ old("
-                            tasks.$index.assigned_to", $task->assigned_to) }}" class="w-full border-gray-300 rounded
+                        <input type="text" name="tasks[{{ $index }}][assigned_to]"
+                            value="{{ old('tasks.' . $index . '.assigned_to', $task->assigned_to) }}" class="w-full border-gray-300 rounded
                         focus:ring-teal-500 focus:border-teal-500" placeholder="Name">
                     </td>
                     <td class="px-2 py-2">
-                        <input type="date" name="tasks[{{ $index }}][deadline]" value="{{ old(" tasks.$index.deadline",
-                            $task->deadline ? $task->deadline->format('Y-m-d') : '') }}" class="w-full border-gray-300
+                        <input type="date" name="tasks[{{ $index }}][deadline]"
+                            value="{{ old('tasks.' . $index . '.deadline', $task->deadline ? $task->deadline->format('Y-m-d') : '') }}"
+                            class="w-full border-gray-300
                         rounded focus:ring-teal-500 focus:border-teal-500">
                     </td>
                     <td class="px-2 py-2">
@@ -352,7 +357,6 @@
         Save Client Project
     </button>
 </div>
-</form>
 
 <script>
     function addCommentRow() {

@@ -3,36 +3,37 @@
 @section('content')
 <style>
     @media print {
-
-        .no-print,
-        .no-print * {
+        .no-print {
             display: none !important;
         }
 
         body {
-            background: white;
+            background: white !important;
         }
 
-        /* Ensure tables break cleanly */
         tr {
             page-break-inside: avoid;
         }
     }
 </style>
-<div
-    class="w-full mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200 dark:bg-slate-800 dark:border-slate-700 transition-colors duration-200">
+
+<div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+    {{-- Project Header --}}
     <div
-        class="bg-gray-50 border-b border-gray-200 dark:bg-slate-800 dark:border-slate-700 px-8 py-4 flex justify-between items-center no-print transition-colors duration-200">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Project Details</h1>
-        <div class="space-x-2">
+        class="bg-white dark:bg-dark-surface border-b border-slate-100 dark:border-dark-border px-8 py-5 flex flex-col md:flex-row justify-between items-center no-print transition-all rounded-t-[32px] gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white font-display">Project Dossier</h1>
+            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">{{ $client->file_number }}</p>
+        </div>
+        <div class="flex items-center gap-3">
             <a href="{{ route('clients.index') }}"
-                class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white px-3 py-2 transition">Back</a>
+                class="px-4 py-2 text-slate-500 hover:text-slate-800 dark:text-gray-400 dark:hover:text-white text-sm font-semibold transition font-display">Back</a>
             @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
             <a href="{{ route('clients.edit', $client) }}"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition">Edit</a>
+                class="bg-white dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 px-5 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition">Edit</a>
             @endif
             <a href="{{ route('finance.analytics', $client) }}"
-                class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded shadow transition flex items-center gap-2 inline-flex">
+                class="bg-rose-500 hover:bg-rose-600 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg shadow-rose-500/20 transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z">
@@ -41,843 +42,751 @@
                 Financial Analysis
             </a>
             <a href="{{ route('portal.show', $client->uuid) }}" target="_blank"
-                class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded shadow transition">Client Portal</a>
+                class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 transition">Portal</a>
             <a href="{{ route('clients.print', $client) }}" target="_blank"
-                class="bg-gray-800 hover:bg-gray-900 text-white px-4 py-2 rounded shadow transition">Print View</a>
+                class="bg-slate-900 hover:bg-black text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg transition">Print</a>
         </div>
     </div>
 
-    <div class="p-8 space-y-8">
-        <!-- Section 1: Header -->
-        <div class="border-b-2 border-teal-700 pb-4 dark:border-teal-500">
-            <h1 class="text-3xl font-bold text-center text-teal-800 uppercase tracking-wider dark:text-teal-400">Client
-                Chart</h1>
-            <p class="text-center text-gray-500 text-sm dark:text-gray-400">Project Work Sheet</p>
-        </div>
+    <div class="p-8 space-y-8 bg-white dark:bg-dark-surface rounded-b-[32px] shadow-premium">
+        {{-- Project Lifecycle Visualization --}}
+        <x-project-lifecycle :client="$client" />
 
-        {{-- AI Insights Widget --}}
+        {{-- AI Insights & Health --}}
         @php
         $risk = $client->risk_analysis;
         $riskLevel = $risk['level'];
-
-        // Explicit classes for Tailwind JIT
-        $textColors = match($riskLevel) {
-        'High' => 'text-red-600 dark:text-red-400',
-        'Medium' => 'text-yellow-600 dark:text-yellow-400',
-        'Low' => 'text-green-600 dark:text-green-400',
-        default => 'text-gray-600 dark:text-gray-400'
-        };
-        $iconColors = match($riskLevel) {
-        'High' => 'text-red-500 dark:text-red-400',
-        'Medium' => 'text-yellow-500 dark:text-yellow-400',
-        'Low' => 'text-green-500 dark:text-green-400',
-        default => 'text-gray-500 dark:text-gray-400'
-        };
-        $borderClass = match($riskLevel) {
-        'High' => 'border-red-500',
-        'Medium' => 'border-yellow-500',
-        'Low' => 'border-green-500',
-        default => 'border-gray-500'
-        };
         @endphp
         <div
-            class="bg-gradient-to-r from-gray-50 to-white dark:from-slate-800 dark:to-slate-900 border-l-4 {{ $borderClass }} rounded-lg p-6 shadow-sm dark:shadow-none transition-colors duration-200">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        <svg class="w-5 h-5 {{ $iconColors }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                        AI Project Insights
-                    </h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Predictive analysis based on current
-                        progress</p>
-                </div>
-                <div class="text-right">
-                    <div class="text-2xl font-black {{ $textColors }}">{{ $risk['score'] }}/100</div>
-                    <div class="text-xs font-bold uppercase tracking-wide {{ $iconColors }}">{{ $risk['level'] }} Risk
+            class="bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl p-8 border border-slate-100 dark:border-dark-border relative overflow-hidden group">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-brand-500/5 blur-[100px] -mr-32 -mt-32 rounded-full"></div>
+            <div class="flex flex-col md:flex-row items-start justify-between gap-8 relative z-10">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2.5 bg-brand-500/10 rounded-xl">
+                            <svg class="w-6 h-6 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">AI Project
+                                Intelligence</h3>
+                            <p class="text-sm text-slate-500 dark:text-dark-muted font-medium mt-0.5">Predictive health
+                                analysis & risk assessment</p>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="mt-4 grid md:grid-cols-2 gap-4">
-                <div class="bg-white dark:bg-slate-800/50 p-3 rounded border border-gray-100 dark:border-slate-700">
-                    <h4 class="text-xs font-bold uppercase text-gray-400 mb-2">Key Factors</h4>
-                    <ul class="space-y-1">
-                        @forelse($risk['reasons'] as $reason)
-                        <li class="text-sm text-gray-700 dark:text-white flex items-start gap-2">
-                            <span class="{{ $iconColors }} mt-1">•</span> {{ $reason }}
-                        </li>
-                        @empty
-                        <li class="text-sm text-gray-500 italic">No significant risks detected.</li>
-                        @endforelse
-                    </ul>
-                </div>
-                <div class="bg-white dark:bg-slate-800/50 p-3 rounded border border-gray-100 dark:border-slate-700">
-                    <h4 class="text-xs font-bold uppercase text-gray-400 mb-2">Projections</h4>
-                    <div class="flex items-center gap-3">
-                        <div class="flex-1">
-                            <div class="text-sm text-gray-600 dark:text-gray-400">Est. Completion</div>
-                            <div class="font-medium text-gray-800 dark:text-white">
-                                {{ now()->addDays($risk['projected_delay'] + ($client->delivery_date ?
-                                now()->diffInDays($client->delivery_date) : 0))->format('d M, Y') }}
+                    <div class="grid md:grid-cols-2 gap-6 mt-8">
+                        <div class="space-y-4">
+                            <h4 class="text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Synthesized Risk Factors</h4>
+                            <ul class="space-y-3">
+                                @forelse($risk['reasons'] as $reason)
+                                <li class="flex items-start gap-3">
+                                    <div
+                                        class="mt-1.5 w-1.5 h-1.5 rounded-full {{ $riskLevel == 'High' ? 'bg-rose-500' : ($riskLevel == 'Medium' ? 'bg-amber-500' : 'bg-emerald-500') }}">
+                                    </div>
+                                    <span
+                                        class="text-[14px] text-slate-600 dark:text-slate-300 font-medium leading-relaxed">{{
+                                        $reason }}</span>
+                                </li>
+                                @empty
+                                <li class="text-sm text-slate-400 italic">No critical risk dependencies identified.</li>
+                                @endforelse
+                            </ul>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Timeline Projections</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div
+                                    class="bg-white dark:bg-dark-bg p-4 rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm">
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">
+                                        Target End</div>
+                                    <div class="text-sm font-bold text-slate-800 dark:text-white">
+                                        {{ now()->addDays($risk['projected_delay'] + ($client->delivery_date ?
+                                        now()->diffInDays($client->delivery_date) : 0))->format('d M, Y') }}
+                                    </div>
+                                </div>
+                                <div
+                                    class="bg-white dark:bg-dark-bg p-4 rounded-2xl border border-slate-100 dark:border-dark-border shadow-sm">
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">
+                                        Schedule Variance</div>
+                                    <div
+                                        class="text-sm font-bold {{ $risk['projected_delay'] > 0 ? 'text-rose-500' : 'text-emerald-500' }}">
+                                        {{ $risk['projected_delay'] > 0 ? '+' . round($risk['projected_delay']) . '
+                                        Days' : 'On Track' }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex-1 border-l border-gray-200 dark:border-slate-700 pl-3">
-                            <div class="text-sm text-gray-600 dark:text-gray-400">Delay Risk</div>
-                            @if($risk['projected_delay'] > 0)
-                            <div class="font-bold text-red-500 dark:text-red-400">+{{ round($risk['projected_delay']) }}
-                                Days</div>
-                            @else
-                            <div class="font-bold text-green-500 dark:text-green-400">On Track</div>
-                            @endif
+                    </div>
+                </div>
+                <div
+                    class="flex flex-col items-center justify-center p-8 bg-white dark:bg-dark-bg rounded-[40px] border border-slate-100 dark:border-dark-border min-w-[200px] shadow-sm">
+                    <div class="relative flex items-center justify-center">
+                        <svg class="w-32 h-32 transform -rotate-90">
+                            <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="8" fill="transparent"
+                                class="text-slate-100 dark:text-slate-800" />
+                            <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="8" fill="transparent"
+                                stroke-dasharray="351.85" stroke-dashoffset="{{ 351.85 * (1 - $risk['score']/100) }}"
+                                class="{{ $riskLevel == 'High' ? 'text-rose-500' : ($riskLevel == 'Medium' ? 'text-amber-500' : 'text-emerald-500') }} transition-all duration-1000" />
+                        </svg>
+                        <div class="absolute flex flex-col items-center">
+                            <span class="text-3xl font-bold text-slate-900 dark:text-white font-display">{{
+                                $risk['score'] }}</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Health</span>
                         </div>
+                    </div>
+                    <div
+                        class="mt-4 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest {{ $riskLevel == 'High' ? 'bg-rose-500 text-white' : ($riskLevel == 'Medium' ? 'bg-amber-500 text-white' : 'bg-emerald-500 text-white') }}">
+                        {{ $riskLevel }} Risk
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Financial Summary Cards --}}
+        @php
+        $approvedTotal = $client->quotations->where('status', 'approved')->sum('total_amount');
+        $pendingTotal = $client->quotations->where('status', 'sent')->sum('total_amount');
+        $paidTotal = $client->payments->sum('amount');
+        @endphp
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
+            <div
+                class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium group">
+                <div
+                    class="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center text-brand-600 mb-4 dark:bg-brand-500/10 dark:text-brand-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Authorized Budget</h4>
+                <div class="text-2xl font-bold text-slate-900 dark:text-white mt-1 font-display">₹{{
+                    number_format($approvedTotal) }}</div>
+                <div class="mt-3 text-[12px] text-slate-500 font-medium">Work officially approved by client.</div>
+            </div>
+            <div
+                class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
+                <div
+                    class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 mb-4 dark:bg-emerald-500/10 dark:text-emerald-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                </div>
+                <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Collected Capital</h4>
+                <div class="text-2xl font-bold text-emerald-600 mt-1 font-display">₹{{ number_format($paidTotal) }}
+                </div>
+                <div class="mt-3 text-[12px] text-slate-500 font-medium">Total payments cleared in ledger.</div>
+            </div>
+            <div
+                class="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium border-l-4 {{ $pendingTotal > 0 ? 'border-amber-500' : 'border-slate-100' }}">
+                <div
+                    class="w-10 h-10 {{ $pendingTotal > 0 ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-400' }} rounded-xl flex items-center justify-center mb-4">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h4 class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Awaiting Approval</h4>
+                <div
+                    class="text-2xl font-bold {{ $pendingTotal > 0 ? 'text-amber-600' : 'text-slate-300' }} mt-1 font-display">
+                    ₹{{ number_format($pendingTotal) }}</div>
+                @if($pendingTotal > 0)
+                <div class="mt-3 text-[11px] text-amber-600 font-bold animate-pulse">ACTION REQUIRED: QUOTATION SENT
+                </div>
+                @else
+                <div class="mt-3 text-[12px] text-slate-400 italic">No pending quotations.</div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Client & Project Info Cards --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {{-- Client Info --}}
+            <div
+                class="bg-white dark:bg-slate-900/40 p-7 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 bg-brand-500/10 rounded-xl">
+                        <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display">Client Configuration</h3>
+                </div>
+                <div class="space-y-4">
+                    <div
+                        class="flex justify-between items-center py-3 border-b border-slate-50 dark:border-dark-border/50">
+                        <span class="text-[13px] text-slate-400 font-bold uppercase tracking-widest">Identified
+                            As</span>
+                        <span class="text-[15px] font-bold text-slate-800 dark:text-white">{{ $client->first_name }} {{
+                            $client->last_name }}</span>
+                    </div>
+                    <div
+                        class="flex justify-between items-center py-3 border-b border-slate-50 dark:border-dark-border/50">
+                        <span class="text-[13px] text-slate-400 font-bold uppercase tracking-widest">Contact
+                            Point</span>
+                        <span class="text-[15px] font-bold text-slate-800 dark:text-white">{{ $client->mobile }}</span>
+                    </div>
+                    <div class="flex justify-between items-start py-3">
+                        <span class="text-[13px] text-slate-400 font-bold uppercase tracking-widest">Site
+                            Location</span>
+                        <span
+                            class="text-[14px] font-medium text-slate-600 dark:text-slate-300 text-right max-w-[200px] leading-relaxed">{{
+                            $client->address }}</span>
                     </div>
                 </div>
             </div>
 
-            {{-- Financial & Quotation Summary --}}
-            @php
-            $approvedTotal = $client->quotations->where('status', 'approved')->sum('total_amount');
-            $pendingTotal = $client->quotations->where('status', 'sent')->sum('total_amount');
-            $paidTotal = $client->payments->sum('amount');
-            @endphp
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 no-print mb-8">
-                <div
-                    class="bg-white dark:bg-slate-800 p-6 rounded-xl border-l-4 border-teal-500 shadow-sm relative group">
-                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Authorized Budget
-                    </h4>
-                    <div class="text-2xl font-black text-teal-600">₹{{ number_format($approvedTotal) }}</div>
-                    <p class="text-[9px] text-slate-500 mt-2">Work officially approved by client.</p>
-                </div>
-
-                <div
-                    class="bg-white dark:bg-slate-800 p-6 rounded-xl border-l-4 border-blue-500 shadow-sm relative group">
-                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Payments Collected
-                    </h4>
-                    <div class="text-2xl font-black text-blue-600">₹{{ number_format($paidTotal) }}</div>
-                    <p class="text-[9px] text-slate-500 mt-2">Total payments received till date.</p>
-                </div>
-
-                <div
-                    class="bg-white dark:bg-slate-800 p-6 rounded-xl border-l-4 {{ $pendingTotal > 0 ? 'border-orange-500 bg-orange-50/10' : 'border-slate-300' }} shadow-sm relative group">
-                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Pending Approval
-                    </h4>
-                    <div class="text-2xl font-black {{ $pendingTotal > 0 ? 'text-orange-600' : 'text-slate-300' }}">₹{{
-                        number_format($pendingTotal) }}</div>
-                    @if($pendingTotal > 0)
-                    <p class="text-[9px] text-orange-600 mt-2 font-bold animate-pulse">ACTION REQUIRED: CLIENT APPROVAL
-                        PENDING</p>
-                    @else
-                    <p class="text-[9px] text-slate-400 mt-2 italic">Nothing pending for approval.</p>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Section 1: Client Info -->
+            {{-- Project Schedule --}}
             <div
-                class="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded border border-gray-200 dark:bg-slate-900 dark:border-slate-700 transition-colors duration-200">
-                <div>
-                    <p class="text-gray-800 dark:text-white"><span
-                            class="font-bold text-gray-700 dark:text-white">Client
-                            Name:</span> {{ $client->first_name }} {{ $client->last_name }}</p>
-                    <p class="text-gray-800 dark:text-white"><span class="font-bold text-gray-700 dark:text-white">File
-                            No:</span> {{ $client->file_number }}</p>
-                    <p class="text-gray-800 dark:text-white"><span
-                            class="font-bold text-gray-700 dark:text-white">Mobile:</span> {{ $client->mobile }}</p>
+                class="bg-white dark:bg-slate-900/40 p-7 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 bg-brand-500/10 rounded-xl">
+                        <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display">Project Timeline</h3>
                 </div>
-                <div>
-                    <p class="text-gray-800 dark:text-white"><span class="font-bold text-gray-700 dark:text-white">Start
-                            Date:</span> {{ $client->start_date ? $client->start_date->format('d M Y') : '-' }}</p>
-                    <p class="text-gray-800 dark:text-white"><span
-                            class="font-bold text-gray-700 dark:text-white">Delivery
-                            Date:</span> {{ $client->delivery_date
-                        ? $client->delivery_date->format('d M Y') : '-' }}</p>
-                    <p class="text-gray-800 dark:text-white"><span
-                            class="font-bold text-gray-700 dark:text-white">Address:</span> {{ $client->address }}</p>
-                </div>
-                <div class="col-span-2">
-                    <p class="text-gray-800 dark:text-white"><span
-                            class="font-bold text-gray-700 dark:text-white">Description:</span> {{
-                        $client->work_description
-                        }}</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div
+                        class="p-5 bg-slate-50 dark:bg-dark-bg rounded-2xl border border-slate-100 dark:border-dark-border">
+                        <div class="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">Initialization
+                        </div>
+                        <div class="text-[15px] font-bold text-slate-800 dark:text-white">{{ $client->start_date ?
+                            $client->start_date->format('d M, Y') : '-' }}</div>
+                    </div>
+                    <div
+                        class="p-5 bg-slate-50 dark:bg-dark-bg rounded-2xl border border-slate-100 dark:border-dark-border">
+                        <div class="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">Target Turnover
+                        </div>
+                        <div class="text-[15px] font-bold text-slate-800 dark:text-white">{{ $client->delivery_date ?
+                            $client->delivery_date->format('d M, Y') : '-' }}</div>
+                    </div>
+                    <div
+                        class="col-span-2 p-5 bg-slate-50/50 dark:bg-dark-bg/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                        <div class="text-[11px] text-slate-400 font-bold uppercase tracking-widest mb-1">Execution Brief
+                        </div>
+                        <p class="text-[14px] font-medium text-slate-600 dark:text-slate-300 leading-relaxed">{{
+                            $client->work_description }}</p>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Section 2: Checklist -->
-            <div>
-                <h3
-                    class="text-lg font-bold text-teal-700 border-b border-gray-300 mb-2 dark:text-teal-400 dark:border-slate-600">
-                    Work Checklist</h3>
-                <div class="grid grid-cols-3 md:grid-cols-5 gap-2 text-sm">
+        {{-- Checklist and Authorizations --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div
+                class="bg-white dark:bg-slate-900/40 p-7 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display mb-6">Validation Checklist</h3>
+                <div class="grid grid-cols-2 gap-3">
                     @forelse($client->checklistItems as $item)
-                    <div class="flex items-center">
+                    <div
+                        class="flex items-center gap-3 p-3 rounded-xl border {{ $item->is_checked ? 'bg-brand-50 border-brand-100 dark:bg-brand-500/10 dark:border-brand-500/20' : 'bg-slate-50 border-slate-100 dark:bg-dark-bg dark:border-dark-border' }}">
+                        <div
+                            class="w-5 h-5 rounded-full flex items-center justify-center {{ $item->is_checked ? 'bg-brand-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-400' }}">
+                            @if($item->is_checked)<svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>@endif
+                        </div>
                         <span
-                            class="w-5 h-5 border border-gray-400 mr-2 flex items-center justify-center rounded text-xs {{ $item->is_checked ? 'bg-teal-100 text-teal-700 border-teal-500 dark:bg-teal-900 dark:text-teal-300 dark:border-teal-700' : 'text-gray-300 dark:border-slate-600' }}">
-                            {{ $item->is_checked ? '✓' : '' }}
-                        </span>
-                        <span
-                            class="{{ $item->is_checked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-500' }}">{{
+                            class="text-[13px] font-bold {{ $item->is_checked ? 'text-brand-900 dark:text-brand-100' : 'text-slate-500' }}">{{
                             $item->name }}</span>
                     </div>
                     @empty
-                    <p class="text-gray-500 col-span-5">No checklist items.</p>
+                    <div class="col-span-2 text-center py-4 text-slate-400 italic text-sm">No checklist defined.</div>
                     @endforelse
                 </div>
             </div>
 
-            <!-- Section 3: Site Info & Permissions -->
-            <div class="grid grid-cols-2 gap-8">
-                <div>
-                    <h3
-                        class="text-lg font-bold text-teal-700 border-b border-gray-300 mb-2 dark:text-teal-400 dark:border-slate-600">
-                        Site Information</h3>
-                    <p class="text-sm mb-1 text-gray-800 dark:text-white"><span
-                            class="font-bold text-gray-700 dark:text-white">Signed By:</span> {{
-                        $client->siteInfo->signed_by }}</p>
-                    <p class="text-sm mb-1 text-gray-800 dark:text-white"><span
-                            class="font-bold text-gray-700 dark:text-white">Facts:</span> {{
-                        $client->siteInfo->site_facts
-                        }}</p>
-                    <p class="text-sm mb-1 text-gray-800 dark:text-white"><span
-                            class="font-bold text-gray-700 dark:text-white">Instructions:</span> {{
-                        $client->siteInfo->working_instructions }}</p>
-                </div>
-                <div>
-                    <h3
-                        class="text-lg font-bold text-teal-700 border-b border-gray-300 mb-2 dark:text-teal-400 dark:border-slate-600">
-                        Permissions</h3>
-                    <div class="space-y-2 text-sm text-gray-800 dark:text-white">
-                        <p>Work Permit: <span class="font-bold text-gray-700 dark:text-white">{{
-                                $client->permission->work_permit ? 'Yes' : 'No' }}</span></p>
-                        <p>Gate Pass: <span class="font-bold text-gray-700 dark:text-white">{{
-                                $client->permission->gate_pass ? 'Yes' : 'No' }}</span></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 3.5: Roles & Responsibility (Scope of Work) -->
-            <div class="mt-8">
-                <h3
-                    class="text-lg font-bold text-teal-700 border-b border-gray-300 mb-4 dark:text-teal-400 dark:border-slate-600">
-                    Roles and Responsibility (Scope of Work)
-                </h3>
-
-                @if(!$client->scopeOfWork)
-                @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
-                <div
-                    class="bg-gray-50 dark:bg-slate-900/50 p-6 rounded-xl border border-dashed border-gray-300 dark:border-slate-700 text-center">
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium italic">No structural definition
-                        exists for this project's roles and responsibilities.</p>
-                    <form action="{{ route('scope.store', $client) }}" method="POST">
-                        @csrf
-                        <input type="hidden" name="version_name" value="Final Proposal">
-                        <button type="submit"
-                            class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition shadow-lg active:scale-95">
-                            Initialize Definitions
-                        </button>
-                    </form>
-                </div>
-                @else
-                <p class="text-sm text-gray-500 italic">No project definitions yet.</p>
-                @endif
-                @else
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    @forelse($client->scopeOfWork->items as $item)
-                    <div
-                        class="bg-white dark:bg-slate-800/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm group hover:shadow-md transition-all">
-                        <h4 class="text-[11px] font-black uppercase tracking-[0.1em] text-teal-600 mb-2">{{
-                            $item->area_name }}</h4>
-                        <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{{ $item->description }}
-                        </p>
-                    </div>
-                    @empty
-                    <div
-                        class="col-span-full py-8 text-center bg-gray-50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-gray-300 dark:border-slate-700 text-gray-400 text-sm italic">
-                        Definitions initialized. Waiting for item deployment.
-                    </div>
-                    @endforelse
-                </div>
-
-                @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
-                <div class="mt-6">
-                    <button onclick="document.getElementById('add-scope-item-modal').classList.remove('hidden')"
-                        class="text-[10px] font-black uppercase tracking-widest text-teal-600 hover:text-teal-700 flex items-center gap-2 group">
-                        <span
-                            class="w-6 h-6 rounded-lg bg-teal-50 dark:bg-teal-500/10 flex items-center justify-center group-hover:bg-teal-100 transition-colors">+</span>
-                        Assign New Responsibility
-                    </button>
-                </div>
-
-                <!-- Add Scope Item Modal -->
-                <div id="add-scope-item-modal"
-                    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
-                    <div
-                        class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700 overflow-hidden transform transition-all">
-                        <div
-                            class="px-8 py-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-dark-bg/50">
-                            <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">New
-                                Responsibility Alignment</h3>
-                            <button onclick="document.getElementById('add-scope-item-modal').classList.add('hidden')"
-                                class="text-slate-400 hover:text-slate-600 transition-colors text-xl font-light">&times;</button>
+            <div
+                class="bg-white dark:bg-slate-900/40 p-7 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display mb-6">Authorizations</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-dark-bg rounded-2xl">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 {{ $client->permission && $client->permission->work_permit ? 'text-emerald-500' : 'text-slate-300' }}"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                                </path>
+                            </svg>
+                            <span class="text-[14px] font-bold text-slate-700 dark:text-slate-200">Site Work
+                                Permit</span>
                         </div>
-                        <form action="{{ route('scope.item.store', $client->scopeOfWork) }}" method="POST"
-                            class="p-8 space-y-6">
-                            @csrf
-                            <div class="space-y-2">
-                                <label
-                                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Operational
-                                    Area</label>
-                                <input type="text" name="area_name" required placeholder="e.g. Master Bedroom, Kitchen"
-                                    class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-4 focus:ring-teal-500/10 transition-all placeholder:text-slate-300">
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Task
-                                    Definition / Responsibility</label>
-                                <textarea name="description" required rows="4"
-                                    placeholder="Describe the specific work and mandates..."
-                                    class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-teal-500/10 transition-all placeholder:text-slate-300 resize-none"></textarea>
-                            </div>
-                            <div class="pt-4 flex justify-end gap-3">
-                                <button type="button"
-                                    onclick="document.getElementById('add-scope-item-modal').classList.add('hidden')"
-                                    class="px-6 py-3 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition">Cancel</button>
-                                <button type="submit"
-                                    class="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.1em] transition shadow-lg shadow-teal-500/20 active:scale-95">
-                                    Confirm Assignment
-                                </button>
-                            </div>
-                        </form>
+                        <span
+                            class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest {{ $client->permission && $client->permission->work_permit ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600' }}">
+                            {{ $client->permission && $client->permission->work_permit ? 'Authenticated' : 'Pending' }}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-dark-bg rounded-2xl">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 {{ $client->permission && $client->permission->gate_pass ? 'text-emerald-500' : 'text-slate-300' }}"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
+                                </path>
+                            </svg>
+                            <span class="text-[14px] font-bold text-slate-700 dark:text-slate-200">Gate Access
+                                Clearance</span>
+                        </div>
+                        <span
+                            class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest {{ $client->permission && $client->permission->gate_pass ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600' }}">
+                            {{ $client->permission && $client->permission->gate_pass ? 'Authenticated' : 'Pending' }}
+                        </span>
                     </div>
                 </div>
-                @endif
-                @endif
             </div>
-
         </div>
 
-        <!-- Section 4: Project Gallery -->
-        <div class="mt-8">
-            <h3
-                class="text-lg font-bold text-teal-700 border-b border-gray-300 mb-4 dark:text-teal-400 dark:border-slate-600">
-                Project Gallery</h3>
-
-            <!-- Feedback Messages -->
-            @if(session('success'))
-            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-                <p>{{ session('success') }}</p>
-            </div>
-            @endif
-            @if(session('error'))
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-                <p>{{ session('error') }}</p>
-            </div>
-            @endif
-            @if($errors->any())
-            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-                <ul>
-                    @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
-
-            <!-- Gallery Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                @forelse($client->galleries as $image)
-                <div
-                    class="group relative bg-gray-50 dark:bg-slate-900 rounded-lg overflow-hidden border border-gray-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
-                    <a href="{{ asset('storage/' . $image->image_path) }}" target="_blank"
-                        class="block aspect-square overflow-hidden bg-gray-200 dark:bg-slate-800">
-                        <img src="{{ asset('storage/' . $image->image_path) }}"
-                            alt="{{ $image->caption ?? 'Project Image' }}"
-                            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                    </a>
-
-                    @if($image->caption)
-                    <div
-                        class="p-2 text-xs text-center border-t border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-900 truncate">
-                        {{ $image->caption }}
+        {{-- Scope of Mandate --}}
+        <div class="mb-12">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-brand-500/10 rounded-xl">
+                        <svg class="w-6 h-6 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                            </path>
+                        </svg>
                     </div>
-                    @endif
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Scope of Mandate</h3>
+                        <p class="text-sm text-slate-500 dark:text-dark-muted font-medium mt-0.5">Categorized work
+                            distribution units</p>
+                    </div>
+                </div>
+                @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
+                <button onclick="document.getElementById('add-scope-modal').classList.remove('hidden')"
+                    class="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition">Add
+                    Unit</button>
+                @endif
+            </div>
 
-                    <!-- Delete Button (Admin Only) -->
-                    @if(Auth::user()->isAdmin())
-                    <form action="{{ route('gallery.destroy', $image) }}" method="POST"
-                        onsubmit="return confirm('Delete this image?');"
-                        class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        @csrf @method('DELETE')
-                        <button type="submit"
-                            class="bg-red-500 text-white p-1 rounded-full shadow hover:bg-red-600 focus:outline-none"
-                            title="Delete Image">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </form>
-                    @endif
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @if($client->scopeOfWork)
+                @forelse($client->scopeOfWork->items as $work)
+                <div
+                    class="bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium group hover:border-brand-500/30 transition-all duration-300">
+                    <div class="flex items-start justify-between mb-4">
+                        <div
+                            class="px-3 py-1 bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                            {{ $work->area_name }}
+                        </div>
+                    </div>
+                    <p class="text-[13px] text-slate-500 dark:text-dark-muted font-medium leading-relaxed">{{
+                        $work->description }}</p>
                 </div>
                 @empty
                 <div
-                    class="col-span-full text-center py-8 text-gray-500 dark:text-gray-400 italic bg-gray-50 dark:bg-slate-900/50 rounded border border-dashed border-gray-300 dark:border-slate-700">
-                    No images uploaded yet.
+                    class="col-span-full py-12 text-center bg-slate-50 dark:bg-dark-bg rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                    <p class="text-slate-400 font-medium font-display">No scope units defined in version: {{
+                        $client->scopeOfWork->version_name }}</p>
+                </div>
+                @endforelse
+                @else
+                <div
+                    class="col-span-full py-12 text-center bg-slate-50 dark:bg-dark-bg rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                    <p class="text-slate-400 font-medium font-display mb-4">No scope units initialized yet.</p>
+                    @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
+                    <form action="{{ route('scope.store', $client) }}" method="POST">@csrf<button type="submit"
+                            class="text-[10px] font-black uppercase text-brand-600 hover:underline">Initialize Version
+                            1.0</button></form>
+                    @endif
+                </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Tabbed Data Section --}}
+        <div x-data="{ activeTab: 'payments' }" class="mb-12">
+            <div class="flex items-center gap-2 mb-8 p-1.5 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl w-fit">
+                <button @click="activeTab = 'payments'"
+                    :class="activeTab === 'payments' ? 'bg-white dark:bg-slate-700 shadow-premium text-brand-600 dark:text-brand-400' : 'text-slate-500'"
+                    class="px-6 py-2 rounded-xl text-sm font-bold transition-all duration-300 font-display">Payments</button>
+                <button @click="activeTab = 'quotations'"
+                    :class="activeTab === 'quotations' ? 'bg-white dark:bg-slate-700 shadow-premium text-brand-600 dark:text-brand-400' : 'text-slate-500'"
+                    class="px-6 py-2 rounded-xl text-sm font-bold transition-all duration-300 font-display">Quotations</button>
+                <button @click="activeTab = 'materials'"
+                    :class="activeTab === 'materials' ? 'bg-white dark:bg-slate-700 shadow-premium text-brand-600 dark:text-brand-400' : 'text-slate-500'"
+                    class="px-6 py-2 rounded-xl text-sm font-bold transition-all duration-300 font-display">Materials</button>
+                <button @click="activeTab = 'tasks'"
+                    :class="activeTab === 'tasks' ? 'bg-white dark:bg-slate-700 shadow-premium text-brand-600 dark:text-brand-400' : 'text-slate-500'"
+                    class="px-6 py-2 rounded-xl text-sm font-bold transition-all duration-300 font-display">Timeline</button>
+            </div>
+
+            {{-- Payments Tab --}}
+            <div x-show="activeTab === 'payments'" class="animate-in fade-in duration-500">
+                <div
+                    class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead
+                            class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                            <tr>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                    Transaction ID</th>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                    Cleared On</th>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                    Settlement Mode</th>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                    Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                            @forelse($client->payments as $payment)
+                            <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                                <td class="px-7 py-4 font-bold text-slate-900 dark:text-white text-[14px] font-display">
+                                    #{{ $payment->id }}</td>
+                                <td class="px-7 py-4 text-[14px] text-slate-500 dark:text-dark-muted font-medium">{{
+                                    $payment->payment_date ? $payment->payment_date->format('d M, Y') : '-' }}</td>
+                                <td class="px-7 py-4"><span
+                                        class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[11px] font-bold uppercase text-slate-500">Digital
+                                        Clearing</span></td>
+                                <td class="px-7 py-4 text-right font-bold text-emerald-600 text-[15px] font-display">₹{{
+                                    number_format($payment->amount) }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="px-7 py-12 text-center text-slate-400 italic">Financial ledger
+                                    initialization required.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Quotations Tab --}}
+            <div x-show="activeTab === 'quotations'" x-cloak class="animate-in fade-in duration-500">
+                <div
+                    class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead
+                            class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                            <tr>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                    Doc Reference</th>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                    Submission</th>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                    Status</th>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                    Valuation</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                            @forelse($client->quotations as $quotation)
+                            <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                                <td class="px-7 py-4 font-bold text-slate-900 dark:text-white text-[14px] font-display">
+                                    {{ $quotation->quotation_number }}</td>
+                                <td class="px-7 py-4 text-[14px] text-slate-500 dark:text-dark-muted font-medium">{{
+                                    $quotation->created_at->format('d M, Y') }}</td>
+                                <td class="px-7 py-4">
+                                    <span
+                                        class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest {{ $quotation->status == 'approved' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600' }}">
+                                        {{ $quotation->status }}
+                                    </span>
+                                </td>
+                                <td
+                                    class="px-7 py-4 text-right font-bold text-slate-900 dark:text-white text-[15px] font-display">
+                                    ₹{{ number_format($quotation->total_amount) }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="px-7 py-12 text-center text-slate-400 italic">No quotation
+                                    records generated.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Materials Tab --}}
+            <div x-show="activeTab === 'materials'" x-cloak class="animate-in fade-in duration-500">
+                <div
+                    class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead
+                            class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                            <tr>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                    Material SKU</th>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                    Inventory Status</th>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                    Qty Provisioned</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                            @forelse($client->projectMaterials as $mat)
+                            <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                                <td class="px-7 py-4 font-bold text-slate-800 dark:text-white text-[14px] font-display">
+                                    {{ $mat->inventoryItem->name ?? 'Unknown item' }}</td>
+                                <td class="px-7 py-4"><span
+                                        class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[11px] font-bold text-slate-500 uppercase">{{
+                                        $mat->status }}</span></td>
+                                <td
+                                    class="px-7 py-4 text-right font-bold text-slate-900 dark:text-white text-[15px] font-display">
+                                    {{ $mat->quantity_dispatched }} {{ $mat->inventoryItem->unit ?? '' }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="px-7 py-12 text-center text-slate-400 italic">Inventory
+                                    allocation pending.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {{-- Tasks Tab --}}
+            <div x-show="activeTab === 'tasks'" x-cloak class="animate-in fade-in duration-500">
+                <div
+                    class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead
+                            class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                            <tr>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                    Operational Assignment</th>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                    Timeline</th>
+                                <th
+                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                    State</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                            @forelse($client->tasks as $task)
+                            <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                                <td class="px-7 py-4">
+                                    <div class="font-bold text-slate-800 dark:text-white text-[14px] font-display">{{
+                                        $task->description }}</div>
+                                    <div class="text-[11px] text-slate-500 mt-0.5 font-medium">Agent: {{
+                                        $task->assigned_to ?: 'Unassigned' }}</div>
+                                </td>
+                                <td
+                                    class="px-7 py-4 text-[13px] {{ $task->deadline && $task->deadline->isPast() && $task->status !== 'Completed' ? 'text-rose-500 font-bold' : 'text-slate-500' }}">
+                                    {{ $task->deadline ? $task->deadline->format('d M, Y') : '-' }}
+                                </td>
+                                <td class="px-7 py-4 text-right">
+                                    <span
+                                        class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest {{ $task->status == 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500' }}">
+                                        {{ $task->status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="px-7 py-12 text-center text-slate-400 italic">No operational
+                                    tasks assigned.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- Operational Log --}}
+        <div class="mb-12">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display mb-6 px-2">Operational Execution
+                Log</h3>
+            <div
+                class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                        <tr>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Date</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Execution Agent</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Status Note</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                        @forelse($client->comments->sortByDesc('date') as $comment)
+                        <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                            <td
+                                class="px-7 py-4 text-[14px] text-slate-500 font-bold font-display uppercase tracking-tight">
+                                {{ $comment->date }}</td>
+                            <td class="px-7 py-4"><span
+                                    class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[11px] font-bold uppercase text-slate-600 dark:text-slate-400">{{
+                                    $comment->initials }}</span></td>
+                            <td class="px-7 py-4">
+                                <div class="text-[14px] font-bold text-slate-800 dark:text-white">{{ $comment->work }}
+                                </div>
+                                <div class="text-[13px] text-slate-500 mt-0.5">{{ $comment->comment }}</div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="px-7 py-12 text-center text-slate-400 italic">No operational logs
+                                recorded.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {{-- Visual Documentation Gallery --}}
+        <div class="pb-12">
+            <div class="flex items-center justify-between mb-8 px-2">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Visual Site Documentation</h3>
+                @if(!auth()->user()->isViewer())
+                <button onclick="document.getElementById('upload-modal').classList.remove('hidden')"
+                    class="px-5 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition">Upload
+                    Media</button>
+                @endif
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                @forelse($client->galleries as $image)
+                <div
+                    class="relative group aspect-square rounded-2xl overflow-hidden border border-slate-100 dark:border-dark-border shadow-sm">
+                    <img src="{{ asset('storage/' . $image->image_path) }}"
+                        class="w-full h-full object-cover transition duration-500 group-hover:scale-110">
+                    <div
+                        class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 px-2 text-center">
+                        <a href="{{ asset('storage/' . $image->image_path) }}" target="_blank"
+                            class="p-2 bg-white/20 backdrop-blur rounded-lg text-white hover:bg-white/40"><svg
+                                class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                                </path>
+                            </svg></a>
+                    </div>
+                </div>
+                @empty
+                <div
+                    class="col-span-full py-12 text-center bg-slate-50 dark:bg-dark-bg rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                    <p class="text-slate-400 font-medium font-display">No visual documentation available.</p>
                 </div>
                 @endforelse
             </div>
-
-            <!-- Upload Form (Admin/Editor Only) -->
-            @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
-            <form action="{{ route('gallery.store', $client) }}" method="POST" enctype="multipart/form-data"
-                class="bg-gray-50 dark:bg-slate-900/50 p-4 rounded border border-gray-200 dark:border-slate-700 no-print">
-                @csrf
-                <div class="flex flex-col md:flex-row items-end gap-4">
-                    <div class="flex-1 w-full">
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Upload
-                            Image</label>
-                        <input type="file" name="image" required
-                            class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 dark:file:bg-teal-900/30 dark:file:text-teal-300">
-                    </div>
-                    <div class="flex-1 w-full">
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Caption
-                            (Optional)</label>
-                        <input type="text" name="caption" placeholder="E.g. Kitchen Before"
-                            class="w-full rounded border-gray-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white text-sm shadow-sm focus:border-teal-500 focus:ring-teal-500">
-                    </div>
-                    <div>
-                        <button type="submit"
-                            class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded text-sm font-bold shadow transition">
-                            Upload
-                        </button>
-                    </div>
-                </div>
-            </form>
-            @endif
-        </div>
-
-        <!-- Section 5: Comments -->
-        <div>
-            <h3
-                class="text-lg font-bold text-teal-700 border-b border-gray-300 mb-2 dark:text-teal-400 dark:border-slate-600">
-                Comments</h3>
-            <table class="w-full text-sm border-collapse border border-gray-300 dark:border-slate-700">
-                <thead class="bg-gray-100 dark:bg-slate-800">
-                    <tr>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Date</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Work</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Initials</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Comment</th>
-                    </tr>
-                </thead>
-                <tbody class="dark:bg-slate-900/50">
-                    @forelse($client->comments as $comment)
-                    <tr>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $comment->date }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $comment->work }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $comment->initials }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $comment->comment }}</td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="p-2 text-center text-gray-500">No comments.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Section 6: Payments -->
-        <div>
-            <h3
-                class="text-lg font-bold text-teal-700 border-b border-gray-300 mb-2 dark:text-teal-400 dark:border-slate-600">
-                Payments</h3>
-            <table class="w-full text-sm border-collapse border border-gray-300 dark:border-slate-700">
-                <thead class="bg-gray-100 dark:bg-slate-800">
-                    <tr>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Name</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Role</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Amount</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Date</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Purpose</th>
-                    </tr>
-                </thead>
-                <tbody class="dark:bg-slate-900/50">
-                    @forelse($client->payments as $payment)
-                    <tr>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $payment->name }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $payment->role }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">
-                            ₹{{ number_format($payment->amount, 2) }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $payment->date }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $payment->purpose }}</td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="p-2 text-center text-gray-500">No payments recorded.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Section 6.2: Advance Payment Requests -->
-        <div class="mt-8">
-            <div class="flex justify-between items-center border-b border-gray-300 mb-2 dark:border-slate-600">
-                <h3 class="text-lg font-bold text-blue-700 dark:text-blue-400">Advance Payment Requests</h3>
-                @if(!auth()->user()->isViewer())
-                <a href="{{ route('payment-requests.create', ['client_id' => $client->id]) }}"
-                    class="text-xs bg-blue-600 text-white px-3 py-1 rounded no-print hover:bg-blue-700 transition">+
-                    Request Advance</a>
-                @endif
-            </div>
-            <table class="w-full text-sm border-collapse border border-gray-300 dark:border-slate-700">
-                <thead class="bg-blue-50 dark:bg-slate-800">
-                    <tr>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Title</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Amount</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Due Date</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-center text-gray-700 dark:text-white">
-                            Status</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-right text-gray-700 dark:text-white">
-                            Action</th>
-                    </tr>
-                </thead>
-                <tbody class="dark:bg-slate-900/50">
-                    @forelse($client->paymentRequests as $preq)
-                    <tr>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2">
-                            <div class="font-bold text-slate-800 dark:text-white">{{ $preq->title }}</div>
-                            @if($preq->quotation) <div class="text-[10px] text-slate-400">Linked to: {{
-                                $preq->quotation->quotation_number }}</div> @endif
-                        </td>
-                        <td
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-blue-600 font-bold italic text-lg">
-                            ₹{{ number_format($preq->amount, 2) }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $preq->due_date ? $preq->due_date->format('d M, Y') : 'N/A' }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-center">
-                            <span
-                                class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest
-                                {{ $preq->status === 'paid' ? 'bg-green-100 text-green-700' : ($preq->status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">
-                                {{ $preq->status }}
-                            </span>
-                        </td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-right space-x-1">
-                            @if(!auth()->user()->isViewer() && $preq->status === 'pending')
-                            <form action="{{ route('payment-requests.updateStatus', $preq) }}" method="POST"
-                                class="inline">
-                                @csrf @method('PATCH')
-                                <input type="hidden" name="status" value="paid">
-                                <button type="submit"
-                                    class="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">Mark
-                                    Paid</button>
-                            </form>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="p-4 text-center text-gray-400 italic">No advance payment requests found.
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Section 6.5: Quotations & Work Approval -->
-        <div class="mt-8" id="quotations-section">
-            <div class="flex justify-between items-center border-b border-gray-300 mb-2 dark:border-slate-600">
-                <h3 class="text-lg font-bold text-teal-700 dark:text-teal-400">Quotations & Work Approval</h3>
-                @if(!auth()->user()->isViewer())
-                <a href="{{ route('quotations.create', ['client_id' => $client->id]) }}"
-                    class="text-xs bg-teal-600 text-white px-3 py-1 rounded no-print hover:bg-teal-700 transition">+ Add
-                    Additional Work</a>
-                @endif
-            </div>
-            <table class="w-full text-sm border-collapse border border-gray-300 dark:border-slate-700">
-                <thead class="bg-gray-100 dark:bg-slate-800">
-                    <tr>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            ID #</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Date</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Total Amount</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-center text-gray-700 dark:text-white">
-                            Status</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-right text-gray-700 dark:text-white">
-                            Action</th>
-                    </tr>
-                </thead>
-                <tbody class="dark:bg-slate-900/50">
-                    @forelse($client->quotations as $quotation)
-                    <tr>
-                        <td
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400 font-mono">
-                            {{ $quotation->quotation_number }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $quotation->date->format('d M, Y') }}</td>
-                        <td
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-gray-800 dark:text-white font-bold">
-                            ₹{{ number_format($quotation->total_amount, 2) }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-center">
-                            <span
-                                class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest
-                                {{ $quotation->status === 'approved' ? 'bg-green-100 text-green-700' : ($quotation->status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }}">
-                                {{ $quotation->status }}
-                            </span>
-                        </td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-right">
-                            <a href="{{ route('quotations.show', $quotation) }}"
-                                class="text-teal-600 font-bold hover:underline">View Details</a>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="p-4 text-center text-gray-500 italic">No quotations issued for this
-                            project.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Section: Material Tracking -->
-        <div class="mt-8">
-            <div class="flex justify-between items-center border-b border-gray-300 mb-2 dark:border-slate-600">
-                <h3 class="text-lg font-bold text-teal-700 dark:text-teal-400">Inventory & Material Tracking</h3>
-                @if(!auth()->user()->isViewer())
-                <button onclick="document.getElementById('dispatch-modal').classList.toggle('hidden')"
-                    class="text-xs bg-teal-600 text-white px-3 py-1 rounded no-print hover:bg-teal-700 transition">+
-                    Dispatch Material</button>
-                @endif
-            </div>
-
-            <table class="w-full text-sm border-collapse border border-gray-300 dark:border-slate-700">
-                <thead class="bg-gray-100 dark:bg-slate-800">
-                    <tr>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Material</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Qty Dispatched</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Date</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-center text-gray-700 dark:text-white">
-                            Status</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-right text-gray-700 dark:text-white no-print">
-                            Action</th>
-                    </tr>
-                </thead>
-                <tbody class="dark:bg-slate-900/50">
-                    @forelse($client->materials as $mat)
-                    <tr>
-                        <td
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-gray-800 dark:text-white font-bold">
-                            {{ $mat->inventoryItem->name }}
-                        </td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">
-                            {{ $mat->quantity_dispatched }} {{ $mat->inventoryItem->unit }}
-                        </td>
-                        <td
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400 font-mono text-xs">
-                            {{ $mat->delivery_date ? $mat->delivery_date->format('d M, Y') : '-' }}
-                        </td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-center">
-                            @if(!auth()->user()->isViewer())
-                            <form action="{{ route('project-materials.updateStatus', $mat) }}" method="POST"
-                                class="inline no-print">
-                                @csrf @method('PATCH')
-                                <select name="status" onchange="this.form.submit()"
-                                    class="text-[10px] px-2 py-0.5 rounded border-none bg-slate-100 dark:bg-slate-800 dark:text-gray-300 cursor-pointer">
-                                    <option value="Stocked" {{ $mat->status === 'Stocked' ? 'selected' : '' }}>Stocked
-                                    </option>
-                                    <option value="In Use" {{ $mat->status === 'In Use' ? 'selected' : '' }}>In Use
-                                    </option>
-                                    <option value="Consumed" {{ $mat->status === 'Consumed' ? 'selected' : ''
-                                        }}>Consumed</option>
-                                </select>
-                            </form>
-                            <span class="print:block hidden text-xs">{{ $mat->status }}</span>
-                            @else
-                            <span class="px-2 py-0.5 rounded-full text-[10px] bg-slate-100 text-slate-700">{{
-                                $mat->status }}</span>
-                            @endif
-                        </td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-right no-print">
-                            @if(!auth()->user()->isViewer())
-                            <form action="{{ route('project-materials.destroy', $mat) }}" method="POST" class="inline"
-                                onsubmit="return confirm('Remove this dispatch record?')">
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                    class="text-red-500 hover:text-red-700 text-xs font-bold uppercase">Remove</button>
-                            </form>
-                            @else
-                            -
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="p-4 text-center text-gray-500 italic">No materials dispatched yet.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Section 7: Tasks & Timeline -->
-        <div class="mt-8">
-            <h3
-                class="text-lg font-bold text-teal-700 border-b border-gray-300 mb-2 dark:text-teal-400 dark:border-slate-600">
-                Tasks & Timeline</h3>
-            <table class="w-full text-sm border-collapse border border-gray-300 dark:border-slate-700">
-                <thead class="bg-gray-100 dark:bg-slate-800">
-                    <tr>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left w-1/3 text-gray-700 dark:text-white">
-                            Task / Description</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Assigned To</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Deadline</th>
-                        <th
-                            class="border border-gray-300 dark:border-slate-700 p-2 text-left text-gray-700 dark:text-white">
-                            Status</th>
-                    </tr>
-                </thead>
-                <tbody class="dark:bg-slate-900/50">
-                    @forelse($client->tasks as $task)
-                    <tr>
-                        <td
-                            class="border border-gray-300 dark:border-slate-700 p-2 font-medium text-gray-800 dark:text-white">
-                            {{ $task->description }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">{{
-                            $task->assigned_to ?? '-' }}</td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2 text-gray-600 dark:text-gray-400">
-                            {{ $task->deadline ? $task->deadline->format('d M, Y') : '-' }}
-                            @if($task->deadline && $task->deadline->isPast() && $task->status !== 'Completed')
-                            <span class="text-red-500 text-xs ml-1 font-bold">(Overdue)</span>
-                            @endif
-                        </td>
-                        <td class="border border-gray-300 dark:border-slate-700 p-2">
-                            @php
-                            $statusColors = [
-                            'Pending' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-                            'In Progress' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-                            'Completed' => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-                            ];
-                            $color = $statusColors[$task->status] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-800
-                            dark:text-white';
-                            @endphp
-                            <span class="{{ $color }} text-xs font-medium px-2.5 py-0.5 rounded">{{ $task->status
-                                }}</span>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="p-2 text-center text-gray-500">No tasks assigned.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
+
+{{-- Modals --}}
 @if(!auth()->user()->isViewer())
-<div id="dispatch-modal"
-    class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+<div id="add-scope-modal"
+    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
     <div
-        class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl max-w-md w-full border border-slate-200 dark:border-slate-700">
-        <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center">
-            <h3 class="text-lg font-bold text-gray-800 dark:text-white">Dispatch Material to Site</h3>
-            <button onclick="document.getElementById('dispatch-modal').classList.toggle('hidden')"
-                class="text-gray-400 hover:text-gray-600">&times;</button>
+        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
+        <div
+            class="px-8 py-6 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Initialize Work Unit</h3>
+            <button onclick="document.getElementById('add-scope-modal').classList.add('hidden')"
+                class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
         </div>
-        <form action="{{ route('project-materials.store') }}" method="POST" class="p-6 space-y-4">
+        <form action="{{ route('scope.store', $client) }}" method="POST" class="p-8 space-y-6">
             @csrf
             <input type="hidden" name="client_id" value="{{ $client->id }}">
-            <div>
-                <label class="block text-xs font-black uppercase text-gray-500 dark:text-gray-400 mb-1">Select Material
-                    from Catalog</label>
-                <select name="inventory_item_id" required
-                    class="w-full border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white rounded shadow-sm focus:ring-teal-500">
-                    <option value="">-- Select Material --</option>
-                    @foreach(\App\Models\InventoryItem::orderBy('name')->get() as $item)
-                    <option value="{{ $item->id }}">{{ $item->name }} ({{ $item->unit }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label
-                        class="block text-xs font-black uppercase text-gray-500 dark:text-gray-400 mb-1">Quantity</label>
-                    <input type="number" step="0.01" name="quantity_dispatched" required
-                        class="w-full border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white rounded shadow-sm focus:ring-teal-500">
+            <div class="grid grid-cols-2 gap-6">
+                <div class="col-span-2">
+                    <label class="block text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">Category /
+                        Trade</label>
+                    <input type="text" name="category" required placeholder="e.g. Electrical, Plumbing"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-4 py-3 text-sm focus:ring-brand-500 transition-all">
                 </div>
-                <div>
-                    <label class="block text-xs font-black uppercase text-gray-500 dark:text-gray-400 mb-1">Date</label>
-                    <input type="date" name="delivery_date" value="{{ date('Y-m-d') }}"
-                        class="w-full border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white rounded shadow-sm focus:ring-teal-500">
+                <div class="col-span-2">
+                    <label class="block text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">Unit
+                        Name</label>
+                    <input type="text" name="unit_name" required placeholder="e.g. Master Bedroom"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-4 py-3 text-sm focus:ring-brand-500 transition-all">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">Technical
+                        Brief</label>
+                    <textarea name="description" rows="3" placeholder="Scope details..."
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-4 py-3 text-sm focus:ring-brand-500 transition-all"></textarea>
                 </div>
             </div>
-            <div class="pt-4 flex justify-end gap-3">
-                <button type="button" onclick="document.getElementById('dispatch-modal').classList.toggle('hidden')"
-                    class="px-4 py-2 text-gray-600 hover:text-gray-800 transition">Cancel</button>
+            <div class="flex justify-end gap-3 pt-4">
+                <button type="button" onclick="document.getElementById('add-scope-modal').classList.add('hidden')"
+                    class="px-6 py-3 text-slate-400 font-bold hover:text-slate-600 transition">Cancel</button>
                 <button type="submit"
-                    class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded font-bold transition">Confirm
-                    Dispatch</button>
+                    class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-brand-500/20 transition">Save
+                    Unit</button>
             </div>
         </form>
     </div>
 </div>
+
+<div id="upload-modal"
+    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div
+        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 dark:border-dark-border">
+        <div
+            class="px-8 py-6 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Upload Media</h3>
+            <button onclick="document.getElementById('upload-modal').classList.add('hidden')"
+                class="text-slate-400 hover:text-slate-600 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg>
+            </button>
+        </div>
+        <form action="{{ route('gallery.store', $client) }}" method="POST" enctype="multipart/form-data"
+            class="p-8 space-y-6">
+            @csrf
+            <div
+                class="p-8 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl flex flex-col items-center justify-center gap-4 bg-slate-50/50">
+                <div
+                    class="w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl shadow-sm flex items-center justify-center text-brand-500">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                </div>
+                <input type="file" name="image" required
+                    class="text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-brand-50 file:text-brand-600 cursor-pointer">
+            </div>
+            <button type="submit"
+                class="w-full bg-brand-500 hover:bg-brand-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-brand-500/20 transition active:scale-95">Start
+                Upload</button>
+        </form>
+    </div>
+</div>
 @endif
+
 @endsection

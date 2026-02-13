@@ -29,6 +29,27 @@ class Client extends Model
             if (empty($model->uuid)) {
                 $model->uuid = (string)\Illuminate\Support\Str::uuid();
             }
+
+            if (empty($model->file_number)) {
+                $datePart = now()->format('dmY'); // DDMMYYYY
+                // User asked for IT-DDMMYY-001, so DDMMYY
+                $datePartShort = now()->format('dmy');
+
+                $prefix = "IT-{$datePartShort}-";
+
+                $latestClient = static::where('file_number', 'like', "{$prefix}%")
+                    ->orderBy('file_number', 'desc')
+                    ->first();
+
+                $sequence = 1;
+                if ($latestClient) {
+                    $parts = explode('-', $latestClient->file_number);
+                    $lastSeq = (int)end($parts);
+                    $sequence = $lastSeq + 1;
+                }
+
+                $model->file_number = $prefix . str_pad($sequence, 3, '0', STR_PAD_LEFT);
+            }
         });
     }
 

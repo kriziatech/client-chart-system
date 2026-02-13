@@ -52,7 +52,7 @@ class ClientController extends Controller
     {
         $request->validate([
             'first_name' => 'required|string|max:255',
-            'file_number' => 'required|string|unique:clients,file_number',
+            'file_number' => 'nullable|string|unique:clients,file_number',
             'user_id' => 'nullable|exists:users,id',
         ]);
 
@@ -75,7 +75,7 @@ class ClientController extends Controller
 
             // Save Comments
             if ($request->has('comments')) {
-                $client->comments()->createMany(array_values($request->input('comments')));
+                $client->comments()->createMany(array_values($request->input('comments', [])));
             }
 
             // Save Payments
@@ -105,13 +105,37 @@ class ClientController extends Controller
             abort(403, 'Unauthorized access to this project.');
         }
 
-        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks', 'scopeOfWork.items']);
+        $client->load([
+            'user',
+            'checklistItems',
+            'siteInfo',
+            'permission',
+            'comments',
+            'payments',
+            'tasks',
+            'scopeOfWork.items',
+            'projectMaterials.inventoryItem',
+            'galleries',
+            'paymentRequests'
+        ]);
+
+        // Failsafe: Ensure relationships are collections (not null)
+        if (is_null($client->projectMaterials)) {
+            $client->setRelation('projectMaterials', collect([]));
+        }
+        if (is_null($client->paymentRequests)) {
+            $client->setRelation('paymentRequests', collect([]));
+        }
+        if (is_null($client->galleries)) {
+            $client->setRelation('galleries', collect([]));
+        }
+
         return view('clients.show', compact('client'));
     }
 
     public function edit(Client $client)
     {
-        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks', 'scopeOfWork.items']);
+        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks', 'scopeOfWork.items', 'projectMaterials.inventoryItem']);
         $users = \App\Models\User::orderBy('name')->get();
         return view('clients.edit', compact('client', 'users'));
     }
@@ -120,7 +144,7 @@ class ClientController extends Controller
     {
         $request->validate([
             'first_name' => 'required|string|max:255',
-            'file_number' => 'required|string|unique:clients,file_number,' . $client->id,
+            'file_number' => 'nullable|string|unique:clients,file_number,' . $client->id,
             'user_id' => 'nullable|exists:users,id',
         ]);
 
@@ -212,7 +236,7 @@ class ClientController extends Controller
 
     public function print(Client $client)
     {
-        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks', 'scopeOfWork.items']);
+        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks', 'scopeOfWork.items', 'projectMaterials.inventoryItem']);
         return view('clients.print', compact('client'));
     }
 }

@@ -2,19 +2,20 @@
 
 @section('content')
 <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center justify-between mb-10">
         <div>
-            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Active Projects</h1>
-            <p class="text-sm text-ui-muted dark:text-dark-muted font-medium mt-1">Manage and track your ongoing project
-                charters.</p>
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-display">Active Workspaces
+            </h1>
+            <p class="text-[15px] text-slate-500 dark:text-dark-muted font-medium mt-1">Manage and track your ongoing
+                workspace dossiers.</p>
         </div>
 
         @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
         <a href="{{ route('clients.create') }}"
-            class="bg-brand-600 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-brand-700 transition-all shadow-xl shadow-brand-500/20 flex items-center gap-2 group transform active:scale-95">
-            <svg class="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" fill="none"
+            class="bg-brand-500 text-white px-6 py-3.5 rounded-2xl text-[13px] font-bold tracking-tight hover:bg-brand-600 transition-all shadow-xl shadow-brand-500/20 flex items-center gap-2.5 group transform active:scale-95">
+            <svg class="w-4.5 h-4.5 group-hover:rotate-90 transition-transform duration-500" fill="none"
                 stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
                 </path>
             </svg>
             Initialize Project

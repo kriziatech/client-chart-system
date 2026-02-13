@@ -107,6 +107,9 @@
 
         <!-- Overview Content -->
         <div x-show="activeTab === 'overview'" class="space-y-8 animate-in slide-in-from-bottom duration-500">
+            {{-- Project Lifecycle Visualization --}}
+            <x-project-lifecycle :client="$client" />
+
             {{-- Progress Overview --}}
             <div>
                 <div class="flex justify-between items-center mb-3">
