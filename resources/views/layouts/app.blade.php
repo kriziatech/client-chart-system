@@ -394,7 +394,8 @@
         function toggleDarkMode() {
             if (localStorage.theme === 'dark') {
                 localStorage.theme = 'light';
-          el              localStorage.theme = 'dark';
+            } else {
+                localStorage.theme = 'dark';
             }
             updateDarkMode();
         }
