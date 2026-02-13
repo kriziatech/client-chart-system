@@ -218,28 +218,144 @@
                     </div>
                 </div>
 
-                <!-- Product Preview Float -->
-                <div class="relative group hidden lg:block">
+                <!-- Enhanced Product Preview Float -->
+                <div
+                    class="relative group hidden lg:block perspective-1000 transform scale-90 hover:scale-95 transition-all duration-700">
+                    <!-- Glow Effect -->
                     <div
-                        class="absolute -inset-1 bg-gradient-to-r from-teal-500 to-transparent rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000">
+                        class="absolute -inset-1 bg-gradient-to-r from-teal-500 to-blue-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 animate-pulse">
                     </div>
-                    <div class="relative bg-[#1C2637] border border-white/5 p-6 rounded-2xl shadow-2xl float-anim">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="flex gap-1.5">
-                                <div class="w-2 h-2 rounded-full bg-red-500/50"></div>
-                                <div class="w-2 h-2 rounded-full bg-yellow-500/50"></div>
-                                <div class="w-2 h-2 rounded-full bg-green-500/50"></div>
+
+                    <!-- Main Interface Container -->
+                    <div
+                        class="relative bg-[#0F172A] border border-slate-700/50 p-5 rounded-2xl shadow-2xl float-anim overflow-hidden">
+
+                        <!-- App Header Mockup -->
+                        <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+                            <div class="flex gap-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+                                <div class="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
                             </div>
-                            <div class="h-4 w-32 bg-white/5 rounded"></div>
+                            <div class="flex gap-3">
+                                <div class="h-2 w-20 bg-slate-700/50 rounded-full"></div>
+                                <div class="h-5 w-5 rounded-full bg-teal-500/20 border border-teal-500/50"></div>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-3 gap-3">
-                            <div
-                                class="h-20 rounded-lg bg-teal-500/10 border border-teal-500/20 flex flex-col justify-center items-center">
-                                <span class="text-teal-400 font-black text-lg">24</span>
-                                <span class="text-[8px] text-teal-600 uppercase font-black">Active Projects</span>
+
+                        <!-- Dashboard Grid -->
+                        <div class="grid grid-cols-12 gap-4">
+
+                            <!-- Left col: Stats & Chart -->
+                            <div class="col-span-4 space-y-3">
+                                <!-- Stat Card 1 -->
+                                <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                                    <div class="text-[8px] text-slate-400 font-bold uppercase tracking-wider mb-1">
+                                        Active Projects</div>
+                                    <div class="text-2xl font-black text-white">24</div>
+                                    <div class="w-full bg-slate-700 h-1 rounded-full mt-2 overflow-hidden">
+                                        <div class="bg-teal-500 h-full w-[70%]"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Stat Card 2 (Mini Chart) -->
+                                <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                                    <div class="text-[8px] text-slate-400 font-bold uppercase tracking-wider mb-2">
+                                        Revenue Flow</div>
+                                    <div class="flex items-end gap-1 h-10 w-full justify-between px-1">
+                                        <div class="w-1.5 bg-slate-600/50 h-[30%] rounded-sm"></div>
+                                        <div class="w-1.5 bg-slate-600/50 h-[50%] rounded-sm"></div>
+                                        <div class="w-1.5 bg-teal-500/50 h-[70%] rounded-sm"></div>
+                                        <div class="w-1.5 bg-teal-500 h-[100%] rounded-sm"></div>
+                                        <div class="w-1.5 bg-slate-600/50 h-[60%] rounded-sm"></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="h-20 rounded-lg bg-white/5 border border-white/10"></div>
-                            <div class="h-20 rounded-lg bg-white/5 border border-white/10"></div>
+
+                            <!-- Right col: Kanban Board Simulation -->
+                            <div class="col-span-8 flex gap-3">
+                                <!-- Column 1 -->
+                                <div class="flex-1 space-y-2">
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase">To Do</div>
+                                    <div class="bg-slate-800 p-2 rounded-lg border-l-2 border-orange-500 shadow-sm">
+                                        <div class="h-1.5 w-10 bg-slate-600 rounded mb-1.5"></div>
+                                        <div class="h-1 w-full bg-slate-700 rounded mb-1"></div>
+                                        <div class="h-1 w-2/3 bg-slate-700 rounded"></div>
+                                    </div>
+                                    <div
+                                        class="bg-slate-800 p-2 rounded-lg border-l-2 border-orange-500 shadow-sm opacity-60">
+                                        <div class="h-1.5 w-6 bg-slate-600 rounded mb-1.5"></div>
+                                        <div class="flex -space-x-1 mt-1">
+                                            <div class="w-3 h-3 rounded-full bg-slate-600 border border-slate-800">
+                                            </div>
+                                            <div class="w-3 h-3 rounded-full bg-slate-500 border border-slate-800">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Column 2 -->
+                                <div class="flex-1 space-y-2">
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase">In Progress</div>
+                                    <div
+                                        class="bg-slate-800 p-2 rounded-lg border-l-2 border-blue-500 shadow-lg transform -rotate-2 hover:rotate-0 transition-transform duration-300 translate-y-1 z-10 ring-1 ring-blue-500/50">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <div class="h-1.5 w-8 bg-slate-500 rounded"></div>
+                                            <div
+                                                class="h-3 w-3 rounded bg-blue-500/20 text-[6px] flex items-center justify-center text-blue-400 font-bold">
+                                                IP</div>
+                                        </div>
+                                        <div class="h-1 w-full bg-slate-700/50 rounded mb-1"></div>
+                                        <div class="h-1 w-3/4 bg-slate-700/50 rounded"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Column 3 -->
+                                <div class="flex-1 space-y-2">
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase">Done</div>
+                                    <div
+                                        class="bg-slate-800 p-2 rounded-lg border-l-2 border-emerald-500 shadow-sm opacity-80">
+                                        <div class="h-1.5 w-12 bg-emerald-500/40 rounded mb-1.5"></div>
+                                        <div
+                                            class="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mt-2">
+                                            <svg class="w-2.5 h-2.5 text-emerald-500" fill="none" viewBox="0 0 24 24"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4"
+                                                    d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Floating Elements for Depth -->
+                    <div class="absolute -right-8 top-12 bg-[#1e293b] p-3 rounded-xl shadow-2xl border border-slate-700/80 w-36 animate-bounce"
+                        style="animation-duration: 3s;">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                            <div class="text-[8px] text-green-400 font-bold uppercase tracking-wider">System Online
+                            </div>
+                        </div>
+                        <div class="h-1 w-full bg-slate-700 rounded-full overflow-hidden">
+                            <div class="bg-green-500 h-full w-[94%]"></div>
+                        </div>
+                        <div class="text-[8px] text-slate-500 mt-1 font-mono text-right">99.9% Uptime</div>
+                    </div>
+
+                    <div
+                        class="absolute -left-4 -bottom-4 bg-[#1e293b] p-2 rounded-lg shadow-xl border border-slate-700/80 flex items-center gap-2 animate-pulse">
+                        <div class="w-6 h-6 rounded bg-brand-600 flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="h-1 w-12 bg-slate-600 rounded mb-1"></div>
+                            <div class="h-1 w-8 bg-slate-700 rounded"></div>
                         </div>
                     </div>
                 </div>
