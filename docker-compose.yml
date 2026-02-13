@@ -30,6 +30,7 @@ services:
 
   db:
     image: mysql:8.0
+    platform: linux/amd64
     container_name: itpm_db
     restart: unless-stopped
     environment:
@@ -44,6 +45,7 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
+    platform: linux/amd64
     container_name: itpm_pma
     restart: unless-stopped
     ports:
