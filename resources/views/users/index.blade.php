@@ -9,7 +9,7 @@
                 operational roles for all system users.</p>
         </div>
 
-        <button onclick="window.location.href='{{ route('register') }}'"
+        <button onclick="document.getElementById('add-user-modal').classList.remove('hidden')"
             class="bg-slate-900 dark:bg-brand-600 text-white text-[11px] px-6 py-3 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg active:scale-95 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
@@ -17,6 +17,23 @@
             Onboard New Personnel
         </button>
     </div>
+
+    <!-- Feedback Messages -->
+    @if(session('success'))
+    <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 p-4 mb-6 rounded-r-xl animate-in fade-in slide-in-from-left-4"
+        role="alert">
+        <p class="text-xs font-black uppercase tracking-widest">{{ session('success') }}</p>
+    </div>
+    @endif
+    @if($errors->any())
+    <div class="bg-rose-50 border-l-4 border-rose-500 text-rose-700 p-4 mb-6 rounded-r-xl" role="alert">
+        <ul class="list-disc list-inside text-xs font-bold uppercase tracking-tight">
+            @foreach($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+    @endif
 
     <div
         class="bg-white dark:bg-dark-surface rounded-[2.5rem] border border-ui-border dark:border-dark-border shadow-premium overflow-hidden">
@@ -80,7 +97,8 @@
                             </span>
                         </td>
                         <td class="py-6 px-6">
-                            <span class="text-[11px] font-bold text-slate-400 uppercase">{{ $usr->created_at->format('d
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-tight">{{
+                                $usr->created_at->format('d
                                 M, Y') }}</span>
                         </td>
                         <td class="py-6 px-8">
@@ -129,5 +147,67 @@
             </table>
         </div>
     </div>
+</div>
+
+<!-- Onboard User Modal -->
+<div id="add-user-modal"
+    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+    <div
+        class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700 overflow-hidden transform transition-all">
+        <div
+            class="px-8 py-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-dark-bg/50">
+            <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">Personnel Access
+                Provisioning</h3>
+            <button onclick="document.getElementById('add-user-modal').classList.add('hidden')"
+                class="text-slate-400 hover:text-slate-600 transition-colors text-xl font-light">&times;</button>
+        </div>
+        <form action="{{ route('users.store') }}" method="POST" class="p-8 space-y-6">
+            @csrf
+            <div class="space-y-2">
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
+                <input type="text" name="name" required placeholder="e.g. Rahul Sharma"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all placeholder:text-slate-300">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email
+                    Identifier</label>
+                <input type="email" name="email" required placeholder="name@krizia.in"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all placeholder:text-slate-300">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Initial
+                        Password</label>
+                    <input type="password" name="password" required
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Confirm
+                        Access</label>
+                    <input type="password" name="password_confirmation" required
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all">
+                </div>
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Access Level
+                    (Role)</label>
+                <select name="role_id" required
+                    class="w-full bg-brand-50/50 dark:bg-brand-500/5 border-transparent rounded-2xl px-5 py-4 text-sm font-black uppercase tracking-widest focus:ring-4 focus:ring-brand-500/10 transition-all appearance-none cursor-pointer">
+                    @foreach($roles as $role)
+                    <option value="{{ $role->id }}">{{ $role->description }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="pt-4 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('add-user-modal').classList.add('hidden')"
+                    class="px-6 py-3 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition">Discard</button>
+                <button type="submit"
+                    class="bg-slate-900 dark:bg-brand-600 text-white px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.1em] transition shadow-lg active:scale-95">
+                    Authorize Personnel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 </div>
 @endsection
