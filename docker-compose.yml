@@ -9,30 +9,34 @@ services:
     ports:
       - "8081:80"
     environment:
-      APP_NAME: "Interior Touch PM"
-      APP_ENV: production
-      APP_DEBUG: "false"
-      APP_URL: "http://localhost"
+      APP_NAME: "${APP_NAME:-Interior Touch PM}"
+      APP_ENV: "${APP_ENV:-production}"
+      APP_DEBUG: "${APP_DEBUG:-false}"
+      APP_URL: "${APP_URL:-http://localhost:8081}"
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: "${DB_DATABASE:-client_chart}"
+      DB_USERNAME: "${DB_USERNAME:-root}"
+      DB_PASSWORD: "${DB_PASSWORD:-secret}"
     depends_on:
       - db
     networks:
       - itpm-network
+    volumes:
+      - ./:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
 
   db:
     image: mysql:8.0
     container_name: itpm_db
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: "${DB_DATABASE:-client_chart}"
+      MYSQL_USER: "${DB_USERNAME:-root}"
+      MYSQL_PASSWORD: "${DB_PASSWORD:-secret}"
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-secret}"
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -46,7 +50,7 @@ services:
       - "8080:80"
     environment:
       PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-secret}"
     depends_on:
       - db
     networks:
