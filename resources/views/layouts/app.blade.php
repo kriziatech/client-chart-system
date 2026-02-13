@@ -412,7 +412,7 @@
                 .then(res => res.json())
                 .then(data => {
                     const container = document.getElementById('attendance-status-badge');
- if (data.status === 'checked_in') {
+                    if (data.status === 'checked_in') {
                         container.innerHTML = `
                             <button onclick="markAttendance('out')" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 text-xs font-bold hover:bg-green-100 transition-colors group">
                                 <span class="relative flex h-2 w-2">
@@ -448,26 +448,26 @@
             }
 
             navigator.geolocation.getCurrentPosition((position) => {
-                const url = type === 'in' ? '{{ route('attendance.check-in') }}' : '{{ route(' attendance.check-out') }}';
+                const url = type === 'in' ? '{{ route('attendance.check-in ') }}' : '{{ route(' attendance.check - out') }}';
 
                   fet              method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                    'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    })
+                },
+                body: JSON.stringify({
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
                 })
-                    .then(res => res                                 .then(data =                                if (                                                                        oast
+            })
+                .then(res => res.then(data =                                if (oast
                                                                      anceStatus();
-                                                      tch(err => {
-                            console.error(err);                             alert('Error marking attendanc                                 btn.innerHTML = origi                                     btn.disab                                     });
+            tch(err => {
+                console.error(err); alert('Error marking attendanc                                 btn.innerHTML = origi                                     btn.disab                                     });
 
             }, (error) => {
                 alert('Unable to retrieve your location: ' + error.message);
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-               }
+            }
     </script>
