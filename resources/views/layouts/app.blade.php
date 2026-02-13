@@ -237,7 +237,9 @@
             <!-- Right Actions -->
             <div class="flex items-center gap-3">
                 {{-- Attendance Badge --}}
-                <div id="attendance-status-badge"></div>
+                <div id="attendance-status-badge" class="flex items-center">
+                    <!-- Loaded via JS -->
+                </div>
 
                 {{-- Dark Mode Toggle --}}
                 <button onclick="toggleDarkMode()"
@@ -400,4 +402,84 @@
             updateDarkMode();
         }
 
-    
+        // Attendance System
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAttendanceStatus();
+        });
+
+        function fetchAttendanceStatus() {
+            fetch('{{ route('attendance.status') }}')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('attendance-status-badge');
+
+                    if (data.status === 'checked_in') {
+                        container.innerHTML = `
+                            <button onclick="markAttendance('out')" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-800 text-xs font-bold hover:bg-green-100 transition-colors group">
+                                <span class="relative flex h-2 w-2">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                </span>
+                                <span>On Shift (${data.duration})</span>
+                                <span class="hidden group-hover:inline ml-1 text-red-500">Check Out</span>
+                            </button>
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <button onclick="markAttendance('in')" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                                <span>Check In</span>
+                            </button>
+                        `;
+                    }
+                });
+        }
+
+        function markAttendance(type) {
+            const btn = document.getElementById('attendance-status-badge').querySelector('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<svg class="animate-spin h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>Locating...</span>`;
+            btn.disabled = true;
+
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition((position) => {
+                const url = type === 'in' ? '{{ route('attendance.check-in ') }}' : '{{ route('attendance.check - out') }}';
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.message) {
+                            // Optional: Show toast
+                        }
+                        fetchAttendanceStatus();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Error marking attendance');
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    });
+
+            }, (error) => {
+                alert('Unable to retrieve your location: ' + error.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
