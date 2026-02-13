@@ -74,8 +74,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Attendance Actions (All Authenticated Users)
         Route::get('/attendance/status', [AttendanceController::class , 'status'])->name('attendance.status');
-        Route::post('/attendance/check-in', [AttendanceController::class , 'checkIn'])->name('attendance.checkIn');
-        Route::post('/attendance/check-out', [AttendanceController::class , 'checkOut'])->name('attendance.checkOut');
+        Route::post('/attendance/check-in', [AttendanceController::class , 'checkIn'])->name('attendance.check-in');
+        Route::post('/attendance/check-out', [AttendanceController::class , 'checkOut'])->name('attendance.check-out');
 
         // Profile routes (from Breeze)
         Route::get('/profile', [ProfileController::class , 'edit'])->name('profile.edit');
@@ -132,12 +132,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/test-notification', function () {
             auth()->user()->notify(new \App\Notifications\SystemTestNotification('Test Notification at ' . now()->format('h:i A')));
             return back()->with('success', 'Test notification sent to your bell icon!');
-        })->name('test.notification');
+        }
+        )->name('test.notification');
 
         Route::post('/notifications/mark-all-read', function () {
             auth()->user()->unreadNotifications->markAsRead();
             return back();
-        })->name('notifications.markAllRead');
+        }
+        )->name('notifications.markAllRead');
     });
 
 
