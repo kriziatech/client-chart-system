@@ -1,50 +1,113 @@
 @csrf
 
 <!-- Section 1: Client Chart -->
-<div class="mb-8 border border-gray-200 rounded-lg p-6 bg-white">
-    <h3 class="text-lg font-semibold text-teal-700 mb-4 border-b pb-2">1. Client Chart</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div>
-            <label class="block text-gray-700 text-sm font-bold mb-2">File No. *</label>
+<div
+    class="mb-8 bg-white dark:bg-dark-surface rounded-2xl border border-ui-border dark:border-dark-border shadow-premium p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <h3 class="text-xs font-bold uppercase tracking-[2px] text-brand-600 mb-8 flex items-center gap-3">
+        <span
+            class="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-600">01</span>
+        Client Signature Details
+    </h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- File Number -->
+        <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">File
+                Number <span class="text-rose-500">*</span></label>
             <input type="text" name="file_number" value="{{ old('file_number', $client->file_number ?? '') }}"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                required>
+                class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white dark:focus:bg-dark-surface transition-all placeholder:text-slate-400 @error('file_number') ring-2 ring-rose-500/20 border-rose-500 @enderror"
+                placeholder="e.g. IT-2024-001" required>
+            @error('file_number') <p class="text-[10px] text-rose-500 font-bold mt-1 italic">{{ $message }}</p>
+            @enderror
         </div>
-        <div>
-            <label class="block text-gray-700 text-sm font-bold mb-2">First Name *</label>
+
+        <!-- First Name -->
+        <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">First Name
+                <span class="text-rose-500">*</span></label>
             <input type="text" name="first_name" value="{{ old('first_name', $client->first_name ?? '') }}"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                required>
+                class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white dark:focus:bg-dark-surface transition-all placeholder:text-slate-400 @error('first_name') ring-2 ring-rose-500/20 border-rose-500 @enderror"
+                placeholder="John" required>
+            @error('first_name') <p class="text-[10px] text-rose-500 font-bold mt-1 italic">{{ $message }}</p> @enderror
         </div>
-        <div>
-            <label class="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
+
+        <!-- Last Name -->
+        <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Last
+                Name</label>
             <input type="text" name="last_name" value="{{ old('last_name', $client->last_name ?? '') }}"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white dark:focus:bg-dark-surface transition-all placeholder:text-slate-400"
+                placeholder="Doe">
+            @error('last_name') <p class="text-[10px] text-rose-500 font-bold mt-1 italic">{{ $message }}</p> @enderror
         </div>
-        <div>
-            <label class="block text-gray-700 text-sm font-bold mb-2">Mobile Number</label>
+
+        <!-- Mobile Number -->
+        <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Mobile /
+                Contact</label>
             <input type="text" name="mobile" value="{{ old('mobile', $client->mobile ?? '') }}"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white dark:focus:bg-dark-surface transition-all placeholder:text-slate-400"
+                placeholder="+91 99999 00000">
         </div>
-        <div>
-            <label class="block text-gray-700 text-sm font-bold mb-2">Start Date</label>
-            <input type="date" name="start_date" value="{{ old('start_date', $client->start_date ?? '') }}"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+
+        <!-- Start Date -->
+        <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Possession
+                / Start Date</label>
+            <input type="date" name="start_date"
+                value="{{ old('start_date', $client->start_date ? $client->start_date->format('Y-m-d') : '') }}"
+                class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white dark:focus:bg-dark-surface transition-all">
         </div>
-        <div>
-            <label class="block text-gray-700 text-sm font-bold mb-2">Delivery Date</label>
-            <input type="date" name="delivery_date" value="{{ old('delivery_date', $client->delivery_date ?? '') }}"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+
+        <!-- Delivery Date -->
+        <div class="space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Target
+                Delivery Date</label>
+            <input type="date" name="delivery_date"
+                value="{{ old('delivery_date', $client->delivery_date ? $client->delivery_date->format('Y-m-d') : '') }}"
+                class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white dark:focus:bg-dark-surface transition-all">
         </div>
-        <div class="md:col-span-3">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Address</label>
+
+        <!-- Linked Account -->
+        <div class="md:col-span-3 space-y-2 pt-4">
+            <label class="text-[11px] font-bold uppercase tracking-widest text-brand-600 flex items-center gap-2">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                    </path>
+                </svg>
+                Client Portal Access
+            </label>
+            <select name="user_id"
+                class="w-full bg-brand-50/50 dark:bg-brand-500/5 border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white dark:focus:bg-dark-surface transition-all appearance-none cursor-pointer">
+                <option value="">-- No Account Linked (Portal Disabled) --</option>
+                @foreach($users as $user)
+                <option value="{{ $user->id }}" {{ old('user_id', $client->user_id) == $user->id ? 'selected' : '' }}>
+                    {{ $user->name }} ({{ $user->email }}) — [{{ ucfirst($user->role->description ?? 'Client') }}]
+                </option>
+                @endforeach
+            </select>
+            <p class="text-[10px] text-ui-muted dark:text-dark-muted mt-1 italic pl-1">Link an account to enable the
+                <b>Client Portal</b>. They will only see updates for this specific project.
+            </p>
+        </div>
+
+        <!-- Address -->
+        <div class="md:col-span-3 space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Site
+                Address</label>
             <textarea name="address" rows="2"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ old('address', $client->address ?? '') }}</textarea>
+                class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white dark:focus:bg-dark-surface transition-all placeholder:text-slate-400"
+                placeholder="Complete postal address of the site...">{{ old('address', $client->address ?? '') }}</textarea>
         </div>
-        <div class="md:col-span-3">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Work Description</label>
+
+        <!-- Work Description -->
+        <div class="md:col-span-3 space-y-2">
+            <label class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Executive
+                Summary / Scope</label>
             <textarea name="work_description" rows="3"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">{{ old('work_description', $client->work_description ?? '') }}</textarea>
+                class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white dark:focus:bg-dark-surface transition-all placeholder:text-slate-400"
+                placeholder="Briefly describe the nature of work (e.g. 3BHK Full Interior, Painting & Flooring works)...">{{ old('work_description', $client->work_description ?? '') }}</textarea>
         </div>
     </div>
 </div>

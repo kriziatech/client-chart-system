@@ -14,6 +14,7 @@ class Task extends Model
 
     protected $casts = [
         'deadline' => 'date',
+        'start_date' => 'date',
     ];
 
     public function client()

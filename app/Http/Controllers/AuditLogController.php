@@ -9,17 +9,21 @@ class AuditLogController extends Controller
 {
     public function index(Request $request)
     {
+        /** @var \Illuminate\Database\Eloquent\Builder $query */
         $query = AuditLog::with('user')->latest('created_at');
 
         // Filters
         if ($request->filled('action')) {
-            $query->where('action', $request->action);
+            $query->where('action', ucfirst($request->action));
         }
         if ($request->filled('user_id')) {
             $query->where('user_id', $request->user_id);
         }
         if ($request->filled('model')) {
             $query->where('model_type', 'like', '%' . $request->model . '%');
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
         $logs = $query->paginate(50);

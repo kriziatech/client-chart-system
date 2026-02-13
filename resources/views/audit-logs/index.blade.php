@@ -1,410 +1,237 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
-    {{-- Header --}}
-    <div
-        class="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div class="flex items-center justify-between mb-8">
         <div>
-            <h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                    </path>
-                </svg>
-                Project Audit Logs
-            </h2>
-            <p class="text-sm text-gray-500 mt-1">Comprehensive tracking of all system activities</p>
+            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">System Activity Logs</h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">A simple chronological view of all
+                system actions and transitions.</p>
         </div>
+
         <div class="flex items-center gap-3">
-            <span class="text-xs text-gray-400">Auto-refreshing</span>
-            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <div
+                class="px-4 py-2 bg-brand-50 dark:bg-brand-500/10 border border-brand-100 dark:border-brand-500/20 rounded-xl flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></div>
+                <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">Live Monitoring</span>
+            </div>
         </div>
     </div>
 
-    {{-- Filters --}}
-    <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
-        <form method="GET" action="{{ route('audit-logs.index') }}" class="flex flex-wrap gap-2 items-center">
-            <select name="action" class="text-xs border-gray-300 rounded px-2 py-1.5 w-32">
-                <option value="">All Actions</option>
-                <option value="Created" {{ request('action')=='Created' ? 'selected' : '' }}>Created</option>
-                <option value="Updated" {{ request('action')=='Updated' ? 'selected' : '' }}>Updated</option>
-                <option value="Deleted" {{ request('action')=='Deleted' ? 'selected' : '' }}>Deleted</option>
-                <option value="Login" {{ request('action')=='Login' ? 'selected' : '' }}>Login</option>
-                <option value="Logout" {{ request('action')=='Logout' ? 'selected' : '' }}>Logout</option>
-            </select>
-            <select name="user_id" class="text-xs border-gray-300 rounded px-2 py-1.5 w-32">
-                <option value="">All Users</option>
-                @foreach($users as $user)
-                <option value="{{ $user->id }}" {{ request('user_id')==$user->id ? 'selected' : '' }}>{{ $user->name }}
-                </option>
-                @endforeach
-            </select>
-            <select name="status" class="text-xs border-gray-300 rounded px-2 py-1.5 w-24">
-                <option value="">Status</option>
-                <option value="success" {{ request('status')=='success' ? 'selected' : '' }}>Success</option>
-                <option value="failed" {{ request('status')=='failed' ? 'selected' : '' }}>Failed</option>
-            </select>
-            <button type="submit"
-                class="bg-gray-800 text-white text-xs px-3 py-1.5 rounded hover:bg-gray-700">Filter</button>
-            <a href="{{ route('audit-logs.index') }}" class="text-xs text-gray-500 underline ml-2">Reset</a>
-        </form>
-    </div>
+    <!-- Simplified Filters -->
+    <div
+        class="bg-white dark:bg-dark-surface rounded-2xl border border-ui-border dark:border-dark-border shadow-sm overflow-hidden mb-8">
+        <form method="GET" action="{{ route('audit-logs.index') }}" class="p-6 flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[200px] space-y-1.5">
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Search Module</label>
+                <input type="text" name="model" value="{{ request('model') }}" placeholder="e.g. Quotation, User..."
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-ui-border dark:border-dark-border rounded-xl px-4 py-2.5 text-sm font-medium focus:ring-4 focus:ring-brand-500/10 placeholder:text-slate-300 transition-all">
+            </div>
 
-    {{-- Log Table --}}
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-gray-100 text-gray-600 uppercase text-[10px] tracking-wider border-b border-gray-200">
-                    <th class="py-3 px-4 w-40">Date & Time</th>
-                    <th class="py-3 px-4 w-48">User / Role</th>
-                    <th class="py-3 px-4 w-32">Action / Module</th>
-                    <th class="py-3 px-4">Description / Changes</th>
-                    <th class="py-3 px-4 w-24">Status</th>
-                    <th class="py-3 px-4 w-48 text-right">Context (IP/Device)</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 text-sm">
-                @forelse($logs as $log)
-                <tr class="hover:bg-gray-50 transition group">
-                    <td class="py-3 px-4 align-top">
-                        <div class="font-medium text-gray-800">{{ $log->created_at->format('d M Y') }}</div>
-                        <div class="text-xs text-gray-500">{{ $log->created_at->format('h:i:s A') }}</div>
-                    </td>
-                    <td class="py-3 px-4 align-top">
-                        <div class="flex items-center gap-2">
-                            <div
-                                class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                                {{ substr($log->user_name, 0, 1) }}
-                            </div>
-                            <div>
-                                <div class="font-medium text-gray-900 leading-tight">{{ $log->user_name }}</div>
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Action Type</label>
+                <select name="action"
+                    class="bg-slate-50 dark:bg-dark-bg border-ui-border dark:border-dark-border rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-4 focus:ring-brand-500/10 cursor-pointer pr-10 min-w-[160px]">
+                    <option value="">All Actions</option>
+                    <option value="Created" {{ request('action')=='Created' ? 'selected' : '' }}>Created</option>
+                    <option value="Updated" {{ request('action')=='Updated' ? 'selected' : '' }}>Updated</option>
+                    <option value="Deleted" {{ request('action')=='Deleted' ? 'selected' : '' }}>Deleted</option>
+                    <option value="Login" {{ request('action')=='Login' ? 'selected' : '' }}>Login</option>
+                </select>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-400 ml-1">Stakeholder</label>
+                <select name="user_id"
+                    class="bg-slate-50 dark:bg-dark-bg border-ui-border dark:border-dark-border rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-4 focus:ring-brand-500/10 cursor-pointer pr-10 min-w-[180px]">
+                    <option value="">Everyone</option>
+                    @foreach($users as $user)
+                    <option value="{{ $user->id }}" {{ request('user_id')==$user->id ? 'selected' : '' }}>{{ $user->name
+                        }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="submit"
+                    class="bg-slate-900 dark:bg-brand-600 text-white text-sm px-6 py-2.5 rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-brand-700 transition-all shadow-sm active:scale-95">
+                    Filter Logs
+                </button>
+                <a href="{{ route('audit-logs.index') }}"
+                    class="px-4 py-2.5 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">Reset</a>
+            </div>
+        </form>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 dark:bg-dark-bg/50 border-b border-ui-border dark:border-dark-border">
+                        <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-slate-400">Timestamp</th>
+                        <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-slate-400">Stakeholder</th>
+                        <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-slate-400">Operation</th>
+                        <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-slate-400">Activity &
+                            Integrity Audit</th>
+                        <th class="py-4 px-6 text-xs font-bold uppercase tracking-wider text-slate-400 text-right">
+                            Telemetry</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-ui-border dark:divide-dark-border">
+                    @forelse($logs as $log)
+                    <tr class="group hover:bg-slate-50/50 dark:hover:bg-dark-bg/30 transition-all duration-200"
+                        x-data="{ open: false }">
+                        <td class="py-5 px-6 whitespace-nowrap align-top">
+                            <div class="text-sm font-bold text-slate-900 dark:text-white">{{ $log->created_at->format('d
+                                M, Y') }}</div>
+                            <div class="text-[11px] font-medium text-slate-400 mt-1 uppercase tracking-tight">{{
+                                $log->created_at->format('h:i A') }}</div>
+                        </td>
+                        <td class="py-5 px-6 align-top">
+                            <div class="flex items-center gap-3">
                                 <div
-                                    class="text-[10px] uppercase tracking-wide text-gray-500 bg-gray-100 px-1 rounded inline-block mt-0.5">
-                                    {{ $log->user_role ?: 'Guest' }}
+                                    class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-dark-bg border border-slate-200 dark:border-dark-border flex items-center justify-center text-slate-500 font-bold text-xs uppercase">
+                                    {{ substr($log->user_name, 0, 1) }}
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ $log->user_name
+                                        }}</div>
+                                    <div class="text-[10px] font-bold uppercase tracking-widest text-brand-600 mt-0.5">
+                                        {{ is_string($log->user_role) ? (str_starts_with($log->user_role, '{') ?
+                                        'Personnel' : $log->user_role) : 'Personnel' }}</div>
                                 </div>
                             </div>
-                        </div>
-                    </td>
-                    <td class="py-3 px-4 align-top">
-                        @php
-                        $colors = [
-                        'Created' => 'bg-green-50 text-green-700 border-green-200',
-                        'Updated' => 'bg-blue-50 text-blue-700 border-blue-200',
-                        'Deleted' => 'bg-red-50 text-red-700 border-red-200',
-                        'Login' => 'bg-purple-50 text-purple-700 border-purple-200',
-                        'Logout' => 'bg-gray-50 text-gray-700 border-gray-200',
-                        'Login Failed' => 'bg-red-100 text-red-800 border-red-300 font-bold',
-                        ];
-                        $colorClass = $colors[$log->action] ?? 'bg-gray-50 text-gray-600 border-gray-200';
-                        @endphp
-                        <span
-                            class="border {{ $colorClass }} px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide block w-fit mb-1">
-                            {{ $log->action }}
-                        </span>
-                        <div class="text-xs text-gray-500 font-medium">{{ $log->module }}</div>
-                        @if($log->model_id)
-                        <div class="text-[10px] text-gray-400">ID: #{{ $log->model_id }}</div>
-                        @endif
-                    </td>
-                    <td class="py-3 px-4 align-top">
-                        <div class="text-gray-800 mb-1">{{ $log->description }}</div>
-
-                        @if($log->failure_reason)
-                        <div class="text-xs text-red-600 bg-red-50 px-2 py-1 rounded border border-red-100 mt-1">
-                            <strong>Error:</strong> {{ $log->failure_reason }}
-                        </div>
-                        @endif
-
-                        @if($log->old_values || $log->new_values)
-                        <button onclick="document.getElementById('details-{{ $log->id }}').classList.toggle('hidden')"
-                            class="text-[10px] text-teal-600 font-semibold hover:underline flex items-center gap-1 mt-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                </path>
-                            </svg>
-                            View Details
-                        </button>
-                        <div id="details-{{ $log->id }}"
-                            class="hidden mt-2 bg-slate-50 border border-slate-200 rounded p-2 text-xs">
-                            <table class="w-full text-left">
-                                <tr class="text-gray-400 border-b border-gray-200">
-                                    <th class="pb-1 font-normal w-1/3">Field</th>
-                                    <th class="pb-1 font-normal w-1/3">Old</th>
-                                    <th class="pb-1 font-normal w-1/3">New</th>
-                                </tr>
-                                @if($log->action === 'Updated' && is_array($log->new_values))
-                                @foreach($log->new_values as $key => $val)
-                                <tr class="border-b border-gray-100 last:border-0">
-                                    <td class="py-1 font-medium text-gray-600">{{ $key }}</td>
-                                    <td class="py-1 text-red-500 break-all">{{ $log->old_values[$key] ?? '-' }}</td>
-                                    <td class="py-1 text-green-600 break-all">{{ is_array($val) ? json_encode($val) :
-                                        $val }}</td>
-                                </tr>
-                                @endforeach
-                                @elseif(is_array($log->new_values))
-                                @foreach($log->new_values as $key => $val)
-                                <tr class="border-b border-gray-100">
-                                    <td class="py-1 font-medium text-gray-600">{{ $key }}</td>
-                                    <td class="py-1 text-gray-400">-</td>
-                                    <td class="py-1 text-green-600 break-all">{{ is_array($val) ? json_encode($val) :
-                                        $val }}</td>
-                                </tr>
-                                @endforeach
+                        </td>
+                        <td class="py-5 px-6 align-top">
+                            @php
+                            $colors = [
+                            'Created' => 'bg-brand-50 text-brand-700 dark:bg-brand-500/20 dark:text-brand-300',
+                            'Updated' => 'bg-brand-500 text-white dark:bg-brand-400/20 dark:text-brand-300',
+                            'Deleted' => 'bg-brand-900 text-brand-50 dark:bg-brand-900/40 dark:text-brand-100',
+                            'Login' => 'bg-brand-100 text-brand-600 dark:bg-brand-700/20 dark:text-brand-400',
+                            ];
+                            $colorClass = $colors[$log->action] ?? 'bg-slate-50 text-slate-500';
+                            @endphp
+                            <div class="flex flex-col items-start gap-1.5">
+                                <span
+                                    class="{{ $colorClass }} px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
+                                    {{ $log->action }}
+                                </span>
+                                <span class="text-xs font-bold text-slate-900 dark:text-white tracking-tight">{{
+                                    $log->module }}</span>
+                                @if($log->model_id)
+                                <span class="text-[10px] font-bold text-slate-400">UID: #{{ $log->model_id }}</span>
                                 @endif
-                            </table>
-                        </div>
-                        @endif
-                    </td>
-                    <td class="py-3 px-4 align-top">
-                        @if($log->status === 'success')
-                        <span
-                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700">
-                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Success
-                        </span>
-                        @else
-                        <span
-                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-700">
-                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Failed
-                        </span>
-                        @endif
-                    </td>
-                    <td class="py-3 px-4 align-top text-right">
-                        <div class="text-xs text-gray-900 font-mono">{{ $log->ip_address }}</div>
-                        <div class="text-[10px] text-gray-500 mt-0.5 flex flex-col items-end gap-0.5">
-                            @if($log->device_type)<span class="bg-gray-100 px-1 rounded">{{ $log->device_type
-                                }}</span>@endif
-                            @if($log->browser)<span>{{ $log->browser }} on {{ $log->os }}</span>@endif
-                            @if($log->source === 'api')<span class="text-purple-600 font-semibold">API</span>@endif
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" class="py-8 text-center text-gray-400">No logs found.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                            </div>
+                        </td>
+                        <td class="py-5 px-6 align-top">
+                            <div class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                {{ $log->description }}
+                            </div>
 
-    <div class="px-6 py-3 border-t bg-gray-50">
-        {{ $logs->appends(request()->query())->links() }}
-    </div>
-</div>
-@endsection
-<h2 class="text-xl font-semibold text-gray-800 flex items-center gap-2">
-    <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-        </path>
-    </svg>
-    Audit Logs
-</h2>
-<p class="text-sm text-gray-500 mt-1">Track all changes in the system</p>
-</div>
-<div class="flex items-center gap-3">
-    <div id="live-indicator"
-        class="flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-xs font-medium border border-green-200">
-        <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-        Live
-    </div>
-</div>
-</div>
+                            @if($log->failure_reason)
+                            <div
+                                class="mt-2 text-xs font-bold text-rose-500 bg-rose-50 dark:bg-rose-500/5 px-3 py-2 rounded-xl border border-rose-100 dark:border-rose-500/10">
+                                <span class="text-[10px] uppercase tracking-widest block mb-1">Terminal Error</span>
+                                {{ $log->failure_reason }}
+                            </div>
+                            @endif
 
-{{-- Filters --}}
-<div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
-    <form method="GET" action="{{ route('audit-logs.index') }}" class="flex flex-wrap gap-3 items-center">
-        <select name="action"
-            class="text-xs border border-gray-300 rounded-lg px-3 py-2 focus:ring-teal-500 focus:border-teal-500 bg-white">
-            <option value="">All Actions</option>
-            <option value="created" {{ request('action')==='created' ? 'selected' : '' }}>🟢 Created</option>
-            <option value="updated" {{ request('action')==='updated' ? 'selected' : '' }}>🟡 Updated</option>
-            <option value="deleted" {{ request('action')==='deleted' ? 'selected' : '' }}>🔴 Deleted</option>
-        </select>
-        <select name="user_id"
-            class="text-xs border border-gray-300 rounded-lg px-3 py-2 focus:ring-teal-500 focus:border-teal-500 bg-white">
-            <option value="">All Users</option>
-            @foreach($users as $user)
-            <option value="{{ $user->id }}" {{ request('user_id')==$user->id ? 'selected' : '' }}>{{ $user->name }}
-            </option>
-            @endforeach
-        </select>
-        <select name="model"
-            class="text-xs border border-gray-300 rounded-lg px-3 py-2 focus:ring-teal-500 focus:border-teal-500 bg-white">
-            <option value="">All Models</option>
-            <option value="Client" {{ request('model')==='Client' ? 'selected' : '' }}>Client</option>
-            <option value="Task" {{ request('model')==='Task' ? 'selected' : '' }}>Task</option>
-            <option value="Comment" {{ request('model')==='Comment' ? 'selected' : '' }}>Comment</option>
-            <option value="Payment" {{ request('model')==='Payment' ? 'selected' : '' }}>Payment</option>
-            <option value="User" {{ request('model')==='User' ? 'selected' : '' }}>User</option>
-        </select>
-        <button type="submit"
-            class="bg-teal-600 hover:bg-teal-700 text-white text-xs px-4 py-2 rounded-lg font-medium transition">
-            Filter
-        </button>
-        <a href="{{ route('audit-logs.index') }}" class="text-xs text-gray-500 hover:text-gray-700 transition">Clear</a>
-    </form>
-</div>
+                            @if($log->old_values || $log->new_values)
+                            <div class="mt-4">
+                                <button @click="open = !open"
+                                    class="flex items-center gap-2 text-[11px] font-bold text-brand-600 hover:text-brand-700 transition-all uppercase tracking-wider">
+                                    <svg class="w-3.5 h-3.5 transition-transform duration-300"
+                                        :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    <span x-text="open ? 'Minimize Audit' : 'Inspect Old vs New Values'"></span>
+                                </button>
 
-{{-- Live Log Entries Container --}}
-<div id="live-logs-container"></div>
-
-{{-- Log Table --}}
-<div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse">
-        <thead>
-            <tr class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
-                <th class="py-3 px-4">When</th>
-                <th class="py-3 px-4">Who</th>
-                <th class="py-3 px-4">Action</th>
-                <th class="py-3 px-4">Description</th>
-                <th class="py-3 px-4">Details</th>
-            </tr>
-        </thead>
-        <tbody id="log-table-body" class="text-gray-600 text-sm">
-            @forelse($logs as $log)
-            <tr class="border-b border-gray-100 hover:bg-gray-50 transition" data-log-id="{{ $log->id }}">
-                <td class="py-3 px-4 whitespace-nowrap">
-                    <div class="text-xs font-medium">{{ $log->created_at->format('d M, Y') }}</div>
-                    <div class="text-xs text-gray-400">{{ $log->created_at->format('h:i:s A') }}</div>
-                </td>
-                <td class="py-3 px-4">
-                    <span class="font-medium">{{ $log->user?->name ?? 'System' }}</span>
-                    @if($log->ip_address)
-                    <div class="text-xs text-gray-400">{{ $log->ip_address }}</div>
-                    @endif
-                </td>
-                <td class="py-3 px-4">
-                    @php
-                    $actionStyles = [
-                    'created' => 'bg-green-100 text-green-800',
-                    'updated' => 'bg-yellow-100 text-yellow-800',
-                    'deleted' => 'bg-red-100 text-red-800',
-                    ];
-                    $actionIcons = ['created' => '🟢', 'updated' => '🟡', 'deleted' => '🔴'];
-                    @endphp
-                    <span
-                        class="{{ $actionStyles[$log->action] ?? 'bg-gray-100' }} text-xs font-semibold px-2.5 py-1 rounded-full">
-                        {{ $actionIcons[$log->action] ?? '' }} {{ ucfirst($log->action) }}
-                    </span>
-                </td>
-                <td class="py-3 px-4">
-                    <span class="text-gray-700">{{ $log->description }}</span>
-                    <div class="text-xs text-gray-400 mt-0.5">{{ $log->model_name }} #{{ $log->model_id }}</div>
-                </td>
-                <td class="py-3 px-4">
-                    @if($log->old_values || $log->new_values)
-                    <button onclick="toggleDetails({{ $log->id }})"
-                        class="text-teal-600 hover:text-teal-800 text-xs font-medium underline transition">
-                        View Changes
-                    </button>
-                    <div id="details-{{ $log->id }}" class="hidden mt-2 bg-gray-50 rounded-lg p-3 text-xs max-w-md">
-                        @if($log->action === 'updated' && $log->old_values && $log->new_values)
-                        @foreach($log->new_values as $key => $newVal)
-                        <div class="flex gap-2 mb-1">
-                            <span class="font-semibold text-gray-500 min-w-[80px]">{{ $key }}:</span>
-                            <span class="text-red-500 line-through">{{ $log->old_values[$key] ?? '—' }}</span>
-                            <span class="text-gray-400">→</span>
-                            <span class="text-green-600">{{ $newVal }}</span>
-                        </div>
-                        @endforeach
-                        @elseif($log->new_values)
-                        @foreach($log->new_values as $key => $val)
-                        @if(!in_array($key, ['id', 'created_at', 'updated_at', 'password']))
-                        <div class="flex gap-2 mb-1">
-                            <span class="font-semibold text-gray-500 min-w-[80px]">{{ $key }}:</span>
-                            <span class="text-green-600">{{ is_array($val) ? json_encode($val) : $val }}</span>
-                        </div>
-                        @endif
-                        @endforeach
-                        @endif
-                    </div>
-                    @else
-                    <span class="text-gray-400 text-xs">—</span>
-                    @endif
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="5" class="py-12 text-center text-gray-400">
-                    <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                        </path>
-                    </svg>
-                    No audit logs yet. Changes will appear here automatically.
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
-</div>
-
-{{-- Pagination --}}
-<div class="px-6 py-4 border-t border-gray-200">
-    {{ $logs->appends(request()->query())->links() }}
-</div>
-</div>
-
-<script>
-    function toggleDetails(id) {
-         const  e l  = document.getElementById('details-' + id);
-        el.classList.toggle('hidden');
-    }
-
-    // Live polling — check for new logs every 5 seconds
-    let latestLogId = {{ $logs-> first() ? -> id ?? 0 }};
-
-    function pollForNewLogs() {
-        fetch(`{{ route('audit-logs.latest') }}?after_id=${latestLogId}`)
-            .then(res => res.json())
-            .then(logs => {
-                if (logs.length > 0) {
-                    latestLogId = Math.max(...logs.map(l => l.id));
-                    const container = document.getElementById('live-logs-container');
-
-                    logs.forEach(log => {
-                        // Check if this log ID already exists in the table
-                        if (document.querySelector(`[data-log-id="${log.id}"]`)) return;
-
-                        const actionStyles = {
-                            'created': 'bg-green-100 text-green-700 border-green-200',
-                            'updated': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-                            'deleted': 'bg-red-100 text-red-700 border-red-200',
-                        };
-                        const actionIcons = { 'created': '🟢', 'updated': '🟡', 'deleted': '🔴' };
-
-                        const el = document.createElement('div');
-                        el.className = `px-6 py-3 border-b border-l-4 ${actionStyles[log.action] || 'bg-gray-100'} animate-pulse`;
-                        el.dataset.logId = log.id;
-                        el.innerHTML = `
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-lg">${actionIcons[log.action] || '⚪'}</span>
-                                    <div>
-                                        <span class="font-medium text-sm text-gray-800">${log.description}</span>
-                                        <span class="text-xs text-gray-500 ml-2">by ${log.user_name}</span>
+                                <div x-show="open" x-collapse x-cloak class="mt-3">
+                                    <div
+                                        class="rounded-xl border border-ui-border dark:border-dark-border bg-slate-50/50 dark:bg-dark-bg/50 overflow-hidden shadow-sm">
+                                        <table class="w-full text-left text-[11px]">
+                                            <thead>
+                                                <tr
+                                                    class="bg-slate-100/50 dark:bg-dark-bg text-[10px] font-black uppercase text-slate-500 tracking-widest border-b border-ui-border dark:border-dark-border">
+                                                    <th class="py-2.5 px-4 w-1/4">Field Key</th>
+                                                    <th class="py-2.5 px-4 text-rose-600 dark:text-rose-400">Previous
+                                                        (Old)</th>
+                                                    <th class="py-2.5 px-4 text-emerald-600 dark:text-emerald-400">
+                                                        Current (New)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y divide-ui-border dark:divide-dark-border">
+                                                @if($log->action === 'Updated' && is_array($log->new_values))
+                                                @foreach($log->new_values as $key => $val)
+                                                <tr>
+                                                    <td
+                                                        class="py-2.5 px-4 font-bold text-slate-500 uppercase tracking-tighter">
+                                                        {{ $key }}</td>
+                                                    <td
+                                                        class="py-2.5 px-4 font-medium text-slate-400 line-through decoration-rose-300/50">
+                                                        {{ is_array($log->old_values[$key] ?? '-') ?
+                                                        json_encode($log->old_values[$key]) : ($log->old_values[$key] ??
+                                                        '-') }}
+                                                    </td>
+                                                    <td class="py-2.5 px-4 font-bold text-slate-900 dark:text-white">
+                                                        {{ is_array($val) ? json_encode($val) : $val }}
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                                @elseif(is_array($log->new_values))
+                                                @foreach($log->new_values as $key => $val)
+                                                <tr>
+                                                    <td
+                                                        class="py-2.5 px-4 font-bold text-slate-500 uppercase tracking-tighter">
+                                                        {{ $key }}</td>
+                                                    <td class="py-2.5 px-4 text-slate-300 italic text-[10px]">VOID</td>
+                                                    <td class="py-2.5 px-4 font-bold text-slate-900 dark:text-white">
+                                                        {{ is_array($val) ? json_encode($val) : $val }}
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                                @endif
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
-                                <span class="text-xs text-gray-500">${log.time_ago}</span>
                             </div>
-                        `;
-                        container.prepend(el);
+                            @endif
+                        </td>
+                        <td class="py-5 px-6 align-top text-right">
+                            <div class="flex flex-col items-end gap-2">
+                                <div
+                                    class="px-2 py-1 rounded bg-slate-100 dark:bg-dark-bg text-[10px] font-black text-slate-500 font-mono tracking-widest border border-slate-200 dark:border-dark-border">
+                                    {{ $log->ip_address }}
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    @if($log->device_type)<span
+                                        class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{{
+                                        $log->device_type }}</span>@endif
+                                    @if($log->browser)<span class="text-[9px] font-bold text-slate-400 italic">{{
+                                        $log->browser }}</span>@endif
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="5" class="py-24 text-center">
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white">No logs found</h3>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-                        // Remove animation after 3s
-                        setTimeout(() => el.classList.remove('animate-pulse'), 3000);
-         });
-                }
-            })
-            .catch(err => console.warn('Audit poll error:', err));
-    }
-
-    // Poll every 5 seconds
-    setInterval(pollForNewLogs, 5000);
-</script>
+    @if($logs->hasPages())
+    <div class="px-4 py-4">
+        {{ $logs->appends(request()->query())->links() }}
+    </div>
+    @endif
+</div>
 @endsection

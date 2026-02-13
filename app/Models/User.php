@@ -22,22 +22,32 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        'role_id',
     ];
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role && $this->role->type === 'admin';
     }
 
     public function isEditor(): bool
     {
-        return $this->role === 'editor';
+        return $this->role && $this->role->type === 'editor';
     }
 
     public function isViewer(): bool
     {
-        return $this->role === 'viewer';
+        return $this->role && $this->role->type === 'viewer';
+    }
+
+    public function chatMessages()
+    {
+        return $this->hasMany(ChatMessage::class);
     }
 
     /**

@@ -12,7 +12,14 @@ class ClientController extends Controller
 {
     public function index()
     {
-        $clients = Client::latest()->paginate(10);
+        $query = Client::latest();
+
+        // If viewer (client), only show their own projects
+        if (auth()->user()->role === 'viewer') {
+            $query->where('user_id', auth()->id());
+        }
+
+        $clients = $query->paginate(10);
         return view('clients.index', compact('clients'));
     }
 
@@ -36,7 +43,9 @@ class ClientController extends Controller
             return new ChecklistItem($item);
         }));
 
-        return view('clients.create', ['client' => $client]);
+        $users = \App\Models\User::orderBy('name')->get();
+
+        return view('clients.create', compact('client', 'users'));
     }
 
     public function store(Request $request)
@@ -44,12 +53,13 @@ class ClientController extends Controller
         $request->validate([
             'first_name' => 'required|string|max:255',
             'file_number' => 'required|string|unique:clients,file_number',
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         $client = DB::transaction(function () use ($request) {
             $client = Client::create($request->only([
                 'first_name', 'last_name', 'file_number', 'mobile',
-                'address', 'work_description', 'start_date', 'delivery_date'
+                'address', 'work_description', 'start_date', 'delivery_date', 'user_id'
             ]));
 
             $client->siteInfo()->create($request->input('site_info', []));
@@ -90,6 +100,11 @@ class ClientController extends Controller
 
     public function show(Client $client)
     {
+        // Restriction for viewers
+        if (auth()->user()->role === 'viewer' && $client->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this project.');
+        }
+
         $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks']);
         return view('clients.show', compact('client'));
     }
@@ -97,7 +112,8 @@ class ClientController extends Controller
     public function edit(Client $client)
     {
         $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks']);
-        return view('clients.edit', compact('client'));
+        $users = \App\Models\User::orderBy('name')->get();
+        return view('clients.edit', compact('client', 'users'));
     }
 
     public function update(Request $request, Client $client)
@@ -105,12 +121,13 @@ class ClientController extends Controller
         $request->validate([
             'first_name' => 'required|string|max:255',
             'file_number' => 'required|string|unique:clients,file_number,' . $client->id,
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         DB::transaction(function () use ($request, $client) {
             $client->update($request->only([
                 'first_name', 'last_name', 'file_number', 'mobile',
-                'address', 'work_description', 'start_date', 'delivery_date'
+                'address', 'work_description', 'start_date', 'delivery_date', 'user_id'
             ]));
 
             $client->siteInfo()->updateOrCreate([], $request->input('site_info', []));
@@ -119,12 +136,18 @@ class ClientController extends Controller
             // Sync Checklist Items
             $inputChecklist = $request->input('checklist_items', []);
             $inputChecklistIds = array_filter(array_column($inputChecklist, 'id'));
-            $client->checklistItems()->whereNotIn('id', $inputChecklistIds)->delete();
+
+            // Delete removed items (one by one to trigger audit logs)
+            $client->checklistItems()->whereNotIn('id', $inputChecklistIds)->get()->each->delete();
+
             foreach ($inputChecklist as $row) {
                 $row['is_checked'] = isset($row['is_checked']) ? true : false;
                 if (isset($row['id']) && $row['id']) {
-                    $client->checklistItems()->where('id', $row['id'])->update(Arr::except($row, ['id']));
-                } else {
+                    $item = $client->checklistItems()->find($row['id']);
+                    if ($item)
+                        $item->update(Arr::except($row, ['id']));
+                }
+                else {
                     $client->checklistItems()->create($row);
                 }
             }
@@ -132,11 +155,15 @@ class ClientController extends Controller
             // Sync Comments
             $inputComments = $request->input('comments', []);
             $inputCommentIds = array_filter(array_column($inputComments, 'id'));
-            $client->comments()->whereNotIn('id', $inputCommentIds)->delete();
+            $client->comments()->whereNotIn('id', $inputCommentIds)->get()->each->delete();
+
             foreach ($inputComments as $row) {
                 if (isset($row['id']) && $row['id']) {
-                    $client->comments()->where('id', $row['id'])->update(Arr::except($row, ['id']));
-                } else {
+                    $item = $client->comments()->find($row['id']);
+                    if ($item)
+                        $item->update(Arr::except($row, ['id']));
+                }
+                else {
                     $client->comments()->create($row);
                 }
             }
@@ -144,11 +171,15 @@ class ClientController extends Controller
             // Sync Payments
             $inputPayments = $request->input('payments', []);
             $inputPaymentIds = array_filter(array_column($inputPayments, 'id'));
-            $client->payments()->whereNotIn('id', $inputPaymentIds)->delete();
+            $client->payments()->whereNotIn('id', $inputPaymentIds)->get()->each->delete();
+
             foreach ($inputPayments as $row) {
                 if (isset($row['id']) && $row['id']) {
-                    $client->payments()->where('id', $row['id'])->update(Arr::except($row, ['id']));
-                } else {
+                    $item = $client->payments()->find($row['id']);
+                    if ($item)
+                        $item->update(Arr::except($row, ['id']));
+                }
+                else {
                     $client->payments()->create($row);
                 }
             }
@@ -156,11 +187,15 @@ class ClientController extends Controller
             // Sync Tasks
             $inputTasks = $request->input('tasks', []);
             $inputTaskIds = array_filter(array_column($inputTasks, 'id'));
-            $client->tasks()->whereNotIn('id', $inputTaskIds)->delete();
+            $client->tasks()->whereNotIn('id', $inputTaskIds)->get()->each->delete();
+
             foreach ($inputTasks as $row) {
                 if (isset($row['id']) && $row['id']) {
-                    $client->tasks()->where('id', $row['id'])->update(Arr::except($row, ['id']));
-                } else {
+                    $item = $client->tasks()->find($row['id']);
+                    if ($item)
+                        $item->update(Arr::except($row, ['id']));
+                }
+                else {
                     $client->tasks()->create($row);
                 }
             }

@@ -52,7 +52,7 @@ class AuditLogSubscriber
         AuditLog::create([
             'user_id' => $user?->id,
             'user_name' => $user->name ?? request('email') ?? 'Guest',
-            'user_role' => $user->role ?? 'guest',
+            'user_role' => $user?->role?->name ?? 'guest',
             'action' => $action,
             'module' => 'Authentication',
             'model_type' => $user ? get_class($user) : null,

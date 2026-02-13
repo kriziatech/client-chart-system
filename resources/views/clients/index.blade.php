@@ -1,96 +1,180 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="bg-white shadow-md rounded-lg overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h2 class="text-xl font-semibold text-gray-800">Projects</h2>
+<div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Active Projects</h1>
+            <p class="text-sm text-ui-muted dark:text-dark-muted font-medium mt-1">Manage and track your ongoing project
+                charters.</p>
+        </div>
+
         @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
         <a href="{{ route('clients.create') }}"
-            class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded text-sm transition">
-            + Add New Project
+            class="bg-brand-600 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-brand-700 transition-all shadow-xl shadow-brand-500/20 flex items-center gap-2 group transform active:scale-95">
+            <svg class="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+                </path>
+            </svg>
+            Initialize Project
         </a>
         @endif
     </div>
 
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                    <th class="py-3 px-6">File #</th>
-                    <th class="py-3 px-6">Client Name</th>
-                    <th class="py-3 px-6">Start Date</th>
-                    <th class="py-3 px-6">Delivery Date</th>
-                    <th class="py-3 px-6 text-center">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-600 text-sm font-light">
-                @forelse($clients as $client)
-                <tr class="border-b border-gray-200 hover:bg-gray-50">
-                    <td class="py-3 px-6 whitespace-nowrap font-medium">{{ $client->file_number }}</td>
-                    <td class="py-3 px-6">{{ $client->first_name }} {{ $client->last_name }}</td>
-                    <td class="py-3 px-6">{{ $client->start_date }}</td>
-                    <td class="py-3 px-6">{{ $client->delivery_date }}</td>
-                    <td class="py-3 px-6 text-center">
-                        <div class="flex item-center justify-center space-x-2">
-                            <a href="{{ route('clients.show', $client) }}"
-                                class="p-1 my-1 text-teal-600 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 rounded"
-                                title="View">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                            </a>
-                            @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
-                            <a href="{{ route('clients.edit', $client) }}"
-                                class="p-1 my-1 text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 rounded"
-                                title="Edit">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                </svg>
-                            </a>
-                            @endif
-                            <a href="{{ route('clients.print', $client) }}"
-                                class="p-1 my-1 text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded"
-                                title="Print" target="_blank">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015-1.837-2.175a48.041 48.041 0 00-1.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
-                                </svg>
-                            </a>
-                            @if(Auth::user()->isAdmin())
-                            <form action="{{ route('clients.destroy', $client) }}" method="POST"
-                                onsubmit="return confirm('Are you sure?');" class="inline">
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                    class="p-1 my-1 text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 rounded"
-                                    title="Delete">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.977 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+    <div
+        class="bg-white dark:bg-dark-surface rounded-3xl border border-ui-border dark:border-dark-border shadow-premium overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr
+                        class="bg-slate-50/50 dark:bg-dark-bg/50 text-[10px] font-black uppercase tracking-[0.2em] text-ui-muted dark:text-dark-muted border-b border-ui-border dark:border-dark-border">
+                        <th class="py-5 px-8">File Ref</th>
+                        <th class="py-5 px-8">Client Identity</th>
+                        <th class="py-5 px-6">Timeline</th>
+                        <th class="py-5 px-8 text-center">Status & Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-ui-border dark:divide-dark-border">
+                    @forelse($clients as $client)
+                    <tr class="group hover:bg-slate-50/50 dark:hover:bg-dark-bg/30 transition-all duration-300">
+                        <td class="py-6 px-8 whitespace-nowrap">
+                            <span
+                                class="inline-flex items-center px-3 py-1 rounded-lg bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-bold leading-none">
+                                {{ $client->file_number }}
+                            </span>
+                        </td>
+                        <td class="py-6 px-8">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-dark-bg flex items-center justify-center text-slate-400 font-bold text-sm uppercase">
+                                    {{ substr($client->first_name, 0, 1) }}{{ substr($client->last_name, 0, 1) }}
+                                </div>
+                                <div>
+                                    <div class="text-sm font-black text-slate-900 dark:text-white">{{
+                                        $client->first_name }} {{ $client->last_name }}</div>
+                                    <div
+                                        class="text-[10px] text-ui-muted dark:text-dark-muted font-bold uppercase tracking-widest mt-0.5">
+                                        {{ $client->mobile ?: 'No Contact' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-6 px-6">
+                            <div class="flex items-center gap-4">
+                                <div>
+                                    <div
+                                        class="text-[10px] uppercase font-bold text-slate-400 tracking-widest leading-none mb-1">
+                                        Start</div>
+                                    <div class="text-xs font-bold text-slate-700 dark:text-slate-300">{{
+                                        $client->start_date ? \Carbon\Carbon::parse($client->start_date)->format('d M,
+                                        Y') : '-' }}</div>
+                                </div>
+                                <div class="h-6 w-px bg-slate-200 dark:bg-dark-border"></div>
+                                <div>
+                                    <div
+                                        class="text-[10px] uppercase font-bold text-slate-400 tracking-widest leading-none mb-1">
+                                        Target</div>
+                                    <div class="text-xs font-bold text-slate-700 dark:text-slate-300">{{
+                                        $client->delivery_date ?
+                                        \Carbon\Carbon::parse($client->delivery_date)->format('d M, Y') : '-' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-6 px-8">
+                            <div class="flex items-center justify-center gap-2 transition-all duration-300">
+                                <a href="{{ route('finance.analytics', $client) }}"
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
+                                    title="Financial Intel">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z">
+                                        </path>
                                     </svg>
-                                </button>
-                            </form>
-                            @endif
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="py-6 text-center text-gray-500">No projects found.</td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-    <div class="px-6 py-4 border-t border-gray-200">
-        {{ $clients->links() }}
+                                </a>
+                                <a href="{{ route('clients.show', $client) }}"
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 hover:bg-brand-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
+                                    title="View Dossier">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z">
+                                        </path>
+                                    </svg>
+                                </a>
+                                @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
+                                <a href="{{ route('clients.edit', $client) }}"
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
+                                    title="Modify Charter">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                        </path>
+                                    </svg>
+                                </a>
+                                @endif
+                                <a href="{{ route('clients.print', $client) }}" target="_blank"
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-500/10 text-slate-600 dark:text-slate-400 hover:bg-slate-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
+                                    title="Export PDF">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                                        </path>
+                                    </svg>
+                                </a>
+                                @if(Auth::user()->isAdmin())
+                                <form action="{{ route('clients.destroy', $client) }}" method="POST"
+                                    onsubmit="return confirm('Archive this project charter permanently?');"
+                                    class="inline">
+                                    @csrf @method('DELETE')
+                                    <button type="submit"
+                                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-400 dark:text-rose-500 hover:bg-rose-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
+                                        title="Archive Project">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="py-20 text-center">
+                            <div class="flex flex-col items-center">
+                                <div
+                                    class="w-20 h-20 bg-slate-50 dark:bg-dark-bg rounded-3xl flex items-center justify-center text-slate-200 mb-4 border border-slate-100 dark:border-dark-border border-dashed">
+                                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-sm font-black text-slate-900 dark:text-white">Void detected.</h3>
+                                <p
+                                    class="text-[11px] text-ui-muted dark:text-dark-muted font-bold uppercase tracking-widest mt-1 italic">
+                                    No active project dossiers found in database.</p>
+                                @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
+                                <a href="{{ route('clients.create') }}"
+                                    class="mt-6 text-xs font-black uppercase tracking-widest text-brand-600 hover:text-brand-700 underline underline-offset-8">Initialize
+                                    First Project</a>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if($clients->hasPages())
+        <div class="px-8 py-5 border-t border-ui-border dark:border-dark-border bg-slate-50/30 dark:bg-dark-bg/30">
+            {{ $clients->links() }}
+        </div>
+        @endif
     </div>
 </div>
 @endsection

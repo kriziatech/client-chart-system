@@ -79,7 +79,7 @@ trait Auditable
         AuditLog::create([
             'user_id' => $user?->id,
             'user_name' => $user?->name ?? 'System',
-            'user_role' => $user?->role ?? 'System',
+            'user_role' => $user?->role?->name ?? 'System',
             'action' => ucfirst($action),
             'module' => $modelName,
             'model_type' => get_class($model),
