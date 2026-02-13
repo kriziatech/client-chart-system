@@ -1,0 +1,7 @@
+/vendor
+/storage/*.log
+.env
+.git
+/tests
+/phpunit.xml
+/README.md
