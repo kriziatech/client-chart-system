@@ -105,13 +105,13 @@ class ClientController extends Controller
             abort(403, 'Unauthorized access to this project.');
         }
 
-        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks']);
+        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks', 'scopeOfWork.items']);
         return view('clients.show', compact('client'));
     }
 
     public function edit(Client $client)
     {
-        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks']);
+        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks', 'scopeOfWork.items']);
         $users = \App\Models\User::orderBy('name')->get();
         return view('clients.edit', compact('client', 'users'));
     }
@@ -212,7 +212,7 @@ class ClientController extends Controller
 
     public function print(Client $client)
     {
-        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks']);
+        $client->load(['checklistItems', 'siteInfo', 'permission', 'comments', 'payments', 'tasks', 'scopeOfWork.items']);
         return view('clients.print', compact('client'));
     }
 }

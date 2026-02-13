@@ -257,6 +257,104 @@
                 </div>
             </div>
 
+            <!-- Section 3.5: Roles & Responsibility (Scope of Work) -->
+            <div class="mt-8">
+                <h3
+                    class="text-lg font-bold text-teal-700 border-b border-gray-300 mb-4 dark:text-teal-400 dark:border-slate-600">
+                    Roles and Responsibility (Scope of Work)
+                </h3>
+
+                @if(!$client->scopeOfWork)
+                @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
+                <div
+                    class="bg-gray-50 dark:bg-slate-900/50 p-6 rounded-xl border border-dashed border-gray-300 dark:border-slate-700 text-center">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4 font-medium italic">No structural definition
+                        exists for this project's roles and responsibilities.</p>
+                    <form action="{{ route('scope.store', $client) }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="version_name" value="Final Proposal">
+                        <button type="submit"
+                            class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition shadow-lg active:scale-95">
+                            Initialize Definitions
+                        </button>
+                    </form>
+                </div>
+                @else
+                <p class="text-sm text-gray-500 italic">No project definitions yet.</p>
+                @endif
+                @else
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    @forelse($client->scopeOfWork->items as $item)
+                    <div
+                        class="bg-white dark:bg-slate-800/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm group hover:shadow-md transition-all">
+                        <h4 class="text-[11px] font-black uppercase tracking-[0.1em] text-teal-600 mb-2">{{
+                            $item->area_name }}</h4>
+                        <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{{ $item->description }}
+                        </p>
+                    </div>
+                    @empty
+                    <div
+                        class="col-span-full py-8 text-center bg-gray-50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-gray-300 dark:border-slate-700 text-gray-400 text-sm italic">
+                        Definitions initialized. Waiting for item deployment.
+                    </div>
+                    @endforelse
+                </div>
+
+                @if(Auth::user()->isAdmin() || Auth::user()->isEditor())
+                <div class="mt-6">
+                    <button onclick="document.getElementById('add-scope-item-modal').classList.remove('hidden')"
+                        class="text-[10px] font-black uppercase tracking-widest text-teal-600 hover:text-teal-700 flex items-center gap-2 group">
+                        <span
+                            class="w-6 h-6 rounded-lg bg-teal-50 dark:bg-teal-500/10 flex items-center justify-center group-hover:bg-teal-100 transition-colors">+</span>
+                        Assign New Responsibility
+                    </button>
+                </div>
+
+                <!-- Add Scope Item Modal -->
+                <div id="add-scope-item-modal"
+                    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+                    <div
+                        class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700 overflow-hidden transform transition-all">
+                        <div
+                            class="px-8 py-6 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-dark-bg/50">
+                            <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-900 dark:text-white">New
+                                Responsibility Alignment</h3>
+                            <button onclick="document.getElementById('add-scope-item-modal').classList.add('hidden')"
+                                class="text-slate-400 hover:text-slate-600 transition-colors text-xl font-light">&times;</button>
+                        </div>
+                        <form action="{{ route('scope.item.store', $client->scopeOfWork) }}" method="POST"
+                            class="p-8 space-y-6">
+                            @csrf
+                            <div class="space-y-2">
+                                <label
+                                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Operational
+                                    Area</label>
+                                <input type="text" name="area_name" required placeholder="e.g. Master Bedroom, Kitchen"
+                                    class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-4 focus:ring-teal-500/10 transition-all placeholder:text-slate-300">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Task
+                                    Definition / Responsibility</label>
+                                <textarea name="description" required rows="4"
+                                    placeholder="Describe the specific work and mandates..."
+                                    class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-teal-500/10 transition-all placeholder:text-slate-300 resize-none"></textarea>
+                            </div>
+                            <div class="pt-4 flex justify-end gap-3">
+                                <button type="button"
+                                    onclick="document.getElementById('add-scope-item-modal').classList.add('hidden')"
+                                    class="px-6 py-3 text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition">Cancel</button>
+                                <button type="submit"
+                                    class="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.1em] transition shadow-lg shadow-teal-500/20 active:scale-95">
+                                    Confirm Assignment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                @endif
+                @endif
+            </div>
+
         </div>
 
         <!-- Section 4: Project Gallery -->
