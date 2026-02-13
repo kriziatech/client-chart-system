@@ -451,29 +451,32 @@
             navigator.geolocation.getCurrentPosition((position) => {
                 const url = type === 'in' ? '{{ route('attendance.check-in ') }}' : '{{ route('attendance.check - out') }}';
 
-                  fet              method: 'POST',
+                fetch(url, {
+                    method: 'POST',
                     headers: {
-                    'Content-Type': 'application/json',
+                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
+                    },
+                    body: JSON.stringify({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    })
                 })
-            })
-                .then(res => res.then(data = fetc                        
-                                                ast or feedback
-                > {
-                    error(err);
-                                t('Error marking attendance');
-                            btn.innerHTML = originalText;
-                    btn.disabled = fal
-                });
+                    .then(res => res.json())
+                    .then(data => {
+                        fetchAttendanceStatus();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Error marking attendance');
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    });
 
-        }, (error) => {
-            alert('Unable to retrieve your location: ' + error.message);
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        });
+            }, (error) => {
+                alert('Unable to retrieve your location: ' + error.message);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
         }
     </script>
