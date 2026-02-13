@@ -449,7 +449,7 @@
             }
 
             navigator.geolocation.getCurrentPosition((position) => {
-                const url = type === 'in' ? '{{ route('attendance.check-in ') }}' : '{{ route('attendance.check - out') }}';
+                const url = type === 'in' ? '{{ route('attendance.check-in') }}' : '{{ route('attendance.check-out') }}';
 
                 fetch(url, {
                     method: 'POST',
