@@ -570,6 +570,15 @@
                         x-text="selectedLead?.name + ' • ' + selectedLead?.lead_number"></p>
                 </div>
                 <div class="flex items-center gap-3">
+                    <a x-show="reqForm.locked" :href="'/leads/' + selectedLead.id + '/requirements/export'"
+                        target="_blank"
+                        class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition shadow-sm flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Excel
+                    </a>
                     <a x-show="reqForm.locked" :href="'/leads/' + selectedLead.id + '/requirements/print'"
                         target="_blank"
                         class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-lg flex items-center gap-2">

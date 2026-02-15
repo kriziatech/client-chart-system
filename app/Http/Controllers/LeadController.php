@@ -272,9 +272,102 @@ class LeadController extends Controller
     /**
      * Print requirements dossier
      */
+    /**
+     * Print requirements dossier
+     */
     public function printRequirements(Lead $lead)
     {
         $requirements = $lead->metadata['requirements'] ?? [];
         return view('leads.requirements-print', compact('lead', 'requirements'));
+    }
+
+    /**
+     * Export requirements to CSV
+     */
+    public function exportRequirements(Lead $lead)
+    {
+        $requirements = $lead->metadata['requirements'] ?? [];
+        $fileName = 'requirements-' . $lead->lead_number . '.csv';
+
+        $headers = [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $callback = function () use ($requirements, $lead) {
+            $file = fopen('php://output', 'w');
+
+            // Header Row matching Quotation Import format
+            fputcsv($file, ['Description', 'Type', 'Quantity', 'Unit', 'Rate']);
+
+            // 1. Property Identity & Basic Info
+            $basics = [
+                'Project Type' => $requirements['project_type'] ?? '',
+                'Property Type' => $requirements['property_type'] ?? '',
+                'Carpet Area' => ($requirements['carpet_area'] ?? '') . ' sqft',
+                'Budget Range' => $requirements['budget_range'] ?? '',
+                'Budget Flexibility' => $requirements['budget_flexibility'] ?? '',
+            ];
+
+            foreach ($basics as $key => $val) {
+                if ($val) {
+                    fputcsv($file, ["Property Info: $key - $val", 'work', 1, 'lot', 0]);
+                }
+            }
+
+            // 2. Room Requirements - Map keys to readable names
+            $roomLabels = [
+                'living_room' => 'Living Room',
+                'kitchen' => 'Kitchen',
+                'bedroom_master' => 'Master Bedroom',
+                'bedroom_kids' => 'Kids Bedroom',
+                'bedroom_guest' => 'Guest Bedroom',
+                'bathroom' => 'Bathroom',
+                'dining' => 'Dining Area',
+                'pooja' => 'Pooja Room',
+                'study' => 'Study Room',
+                'entertainment' => 'Entertainment Room',
+                'utility' => 'Utility Area',
+                'balcony' => 'Balcony',
+                'foyer' => 'Entrance Foyer',
+            ];
+
+            foreach ($requirements as $key => $value) {
+                // Skip basic fields
+                if (in_array($key, ['project_type', 'property_type', 'carpet_area', 'budget_range', 'budget_flexibility', 'priorities', 'decision_maker', 'timeline', 'urgency', 'notes', 'locked'])) {
+                    continue;
+                }
+
+                // Check if it's a room object
+                if (is_array($value)) {
+                    $roomName = $roomLabels[$key] ?? ucwords(str_replace('_', ' ', $key));
+
+                    foreach ($value as $itemKey => $itemValue) {
+                        if ($itemValue === true || $itemValue === 'true' || $itemValue === 1 || $itemValue === '1') {
+                            // Boolean item (e.g., TV Unit)
+                            $itemLabel = ucwords(str_replace('_', ' ', $itemKey));
+                            fputcsv($file, ["$roomName - $itemLabel", 'work', 1, 'nos', 0]);
+                        }
+                        elseif (is_string($itemValue) && $itemValue !== '' && $itemValue !== 'false') {
+                            // String value (e.g., Structure: Modular)
+                            $itemLabel = ucwords(str_replace('_', ' ', $itemKey));
+                            fputcsv($file, ["$roomName - $itemLabel: $itemValue", 'material', 1, 'lot', 0]);
+                        }
+                    }
+                }
+            }
+
+            // Notes
+            if (!empty($requirements['notes'])) {
+                fputcsv($file, ["Internal Notes: " . $requirements['notes'], 'work', 1, 'lot', 0]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

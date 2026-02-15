@@ -212,6 +212,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/leads/{lead}/follow-up', [\App\Http\Controllers\LeadController::class , 'setFollowUp'])->name('leads.setFollowUp');
             Route::post('/leads/{lead}/requirements', [\App\Http\Controllers\LeadController::class , 'saveRequirements'])->name('leads.saveRequirements');
             Route::get('/leads/{lead}/requirements/print', [\App\Http\Controllers\LeadController::class , 'printRequirements'])->name('leads.printRequirements');
+            Route::get('/leads/{lead}/requirements/export', [\App\Http\Controllers\LeadController::class , 'exportRequirements'])->name('leads.exportRequirements');
             Route::delete('/leads/{lead}', [\App\Http\Controllers\LeadController::class , 'destroy'])->name('leads.destroy');
             Route::post('/leads/sync', [\App\Http\Controllers\LeadController::class , 'sync'])->name('leads.sync');
         }

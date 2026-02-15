@@ -35,14 +35,25 @@
                                     class="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center text-brand-600">01</span>
                                 Bill of Quantities (Items)
                             </h3>
-                            <button type="button" id="add-item"
-                                class="px-4 py-2 bg-white dark:bg-dark-surface border border-brand-200 dark:border-brand-500/30 text-brand-600 dark:text-brand-400 rounded-xl text-[11px] font-bold uppercase tracking-wider hover:bg-brand-50 dark:hover:bg-brand-900 transition-all shadow-sm flex items-center gap-2">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                </svg>
-                                Append Line Item
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <input type="file" id="import-file" accept=".csv" class="hidden">
+                                <button type="button" id="import-csv-btn"
+                                    class="px-4 py-2 bg-white dark:bg-dark-surface border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-brand-600 rounded-xl text-[11px] font-bold uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-dark-bg transition-all shadow-sm flex items-center gap-2">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Import Excel
+                                </button>
+                                <button type="button" id="add-item"
+                                    class="px-4 py-2 bg-white dark:bg-dark-surface border border-brand-200 dark:border-brand-500/30 text-brand-600 dark:text-brand-400 rounded-xl text-[11px] font-bold uppercase tracking-wider hover:bg-brand-50 dark:hover:bg-brand-900 transition-all shadow-sm flex items-center gap-2">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                    Append Line Item
+                                </button>
+                            </div>
                         </div>
 
                         <div class="p-8">
@@ -209,6 +220,8 @@
     document.addEventListener('DOMContentLoaded', function () {
         const itemsContainer = document.getElementById('items-container');
         const addItemBtn = document.getElementById('add-item');
+        const importBtn = document.getElementById('import-csv-btn');
+        const fileInput = document.getElementById('import-file');
         let itemIndex = 1;
 
         function calculateTotals() {
@@ -228,28 +241,28 @@
             document.getElementById('total').textContent = '₹' + total.toLocaleString('en-IN', { minimumFractionDigits: 2 });
         }
 
-        addItemBtn.addEventListener('click', function () {
+        function addItem(description = '', type = 'material', quantity = 1, unit = '', rate = '') {
             const newRow = document.createElement('div');
             newRow.className = 'item-row grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-slate-50 dark:bg-dark-bg/50 rounded-2xl border border-transparent hover:border-brand-500/20 hover:bg-white dark:hover:bg-dark-surface transition-all group relative';
             newRow.innerHTML = `
                 <div class="col-span-4">
-                    <input type="text" name="items[${itemIndex}][description]" required placeholder="Description..." class="w-full bg-transparent border-none p-0 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-300 focus:ring-0">
+                    <input type="text" name="items[${itemIndex}][description]" value="${description.replace(/"/g, '&quot;')}" required placeholder="Description of work..." class="w-full bg-transparent border-none p-0 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-300 focus:ring-0">
                 </div>
                 <div class="col-span-2">
                     <select name="items[${itemIndex}][type]" required class="w-full bg-brand-50/50 dark:bg-brand-500/5 border-none rounded-lg text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-brand-500/20 cursor-pointer py-1.5">
-                        <option value="material">Material</option>
-                        <option value="labour">Labour</option>
-                        <option value="work">Work/Service</option>
+                        <option value="material" ${type === 'material' ? 'selected' : ''}>Material</option>
+                        <option value="labour" ${type === 'labour' ? 'selected' : ''}>Labour</option>
+                        <option value="work" ${type === 'work' ? 'selected' : ''}>Work/Service</option>
                     </select>
                 </div>
                 <div class="col-span-1">
-                    <input type="number" step="0.01" name="items[${itemIndex}][quantity]" value="1" required class="w-full bg-transparent border-none p-1 text-sm font-black text-center text-slate-700 dark:text-slate-300 focus:ring-0 qty">
+                    <input type="number" step="0.01" name="items[${itemIndex}][quantity]" value="${quantity}" required class="w-full bg-transparent border-none p-1 text-sm font-black text-center text-slate-700 dark:text-slate-300 focus:ring-0 qty">
                 </div>
                 <div class="col-span-1">
-                    <input type="text" name="items[${itemIndex}][unit]" placeholder="unit" class="w-full bg-transparent border-none p-1 text-[11px] font-bold text-center text-ui-muted dark:text-dark-muted focus:ring-0 uppercase tracking-tighter">
+                    <input type="text" name="items[${itemIndex}][unit]" value="${unit}" placeholder="unit" class="w-full bg-transparent border-none p-1 text-[11px] font-bold text-center text-ui-muted dark:text-dark-muted focus:ring-0 uppercase tracking-tighter">
                 </div>
                 <div class="col-span-3 pr-4">
-                    <input type="number" step="0.01" name="items[${itemIndex}][rate]" required placeholder="0.00" class="w-full bg-transparent border-none p-1 text-sm font-black text-right text-brand-600 focus:ring-0 rate">
+                    <input type="number" step="0.01" name="items[${itemIndex}][rate]" value="${rate}" required placeholder="0.00" class="w-full bg-transparent border-none p-1 text-sm font-black text-right text-brand-600 focus:ring-0 rate">
                 </div>
                 <div class="col-span-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <button type="button" class="remove-item text-rose-400 hover:text-rose-600 transition-colors">
@@ -260,7 +273,47 @@
             itemsContainer.appendChild(newRow);
             itemIndex++;
             calculateTotals();
-        });
+        }
+
+        addItemBtn.addEventListener('click', () => addItem());
+
+        // Import Logic
+        if (importBtn && fileInput) {
+            importBtn.addEventListener('click', () => fileInput.click());
+
+            fileInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const text = e.target.result;
+                    const rows = text.split('\n');
+
+                    for (let i = 1; i < rows.length; i++) {
+                        let line = rows[i].trim();
+                        if (!line) continue;
+
+                        let row = [];
+                        let inQuote = false;
+                        let field = '';
+                        for (let char of line) {
+                            if (char === '"') { inQuote = !inQuote; }
+                            else if (char === ',' && !inQuote) { row.push(field); field = ''; }
+                            else { field += char; }
+                        }
+                        row.push(field);
+                        row = row.map(f => f.replace(/^"|"$/g, '').replace(/""/g, '"'));
+
+                        if (row.length >= 1) {
+                            addItem(row[0], (row[1] || 'material').toLowerCase(), row[2] || 1, row[3] || 'nos', row[4] || 0);
+                        }
+                    }
+                    fileInput.value = '';
+                };
+                reader.readAsText(file);
+            });
+        }
 
         itemsContainer.addEventListener('click', function (e) {
             if (e.target.closest('.remove-item')) {
