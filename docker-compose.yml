@@ -3,14 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: interiortouch-pm
-    platform: linux/amd64
+    image: interiortouch-pm:latest
     container_name: itpm_app
     restart: unless-stopped
     ports:
       - "8081:80"
     environment:
-      APP_NAME: "${APP_NAME:-Interior Touch PM}"
+      APP_NAME: "${APP_NAME:-Interior Touch}"
       APP_ENV: "${APP_ENV:-production}"
       APP_DEBUG: "${APP_DEBUG:-false}"
       APP_URL: "${APP_URL:-http://localhost:8081}"
@@ -20,14 +19,14 @@ services:
       DB_DATABASE: "${DB_DATABASE:-client_chart}"
       DB_USERNAME: "${DB_USERNAME:-root}"
       DB_PASSWORD: "${DB_PASSWORD:-secret}"
+      FILESYSTEM_DISK: public
     depends_on:
       - db
     networks:
       - itpm-network
     volumes:
-      - ./:/var/www/html
-      - /var/www/html/vendor
-      - /var/www/html/node_modules
+      - storage_data:/var/www/html/storage
+      - public_uploads:/var/www/html/public/uploads
 
   db:
     image: mariadb:10.6
@@ -43,24 +42,11 @@ services:
     networks:
       - itpm-network
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    platform: linux/amd64
-    container_name: itpm_pma
-    restart: unless-stopped
-    ports:
-      - "8082:80"
-    environment:
-      PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-secret}"
-    depends_on:
-      - db
-    networks:
-      - itpm-network
-
 networks:
   itpm-network:
     driver: bridge
 
 volumes:
   db_data:
+  storage_data:
+  public_uploads:
