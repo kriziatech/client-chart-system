@@ -210,6 +210,7 @@ Route::middleware(['auth'])->group(function () {
             Route::patch('/leads/{lead}/status', [\App\Http\Controllers\LeadController::class , 'updateStatus'])->name('leads.updateStatus');
             Route::post('/leads/{lead}/note', [\App\Http\Controllers\LeadController::class , 'addNote'])->name('leads.addNote');
             Route::post('/leads/{lead}/follow-up', [\App\Http\Controllers\LeadController::class , 'setFollowUp'])->name('leads.setFollowUp');
+            Route::post('/leads/{lead}/requirements', [\App\Http\Controllers\LeadController::class , 'saveRequirements'])->name('leads.saveRequirements');
             Route::delete('/leads/{lead}', [\App\Http\Controllers\LeadController::class , 'destroy'])->name('leads.destroy');
             Route::post('/leads/sync', [\App\Http\Controllers\LeadController::class , 'sync'])->name('leads.sync');
         }

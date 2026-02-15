@@ -189,6 +189,37 @@ class LeadController extends Controller
     }
 
     /**
+     * Save site requirements (AJAX)
+     */
+    public function saveRequirements(Request $request, Lead $lead)
+    {
+        $metadata = $lead->metadata ?? [];
+        $metadata['requirements'] = $request->input('requirements', []);
+
+        // Also update budget if provided in requirements
+        if (isset($metadata['requirements']['budget_range'])) {
+            $budgetMap = [
+                'below 10 Lakhs' => 800000,
+                '10-20 Lakhs' => 1500000,
+                '20-40 Lakhs' => 3000000,
+                '40-60 Lakhs' => 5000000,
+                '60 Lakhs+' => 7500000,
+            ];
+            if (!$lead->budget && isset($budgetMap[$metadata['requirements']['budget_range']])) {
+                $lead->budget = $budgetMap[$metadata['requirements']['budget_range']];
+            }
+        }
+
+        $lead->update(['metadata' => $metadata]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Requirements saved successfully.',
+            'lead' => $lead->fresh()
+        ]);
+    }
+
+    /**
      * Delete a lead
      */
     public function destroy(Lead $lead)
