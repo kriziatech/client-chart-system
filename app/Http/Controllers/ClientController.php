@@ -123,7 +123,10 @@ class ClientController extends Controller
             'galleries',
             'paymentRequests',
             'handover.items',
-            'feedback'
+            'feedback',
+            'vendorPayments.vendor',
+            'materialInwards.payments',
+            'financials'
         ]);
 
         // Failsafe: Ensure relationships are collections (not null)

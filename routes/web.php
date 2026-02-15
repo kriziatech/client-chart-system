@@ -159,6 +159,13 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/clients/{client}/expenses', [\App\Http\Controllers\FinanceController::class , 'storeExpense'])->name('finance.expense.store');
             Route::get('/clients/{client}/analytics', [\App\Http\Controllers\FinanceController::class , 'analytics'])->name('finance.analytics');
             Route::post('/payment-requests/{paymentRequest}/reminder', [\App\Http\Controllers\FinanceController::class , 'sendReminder'])->name('finance.reminder.send');
+
+            // Financial Control Room Routes
+            Route::post('/clients/{client}/vendor-payments', [\App\Http\Controllers\FinanceController::class , 'storeVendorPayment'])->name('finance.vendor.store');
+            Route::post('/clients/{client}/material-inwards', [\App\Http\Controllers\FinanceController::class , 'storeMaterialInward'])->name('finance.material-inward.store');
+            Route::post('/clients/{client}/material-payments', [\App\Http\Controllers\FinanceController::class , 'storeMaterialPayment'])->name('finance.material-payment.store');
+            Route::post('/clients/{client}/profit-lock', [\App\Http\Controllers\FinanceController::class , 'toggleLock'])->name('finance.profit.lock');
+            Route::get('/clients/{client}/ledger', [\App\Http\Controllers\FinanceController::class , 'downloadLedger'])->name('finance.ledger.download');
         }
         );
 

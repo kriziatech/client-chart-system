@@ -12,6 +12,61 @@ class Client extends Model
 
     protected $guarded = [];
 
+    /**
+     * Financial Control Room Relationships
+     */
+    public function vendorPayments()
+    {
+        return $this->hasMany(VendorPayment::class);
+    }
+
+    public function materialInwards()
+    {
+        return $this->hasMany(MaterialInward::class);
+    }
+
+    public function materialPayments()
+    {
+        return $this->hasMany(MaterialPayment::class);
+    }
+
+    public function financials()
+    {
+        return $this->hasOne(ProjectFinancial::class)->withDefault([
+            'budget_locked_amount' => 0,
+            'is_locked' => false,
+            'expected_profit_margin' => 15.00
+        ]);
+    }
+
+    /**
+     * Financial Calculations
+     */
+    public function getTotalClientReceivedAttribute()
+    {
+        return $this->payments()->sum('amount');
+    }
+
+    public function getTotalVendorPaidAttribute()
+    {
+        return $this->vendorPayments()->sum('amount');
+    }
+
+    public function getTotalMaterialCostAttribute()
+    {
+        return $this->materialInwards()->sum('total_amount');
+    }
+
+    public function getTotalMaterialPaidAttribute()
+    {
+        return $this->materialPayments()->sum('amount_paid');
+    }
+
+    public function getRealTimeProfitAttribute()
+    {
+        return $this->total_client_received - ($this->total_vendor_paid + $this->total_material_cost);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

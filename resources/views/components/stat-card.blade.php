@@ -1,11 +1,12 @@
-@props(['label', 'value', 'trend' => null, 'trendUp' => true, 'sparkline' => [], 'icon' => ''])
+@props(['label', 'value', 'trend' => null, 'trendUp' => true, 'sparkline' => [], 'icon' => '', 'iconClass' =>
+'text-slate-500'])
 
 <div
     class="bg-white dark:bg-dark-surface p-6 rounded-3xl border border-ui-border dark:border-dark-border shadow-premium hover:shadow-premium-hover transition-all duration-500 group">
     <div class="flex justify-between items-start mb-6">
         <div
             class="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl group-hover:bg-brand-500 group-hover:text-white transition-all duration-500 shadow-sm group-hover:shadow-brand-500/20">
-            <svg class="w-5 h-5 text-slate-500 group-hover:text-white" fill="none" stroke="currentColor"
+            <svg class="w-5 h-5 {{ $iconClass }} group-hover:text-white" fill="none" stroke="currentColor"
                 viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}"></path>
             </svg>

@@ -16,11 +16,22 @@ class DashboardController extends Controller
         $user = auth()->user();
         $isViewer = $user->isViewer() || $user->isClient();
 
-        // 1. Key Metrics with Trends
+        // 1. Key Metrics with Real Financial Data
         if ($isViewer) {
             $clientIds = Client::where('user_id', $user->id)->pluck('id');
             $totalProjects = $clientIds->count();
+
+            // Income
             $totalRevenue = Payment::whereIn('client_id', $clientIds)->sum('amount');
+
+            // Expenses (Vendor + Material + General Expenses)
+            $vendorExpenses = \App\Models\VendorPayment::whereIn('client_id', $clientIds)->sum('amount');
+            $materialExpenses = \App\Models\MaterialPayment::whereIn('client_id', $clientIds)->sum('amount_paid');
+            $generalExpenses = \App\Models\Expense::whereIn('client_id', $clientIds)->sum('amount');
+
+            $totalExpenses = $vendorExpenses + $materialExpenses + $generalExpenses;
+            $netProfit = $totalRevenue - $totalExpenses;
+
             $activeTasks = Task::whereIn('client_id', $clientIds)
                 ->whereIn('status', ['Pending', 'In Progress'])
                 ->count();
@@ -28,45 +39,81 @@ class DashboardController extends Controller
                 ->where('delivery_date', '<', now())
                 ->count();
 
+            // Last Month Financials
+            $lastMonthStart = now()->subMonth()->startOfMonth();
+            $lastMonthEnd = now()->subMonth()->endOfMonth();
+
             $lastMonthRevenue = Payment::whereIn('client_id', $clientIds)
-                ->whereBetween('date', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])
-                ->sum('amount');
+                ->whereBetween('payment_date', [$lastMonthStart, $lastMonthEnd])
+                ->sum('amount'); // revenue
         }
         else {
             $totalProjects = Client::count();
+
+            // Income
             $totalRevenue = Payment::sum('amount');
+
+            // Expenses
+            $vendorExpenses = \App\Models\VendorPayment::sum('amount');
+            $materialExpenses = \App\Models\MaterialPayment::sum('amount_paid');
+            $generalExpenses = \App\Models\Expense::sum('amount');
+
+            $totalExpenses = $vendorExpenses + $materialExpenses + $generalExpenses;
+            $netProfit = $totalRevenue - $totalExpenses;
+
             $activeTasks = Task::whereIn('status', ['Pending', 'In Progress'])->count();
             $completedProjects = Client::where('delivery_date', '<', now())->count();
 
-            $lastMonthRevenue = Payment::whereBetween('date', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])
+            $lastMonthStart = now()->subMonth()->startOfMonth();
+            $lastMonthEnd = now()->subMonth()->endOfMonth();
+
+            $lastMonthRevenue = Payment::whereBetween('payment_date', [$lastMonthStart, $lastMonthEnd])
                 ->sum('amount');
         }
 
         // Trend calculation
-        $revenueGrowth = $lastMonthRevenue > 0 ? (($totalRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 : 12.5; // Default for UI logic if no data
+        $revenueGrowth = $lastMonthRevenue > 0 ? (($totalRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 : 0;
 
         // Generate sparkline (simulating daily totals for the last 7 days)
         $sparklineQuery = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->toDateString();
-            $dailySum = Payment::whereDate('date', $date);
+            $dailySum = Payment::whereDate('payment_date', $date);
             if ($isViewer) {
                 $dailySum->whereIn('client_id', $clientIds ?? []);
             }
-            $sparklineQuery[] = $dailySum->sum('amount') ?: rand(1000, 5000); // Random data if empty for sparkline effect
+            $sparklineQuery[] = $dailySum->sum('amount');
         }
 
-        // 2. Chart Data: Project Trends (Last 6 Months)
+        // 2. Chart Data: Financial Trends (Income vs Expense - Last 6 Months)
         $months = [];
-        $projectCounts = [];
+        $incomeData = [];
+        $expenseData = [];
+
         for ($i = 5; $i >= 0; $i--) {
             $month = Carbon::now()->subMonths($i);
+            $start = $month->copy()->startOfMonth();
+            $end = $month->copy()->endOfMonth();
+
             $months[] = $month->format('M Y');
-            $pQuery = Client::whereYear('created_at', $month->year)->whereMonth('created_at', $month->month);
+
+            // Monthly Income
+            $incQuery = Payment::whereBetween('payment_date', [$start, $end]);
+
+            // Monthly Expense
+            $expVendor = \App\Models\VendorPayment::whereBetween('payment_date', [$start, $end]);
+            $expMat = \App\Models\MaterialPayment::whereBetween('payment_date', [$start, $end]);
+            $expGen = \App\Models\Expense::whereBetween('date', [$start, $end]);
+
             if ($isViewer) {
-                $pQuery->where('user_id', $user->id);
+                $incQuery->whereIn('client_id', $clientIds ?? []);
+                $expVendor->whereIn('client_id', $clientIds ?? []);
+                $expMat->whereIn('client_id', $clientIds ?? []);
+                $expGen->whereIn('client_id', $clientIds ?? []);
             }
-            $projectCounts[] = $pQuery->count();
+
+            $incomeData[] = $incQuery->sum('amount');
+            $expenseData[] = $expVendor->sum('amount') + $expMat->sum('amount_paid') + $expGen->sum('amount');
         }
 
         // 3. Chart Data: Tasks Status
@@ -79,52 +126,44 @@ class DashboardController extends Controller
         $taskData = array_values($taskStats);
 
         // 4. Recent Data
-        $rpQuery = Client::latest()->take(5);
+        $rpQuery = Client::latest()->take(3); // Reduced to 3
         if ($isViewer) {
             $rpQuery->where('user_id', $user->id);
         }
         $recentProjects = $rpQuery->get();
 
         $qQuery = \App\Models\Quotation::with('client')->latest()->take(3);
-        $totalQuotedQuery = \App\Models\Quotation::query();
-        $totalApprovedQuery = \App\Models\Quotation::where('status', 'approved');
-        $pendingApprovalQuery = \App\Models\Quotation::where('status', 'sent');
 
         if ($isViewer) {
             $qQuery->whereIn('client_id', $clientIds ?? []);
-            $totalQuotedQuery->whereIn('client_id', $clientIds ?? []);
-            $totalApprovedQuery->whereIn('client_id', $clientIds ?? []);
-            $pendingApprovalQuery->whereIn('client_id', $clientIds ?? []);
         }
 
         $recentQuotations = $qQuery->get();
-        $totalQuoted = $totalQuotedQuery->sum('total_amount');
-        $totalApproved = $totalApprovedQuery->sum('total_amount');
-        $pendingApprovalCount = $pendingApprovalQuery->count();
 
-        $rmQuery = \App\Models\ProjectMaterial::with(['client', 'inventoryItem'])->latest()->take(5);
+        // Recent Materials (Inwards)
+        $rmQuery = \App\Models\MaterialInward::with(['client'])->latest()->take(3); // Reduced to 3
         if ($isViewer) {
             $rmQuery->whereIn('client_id', $clientIds ?? []);
         }
         $recentMaterials = $rmQuery->get();
 
-        $drQuery = \App\Models\DailyReport::with('client')->latest()->take(4);
+        $drQuery = \App\Models\DailyReport::with('client')->latest()->take(3); // Reduced to 3
         if ($isViewer) {
             $drQuery->whereIn('client_id', $clientIds ?? []);
         }
         $recentReports = $drQuery->get();
 
-        $payQuery = \App\Models\Payment::with('client')->latest()->take(5);
+        $payQuery = \App\Models\Payment::with('client')->latest()->take(3); // Reduced to 3
         if ($isViewer) {
             $payQuery->whereIn('client_id', $clientIds ?? []);
         }
         $recentPayments = $payQuery->get();
 
         return view('dashboard', compact(
-            'totalProjects', 'totalRevenue', 'activeTasks', 'completedProjects',
-            'months', 'projectCounts',
+            'totalProjects', 'totalRevenue', 'totalExpenses', 'netProfit', 'activeTasks', 'completedProjects',
+            'months', 'incomeData', 'expenseData',
             'taskLabels', 'taskData',
-            'recentProjects', 'recentQuotations', 'totalQuoted', 'totalApproved', 'pendingApprovalCount',
+            'recentProjects', 'recentQuotations',
             'recentMaterials', 'revenueGrowth', 'sparklineQuery',
             'recentReports', 'recentPayments'
         ));

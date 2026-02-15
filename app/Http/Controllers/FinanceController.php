@@ -11,6 +11,110 @@ use Illuminate\Http\Request;
 class FinanceController extends Controller
 {
     /**
+     * Store Vendor Payment
+     */
+    public function storeVendorPayment(Request $request, Client $client)
+    {
+        // Permission Check: Only Admin or Editor (Project Manager)
+        if (auth()->user()->isViewer() || auth()->user()->isClient()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Lock Check
+        if ($client->financials->is_locked) {
+            return back()->with('error', 'Project financials are LOCKED. Unlock to add payments.');
+        }
+
+        $validated = $request->validate([
+            'vendor_id' => 'required|exists:vendors,id',
+            'amount' => 'required|numeric|min:0',
+            'work_type' => 'required|string',
+            'payment_date' => 'required|date',
+            'payment_mode' => 'nullable|string',
+            'notes' => 'nullable|string'
+        ]);
+
+        $client->vendorPayments()->create($validated);
+
+        return back()->with('success', 'Vendor payment recorded successfully.');
+    }
+
+    /**
+     * Store Material Inward (Bill Entry)
+     */
+    public function storeMaterialInward(Request $request, Client $client)
+    {
+        if (auth()->user()->isViewer() || auth()->user()->isClient()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($client->financials->is_locked) {
+            return back()->with('error', 'Project financials are LOCKED. Unlock to add material.');
+        }
+
+        $validated = $request->validate([
+            'supplier_name' => 'required|string',
+            'item_name' => 'required|string',
+            'quantity' => 'required|numeric|min:0',
+            'rate' => 'required|numeric|min:0',
+            'unit' => 'required|string',
+            'inward_date' => 'required|date',
+            'bill_number' => 'nullable|string'
+        ]);
+
+        // Auto calculate total
+        $validated['total_amount'] = $validated['quantity'] * $validated['rate'];
+
+        $client->materialInwards()->create($validated);
+
+        return back()->with('success', 'Material bill recorded. Don\'t forget to add payment.');
+    }
+
+    /**
+     * Store Material Payment
+     */
+    public function storeMaterialPayment(Request $request, Client $client)
+    {
+        if (auth()->user()->isViewer() || auth()->user()->isClient()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // We allow payments even if locked? No, better strict.
+        if ($client->financials->is_locked) {
+            return back()->with('error', 'Project financials are LOCKED.');
+        }
+
+        $validated = $request->validate([
+            'material_inward_id' => 'nullable|exists:material_inwards,id',
+            'amount_paid' => 'required|numeric|min:0',
+            'payment_date' => 'required|date',
+            'payment_mode' => 'nullable|string',
+            'supplier_name' => 'nullable|string' // If generic payment
+        ]);
+
+        $client->materialPayments()->create($validated);
+
+        return back()->with('success', 'Material payment recorded.');
+    }
+
+    /**
+     * Toggle Profit Lock
+     */
+    public function toggleLock(Client $client)
+    {
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Only Admins can lock/unlock projects.');
+        }
+
+        $financials = $client->financials;
+        $financials->is_locked = !$financials->is_locked;
+        $financials->save();
+
+        $status = $financials->is_locked ? 'LOCKED 🔐' : 'UNLOCKED 🔓';
+        return back()->with('success', "Project financials are now $status.");
+    }
+
+    /**
      * Store Project Expense
      */
     public function storeExpense(Request $request, Client $client)
@@ -34,6 +138,25 @@ class FinanceController extends Controller
         ]);
 
         return back()->with('success', 'Expense logged successfully.');
+    }
+
+    /**
+     * Download Financial Ledger PDF
+     */
+    public function downloadLedger(Client $client)
+    {
+        if (auth()->user()->isViewer() && $client->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        // We could use a library like DomPDF, but for now we'll create a print-friendly view
+        // that automatically triggers print dialog or looks like a report.
+        // Or if DomPDF is installed, use it. Since I don't see dompdf in context, 
+        // I will return a print-optimized view.
+
+        $client->load(['vendorPayments.vendor', 'materialInwards.payments', 'payments', 'financials']);
+
+        return view('finance.ledger', compact('client'));
     }
 
     /**
