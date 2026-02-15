@@ -581,338 +581,362 @@
             {{-- Modal Body --}}
             <div class="flex-1 overflow-y-auto p-8 custom-scrollbar space-y-10">
                 <form id="requirementsForm" class="space-y-12">
-                    <!-- Section: Property Info -->
-                    <div class="space-y-6">
-                        <h4
-                            class="text-[10px] font-black text-brand-600 uppercase tracking-[0.3em] flex items-center gap-3">
-                            <span class="w-8 h-px bg-brand-500"></span>
-                            Property Identity
-                        </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div>
-                                <label
-                                    class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Project
-                                    Type</label>
-                                <select x-model="reqForm.project_type"
-                                    class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-brand-500">
-                                    <option value="Interior Design">Interior Design</option>
-                                    <option value="Renovation">Renovation</option>
-                                    <option value="Consultation">Consultation Only</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label
-                                    class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Property
-                                    Type</label>
-                                <select x-model="reqForm.property_type"
-                                    class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-brand-500">
-                                    <option value="Flat">Individual Flat (Apartment)</option>
-                                    <option value="Villa">Villa / Penthouse</option>
-                                    <option value="Office">Commercial Office</option>
-                                    <option value="Shop">Retail Shop</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label
-                                    class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Carpet
-                                    Area (Sq.Ft.)</label>
-                                <input type="text" x-model="reqForm.area" placeholder="e.g. 1250"
-                                    class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-brand-500">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section: Budget & Expectations -->
-                    <div class="space-y-6">
-                        <h4
-                            class="text-[10px] font-black text-brand-600 uppercase tracking-[0.3em] flex items-center gap-3">
-                            <span class="w-8 h-px bg-brand-500"></span>
-                            Budget & Expectations
-                        </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <label
-                                    class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Approximate
-                                    Budget Range</label>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <template
-                                        x-for="range in ['below 10 Lakhs', '10-20 Lakhs', '20-40 Lakhs', '40-60 Lakhs', '60 Lakhs+']">
-                                        <button type="button" @click="reqForm.budget_range = range"
-                                            :class="reqForm.budget_range === range ? 'bg-brand-500 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'"
-                                            class="px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
-                                            x-text="range"></button>
-                                    </template>
-                                </div>
-                            </div>
-                            <div>
-                                <label
-                                    class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Budget
-                                    Flexibility</label>
-                                <div class="flex gap-2">
-                                    <template x-for="flex in ['Fixed', 'Slightly Flexible', 'Fully Flexible']">
-                                        <button type="button" @click="reqForm.budget_flexibility = flex"
-                                            :class="reqForm.budget_flexibility === flex ? 'bg-indigo-500 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'"
-                                            class="flex-1 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
-                                            x-text="flex"></button>
-                                    </template>
-                                </div>
-                            </div>
-                            <div>
-                                <label
-                                    class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Top
-                                    Priorities (Multiple)</label>
-                                <div class="flex flex-wrap gap-2">
-                                    <template
-                                        x-for="prio in ['Design & Aesthetics', 'Durability / Quality', 'Cost Optimization', 'Fast Completion']">
-                                        <button type="button" @click="toggleReqArray('priorities', prio)"
-                                            :class="reqForm.priorities.includes(prio) ? 'bg-emerald-500 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'"
-                                            class="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
-                                            x-text="prio"></button>
-                                    </template>
-                                </div>
-                            </div>
-                            <div>
-                                <label
-                                    class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Final
-                                    Decision Maker</label>
-                                <div class="flex flex-wrap gap-2">
-                                    <template x-for="dm in ['Self', 'Spouse', 'Family', 'Company Management']">
-                                        <button type="button" @click="reqForm.decision_maker = dm"
-                                            :class="reqForm.decision_maker === dm ? 'bg-slate-900 dark:bg-white dark:text-slate-900 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'"
-                                            class="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
-                                            x-text="dm"></button>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section: Room Requirements -->
-                    <div class="space-y-6">
-                        <h4
-                            class="text-[10px] font-black text-brand-600 uppercase tracking-[0.3em] flex items-center gap-3">
-                            <span class="w-8 h-px bg-brand-500"></span>
-                            Room Intel
-                        </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div
-                                class="p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
-                                <label
-                                    class="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-4">Living
-                                    Room Needs</label>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <template
-                                        x-for="item in ['TV Unit', 'False Ceiling', 'Wall Panel / Texture', 'Decorative Lighting', 'Sofa Set', 'Dining Unit']">
-                                        <label class="flex items-center gap-3 cursor-pointer group">
-                                            <input type="checkbox" :value="item" x-model="reqForm.living_room_items"
-                                                class="w-5 h-5 rounded-lg border-slate-200 dark:border-slate-700 text-brand-600 focus:ring-brand-500">
-                                            <span
-                                                class="text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-brand-500 transition-colors"
-                                                x-text="item"></span>
-                                        </label>
-                                    </template>
-                                </div>
-                            </div>
-                            <div
-                                class="p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
-                                <label
-                                    class="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-4">Kitchen
-                                    Details</label>
-                                <div class="space-y-4">
-                                    <div>
-                                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-2">
-                                            Structure</p>
-                                        <div class="flex gap-2">
-                                            <button type="button" @click="reqForm.kitchen_type = 'Modular'"
-                                                :class="reqForm.kitchen_type === 'Modular' ? 'bg-brand-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-500 shadow-sm'"
-                                                class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">Modular</button>
-                                            <button type="button" @click="reqForm.kitchen_type = 'Semi-Modular'"
-                                                :class="reqForm.kitchen_type === 'Semi-Modular' ? 'bg-brand-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-500 shadow-sm'"
-                                                class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">Semi-Modular</button>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p
-                                            class="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-2 text-right">
-                                            Finish Preference</p>
-                                        <div class="flex flex-wrap justify-end gap-2">
-                                            <template x-for="f in ['Laminate', 'Acrylic', 'PU Finish', 'Veneer']">
-                                                <button type="button" @click="toggleReqArray('kitchen_finish', f)"
-                                                    :class="reqForm.kitchen_finish.includes(f) ? 'bg-indigo-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-500 shadow-sm'"
-                                                    class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest"
-                                                    x-text="f"></button>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section: Bed & Bathroom -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <fieldset :disabled="reqForm.locked" class="disabled:opacity-75 transition-opacity">
+                        <!-- Section: Property Info -->
                         <div class="space-y-6">
                             <h4
                                 class="text-[10px] font-black text-brand-600 uppercase tracking-[0.3em] flex items-center gap-3">
                                 <span class="w-8 h-px bg-brand-500"></span>
-                                Sleeping Quarters
+                                Property Identity
                             </h4>
-                            <div class="space-y-4">
-                                <div
-                                    class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                                    <span class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Number
-                                        of Bedrooms</span>
-                                    <input type="number" x-model="reqForm.bedrooms"
-                                        class="w-20 bg-slate-100 dark:bg-slate-900 border-transparent rounded-xl px-3 py-1.5 text-center font-black">
-                                </div>
-                                <div
-                                    class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                                    <span
-                                        class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Wardrobe
-                                        Type</span>
-                                    <select x-model="reqForm.wardrobe_type"
-                                        class="bg-slate-100 dark:bg-slate-900 border-transparent rounded-xl px-3 py-1.5 text-[10px] font-black uppercase tracking-widest">
-                                        <option value="Sliding">Sliding Door</option>
-                                        <option value="Openable">Openable Door</option>
-                                        <option value="Walk-in">Walk-in Closet</option>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label
+                                        class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Project
+                                        Type</label>
+                                    <select x-model="reqForm.project_type"
+                                        class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-brand-500">
+                                        <option value="Interior Design">Interior Design</option>
+                                        <option value="Renovation">Renovation</option>
+                                        <option value="Consultation">Consultation Only</option>
                                     </select>
                                 </div>
-                                <div
-                                    class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                                    <span class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Bed
-                                        with Storage?</span>
-                                    <div class="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
-                                        <button type="button" @click="reqForm.bed_storage = 'Yes'"
-                                            :class="reqForm.bed_storage === 'Yes' ? 'bg-white dark:bg-slate-700 shadow text-brand-600' : 'text-slate-400 text-xs'"
-                                            class="px-4 py-1.5 rounded-lg font-black uppercase text-[10px]">Yes</button>
-                                        <button type="button" @click="reqForm.bed_storage = 'No'"
-                                            :class="reqForm.bed_storage === 'No' ? 'bg-white dark:bg-slate-700 shadow text-brand-600' : 'text-slate-400 text-xs'"
-                                            class="px-4 py-1.5 rounded-lg font-black uppercase text-[10px]">No</button>
-                                    </div>
+                                <div>
+                                    <label
+                                        class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Property
+                                        Type</label>
+                                    <select x-model="reqForm.property_type"
+                                        class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-brand-500">
+                                        <option value="Flat">Individual Flat (Apartment)</option>
+                                        <option value="Villa">Villa / Penthouse</option>
+                                        <option value="Office">Commercial Office</option>
+                                        <option value="Shop">Retail Shop</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Carpet
+                                        Area (Sq.Ft.)</label>
+                                    <input type="text" x-model="reqForm.area" placeholder="e.g. 1250"
+                                        class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-3.5 text-sm font-bold focus:ring-brand-500">
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Section: Budget & Expectations -->
                         <div class="space-y-6">
                             <h4
                                 class="text-[10px] font-black text-brand-600 uppercase tracking-[0.3em] flex items-center gap-3">
                                 <span class="w-8 h-px bg-brand-500"></span>
-                                Sanitation Space
+                                Budget & Expectations
                             </h4>
-                            <div class="grid grid-cols-1 gap-3">
-                                <template
-                                    x-for="item in ['Vanity Unit', 'Mirror Cabinet', 'Shower Partition', 'Full Tiles Replacement', 'CP Fittings Replacement']">
-                                    <div @click="toggleReqArray('bathroom_needs', item)"
-                                        class="flex items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-800 cursor-pointer transition-all"
-                                        :class="reqForm.bathroom_needs.includes(item) ? 'bg-brand-500 text-white border-brand-500 translate-x-1' : 'bg-white dark:bg-slate-800 text-slate-500 hover:bg-slate-50'">
-                                        <span class="text-[11px] font-black uppercase tracking-widest"
-                                            x-text="item"></span>
-                                        <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
-                                            :class="reqForm.bathroom_needs.includes(item) ? 'border-white' : 'border-slate-200'">
-                                            <div class="w-2.5 h-2.5 rounded-full bg-white"
-                                                x-show="reqForm.bathroom_needs.includes(item)"></div>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section: Products & Timeline -->
-                    <div class="space-y-8 pb-10">
-                        <h4
-                            class="text-[10px] font-black text-brand-600 uppercase tracking-[0.3em] flex items-center gap-3">
-                            <span class="w-8 h-px bg-brand-500"></span>
-                            Final Logistics
-                        </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="space-y-4">
-                                <label
-                                    class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Products
-                                    to Purchase</label>
-                                <div class="flex flex-wrap gap-2">
-                                    <template
-                                        x-for="prod in ['Lights', 'Furniture', 'Modular Kitchen Hardware', 'Appliances', 'Curtains', 'Wallpaper']">
-                                        <button type="button" @click="toggleReqArray('products', prod)"
-                                            :class="reqForm.products.includes(prod) ? 'bg-slate-900 dark:bg-white dark:text-slate-900 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'"
-                                            class="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
-                                            x-text="prod"></button>
-                                    </template>
-                                </div>
-                                <div class="pt-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div>
                                     <label
-                                        class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Preferred
-                                        Hardware Brand</label>
+                                        class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Approximate
+                                        Budget Range</label>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <template
+                                            x-for="range in ['below 10 Lakhs', '10-20 Lakhs', '20-40 Lakhs', '40-60 Lakhs', '60 Lakhs+']">
+                                            <button type="button" @click="reqForm.budget_range = range"
+                                                :class="reqForm.budget_range === range ? 'bg-brand-500 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'"
+                                                class="px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                                x-text="range"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Budget
+                                        Flexibility</label>
                                     <div class="flex gap-2">
-                                        <template x-for="brand in ['Hettich', 'Hafele', 'Ebco', 'No Preference']">
-                                            <button type="button" @click="reqForm.preferred_brand = brand"
-                                                :class="reqForm.preferred_brand === brand ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
-                                                class="px-3 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all"
-                                                x-text="brand"></button>
+                                        <template x-for="flex in ['Fixed', 'Slightly Flexible', 'Fully Flexible']">
+                                            <button type="button" @click="reqForm.budget_flexibility = flex"
+                                                :class="reqForm.budget_flexibility === flex ? 'bg-indigo-500 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'"
+                                                class="flex-1 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                                                x-text="flex"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Top
+                                        Priorities (Multiple)</label>
+                                    <div class="flex flex-wrap gap-2">
+                                        <template
+                                            x-for="prio in ['Design & Aesthetics', 'Durability / Quality', 'Cost Optimization', 'Fast Completion']">
+                                            <button type="button" @click="toggleReqArray('priorities', prio)"
+                                                :class="reqForm.priorities.includes(prio) ? 'bg-emerald-500 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'"
+                                                class="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                                                x-text="prio"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label
+                                        class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Final
+                                        Decision Maker</label>
+                                    <div class="flex flex-wrap gap-2">
+                                        <template x-for="dm in ['Self', 'Spouse', 'Family', 'Company Management']">
+                                            <button type="button" @click="reqForm.decision_maker = dm"
+                                                :class="reqForm.decision_maker === dm ? 'bg-slate-900 dark:bg-white dark:text-slate-900 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'"
+                                                class="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                                                x-text="dm"></button>
                                         </template>
                                     </div>
                                 </div>
                             </div>
-                            <div class="space-y-4">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label
-                                            class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Expected
-                                            Start</label>
-                                        <input type="date" x-model="reqForm.start_date"
-                                            class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-brand-500">
-                                    </div>
-                                    <div>
-                                        <label
-                                            class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Completion
-                                            Timeline</label>
-                                        <select x-model="reqForm.timeline"
-                                            class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-brand-500">
-                                            <option value="1-2 Months">1-2 Months</option>
-                                            <option value="3-4 Months">3-4 Months</option>
-                                            <option value="6+ Months">6+ Months</option>
-                                        </select>
+                        </div>
+
+                        <!-- Section: Room Requirements -->
+                        <div class="space-y-6">
+                            <h4
+                                class="text-[10px] font-black text-brand-600 uppercase tracking-[0.3em] flex items-center gap-3">
+                                <span class="w-8 h-px bg-brand-500"></span>
+                                Room Intel
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div
+                                    class="p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
+                                    <label
+                                        class="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-4">Living
+                                        Room Needs</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <template
+                                            x-for="item in ['TV Unit', 'False Ceiling', 'Wall Panel / Texture', 'Decorative Lighting', 'Sofa Set', 'Dining Unit']">
+                                            <label class="flex items-center gap-3 cursor-pointer group">
+                                                <input type="checkbox" :value="item" x-model="reqForm.living_room_items"
+                                                    class="w-5 h-5 rounded-lg border-slate-200 dark:border-slate-700 text-brand-600 focus:ring-brand-500">
+                                                <span
+                                                    class="text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-brand-500 transition-colors"
+                                                    x-text="item"></span>
+                                            </label>
+                                        </template>
                                     </div>
                                 </div>
                                 <div
-                                    class="flex items-center justify-between p-4 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-100 dark:border-rose-900/30">
-                                    <span class="text-[11px] font-black text-rose-600 uppercase tracking-widest">Urgency
-                                        Level</span>
-                                    <div class="flex bg-white/50 dark:bg-black/20 p-1 rounded-xl">
-                                        <button type="button" @click="reqForm.urgency = 'Normal'"
-                                            :class="reqForm.urgency === 'Normal' ? 'bg-white dark:bg-slate-700 shadow text-slate-600' : 'text-slate-400'"
-                                            class="px-4 py-1.5 rounded-lg font-black uppercase text-[10px]">Normal</button>
-                                        <button type="button" @click="reqForm.urgency = 'Fast Track'"
-                                            :class="reqForm.urgency === 'Fast Track' ? 'bg-rose-500 text-white shadow-lg' : 'text-rose-400'"
-                                            class="px-4 py-1.5 rounded-lg font-black uppercase text-[10px]">Fast
-                                            Track</button>
+                                    class="p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
+                                    <label
+                                        class="text-[11px] font-black text-slate-400 uppercase tracking-widest block mb-4">Kitchen
+                                        Details</label>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <p
+                                                class="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-2">
+                                                Structure</p>
+                                            <div class="flex gap-2">
+                                                <button type="button" @click="reqForm.kitchen_type = 'Modular'"
+                                                    :class="reqForm.kitchen_type === 'Modular' ? 'bg-brand-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-500 shadow-sm'"
+                                                    class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">Modular</button>
+                                                <button type="button" @click="reqForm.kitchen_type = 'Semi-Modular'"
+                                                    :class="reqForm.kitchen_type === 'Semi-Modular' ? 'bg-brand-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-500 shadow-sm'"
+                                                    class="flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest">Semi-Modular</button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <p
+                                                class="text-[9px] font-black text-slate-400 uppercase tracking-tighter mb-2 text-right">
+                                                Finish Preference</p>
+                                            <div class="flex flex-wrap justify-end gap-2">
+                                                <template x-for="f in ['Laminate', 'Acrylic', 'PU Finish', 'Veneer']">
+                                                    <button type="button" @click="toggleReqArray('kitchen_finish', f)"
+                                                        :class="reqForm.kitchen_finish.includes(f) ? 'bg-indigo-500 text-white' : 'bg-white dark:bg-slate-800 text-slate-500 shadow-sm'"
+                                                        class="px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest"
+                                                        x-text="f"></button>
+                                                </template>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="pt-6">
-                            <label
-                                class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Internal
-                                Disposition Notes</label>
-                            <textarea x-model="reqForm.notes" rows="3"
-                                placeholder="Any specific requirements or technical observations from the site visit..."
-                                class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-[2rem] px-6 py-5 text-sm font-bold focus:ring-brand-500 shadow-inner"></textarea>
+
+                        <!-- Section: Bed & Bathroom -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <h4
+                                    class="text-[10px] font-black text-brand-600 uppercase tracking-[0.3em] flex items-center gap-3">
+                                    <span class="w-8 h-px bg-brand-500"></span>
+                                    Sleeping Quarters
+                                </h4>
+                                <div class="space-y-4">
+                                    <div
+                                        class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                        <span
+                                            class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Number
+                                            of Bedrooms</span>
+                                        <input type="number" x-model="reqForm.bedrooms"
+                                            class="w-20 bg-slate-100 dark:bg-slate-900 border-transparent rounded-xl px-3 py-1.5 text-center font-black">
+                                    </div>
+                                    <div
+                                        class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                        <span
+                                            class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Wardrobe
+                                            Type</span>
+                                        <select x-model="reqForm.wardrobe_type"
+                                            class="bg-slate-100 dark:bg-slate-900 border-transparent rounded-xl px-3 py-1.5 text-[10px] font-black uppercase tracking-widest">
+                                            <option value="Sliding">Sliding Door</option>
+                                            <option value="Openable">Openable Door</option>
+                                            <option value="Walk-in">Walk-in Closet</option>
+                                        </select>
+                                    </div>
+                                    <div
+                                        class="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                        <span
+                                            class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Bed
+                                            with Storage?</span>
+                                        <div class="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+                                            <button type="button" @click="reqForm.bed_storage = 'Yes'"
+                                                :class="reqForm.bed_storage === 'Yes' ? 'bg-white dark:bg-slate-700 shadow text-brand-600' : 'text-slate-400 text-xs'"
+                                                class="px-4 py-1.5 rounded-lg font-black uppercase text-[10px]">Yes</button>
+                                            <button type="button" @click="reqForm.bed_storage = 'No'"
+                                                :class="reqForm.bed_storage === 'No' ? 'bg-white dark:bg-slate-700 shadow text-brand-600' : 'text-slate-400 text-xs'"
+                                                class="px-4 py-1.5 rounded-lg font-black uppercase text-[10px]">No</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="space-y-6">
+                                <h4
+                                    class="text-[10px] font-black text-brand-600 uppercase tracking-[0.3em] flex items-center gap-3">
+                                    <span class="w-8 h-px bg-brand-500"></span>
+                                    Sanitation Space
+                                </h4>
+                                <div class="grid grid-cols-1 gap-3">
+                                    <template
+                                        x-for="item in ['Vanity Unit', 'Mirror Cabinet', 'Shower Partition', 'Full Tiles Replacement', 'CP Fittings Replacement']">
+                                        <div @click="toggleReqArray('bathroom_needs', item)"
+                                            class="flex items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-800 cursor-pointer transition-all"
+                                            :class="reqForm.bathroom_needs.includes(item) ? 'bg-brand-500 text-white border-brand-500 translate-x-1' : 'bg-white dark:bg-slate-800 text-slate-500 hover:bg-slate-50'">
+                                            <span class="text-[11px] font-black uppercase tracking-widest"
+                                                x-text="item"></span>
+                                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                                :class="reqForm.bathroom_needs.includes(item) ? 'border-white' : 'border-slate-200'">
+                                                <div class="w-2.5 h-2.5 rounded-full bg-white"
+                                                    x-show="reqForm.bathroom_needs.includes(item)"></div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+
+                        <!-- Section: Products & Timeline -->
+                        <div class="space-y-8 pb-10">
+                            <h4
+                                class="text-[10px] font-black text-brand-600 uppercase tracking-[0.3em] flex items-center gap-3">
+                                <span class="w-8 h-px bg-brand-500"></span>
+                                Final Logistics
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="space-y-4">
+                                    <label
+                                        class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Products
+                                        to Purchase</label>
+                                    <div class="flex flex-wrap gap-2">
+                                        <template
+                                            x-for="prod in ['Lights', 'Furniture', 'Modular Kitchen Hardware', 'Appliances', 'Curtains', 'Wallpaper']">
+                                            <button type="button" @click="toggleReqArray('products', prod)"
+                                                :class="reqForm.products.includes(prod) ? 'bg-slate-900 dark:bg-white dark:text-slate-900 text-white' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'"
+                                                class="px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                                                x-text="prod"></button>
+                                        </template>
+                                    </div>
+                                    <div class="pt-4">
+                                        <label
+                                            class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Preferred
+                                            Hardware Brand</label>
+                                        <div class="flex gap-2">
+                                            <template x-for="brand in ['Hettich', 'Hafele', 'Ebco', 'No Preference']">
+                                                <button type="button" @click="reqForm.preferred_brand = brand"
+                                                    :class="reqForm.preferred_brand === brand ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'"
+                                                    class="px-3 py-2 rounded-xl text-[8px] font-black uppercase tracking-widest transition-all"
+                                                    x-text="brand"></button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label
+                                                class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Expected
+                                                Start</label>
+                                            <input type="date" x-model="reqForm.start_date"
+                                                class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-brand-500">
+                                        </div>
+                                        <div>
+                                            <label
+                                                class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-1.5">Completion
+                                                Timeline</label>
+                                            <select x-model="reqForm.timeline"
+                                                class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-2xl px-4 py-3 text-sm font-bold focus:ring-brand-500">
+                                                <option value="1-2 Months">1-2 Months</option>
+                                                <option value="3-4 Months">3-4 Months</option>
+                                                <option value="6+ Months">6+ Months</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="flex items-center justify-between p-4 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-100 dark:border-rose-900/30">
+                                        <span
+                                            class="text-[11px] font-black text-rose-600 uppercase tracking-widest">Urgency
+                                            Level</span>
+                                        <div class="flex bg-white/50 dark:bg-black/20 p-1 rounded-xl">
+                                            <button type="button" @click="reqForm.urgency = 'Normal'"
+                                                :class="reqForm.urgency === 'Normal' ? 'bg-white dark:bg-slate-700 shadow text-slate-600' : 'text-slate-400'"
+                                                class="px-4 py-1.5 rounded-lg font-black uppercase text-[10px]">Normal</button>
+                                            <button type="button" @click="reqForm.urgency = 'Fast Track'"
+                                                :class="reqForm.urgency === 'Fast Track' ? 'bg-rose-500 text-white shadow-lg' : 'text-rose-400'"
+                                                class="px-4 py-1.5 rounded-lg font-black uppercase text-[10px]">Fast
+                                                Track</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pt-6">
+                                <label
+                                    class="text-[11px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Internal
+                                    Disposition Notes</label>
+                                <textarea x-model="reqForm.notes" rows="3"
+                                    placeholder="Any specific requirements or technical observations from the site visit..."
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700 rounded-[2rem] px-6 py-5 text-sm font-bold focus:ring-brand-500 shadow-inner"></textarea>
+                            </div>
+                        </div>
                 </form>
             </div>
 
             {{-- Modal Footer --}}
             <div
                 class="p-8 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-end gap-3">
-                <button @click="showRequirementsModal = false"
-                    class="px-8 py-4 text-sm font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 transition">Discard</button>
-                <button @click="saveRequirements()"
-                    class="px-12 py-4 bg-brand-600 text-white rounded-2xl text-[12px] font-black uppercase tracking-[0.2em] hover:bg-brand-700 shadow-2xl shadow-brand-500/30 transition-all transform active:scale-95 flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                <p x-show="reqForm.locked" class="mr-auto text-xs font-bold text-amber-600 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
-                    Commit Dossier
-                </button>
+                    Dossier Locked for Quotation
+                </p>
+
+                <button @click="showRequirementsModal = false"
+                    class="px-8 py-4 text-sm font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 transition">Close</button>
+
+                <template x-if="!reqForm.locked">
+                    <div class="flex gap-3">
+                        <button @click="saveRequirements(false)"
+                            class="px-6 py-4 bg-white border border-slate-200 text-slate-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-slate-50 transition">
+                            Save Draft
+                        </button>
+                        <button @click="saveRequirements(true)"
+                            class="px-8 py-4 bg-brand-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-brand-700 shadow-2xl shadow-brand-500/30 transition-all transform active:scale-95 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Lock & Create Quote
+                        </button>
+                    </div>
+                </template>
             </div>
         </div>
     </div>
