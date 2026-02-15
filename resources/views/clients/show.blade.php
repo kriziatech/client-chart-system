@@ -1,10 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- SYNC_TEST_MARKER -->
-<div class="sync-test-overlay"
-    style="position: fixed; top: 0; left: 0; background: red; color: white; z-index: 9999; padding: 10px;">VERSION 2.0
-</div>
 <style>
     @media print {
         .no-print {
