@@ -68,16 +68,16 @@ $ctaLabel = match($currentJourneyStage) {
 default => 'Next Step'
 };
 
-$ctaAction = match($currentJourneyStage) {
-1 => "activeTab = 'overview'",
-2 => "activeTab = 'quotations'",
-3 => "activeTab = 'quotations'",
-4 => "activeTab = 'tasks'",
-5 => "activeTab = 'overview'",
-6 => "activeTab = 'tasks'",
-7 => "activeTab = 'payments'",
-8 => "activeTab = 'handover'",
-default => "activeTab = 'overview'"
+$ctaAction = match((int)$currentJourneyStage) {
+1 => "\$dispatch('switch-tab', 'overview')",
+2 => "\$dispatch('switch-tab', 'quotations')",
+3 => "\$dispatch('switch-tab', 'quotations')",
+4 => "\$dispatch('switch-tab', 'tasks')",
+5 => "\$dispatch('switch-tab', 'overview')",
+6 => "\$dispatch('switch-tab', 'tasks')",
+7 => "\$dispatch('switch-tab', 'payments')",
+8 => "\$dispatch('switch-tab', 'handover')",
+default => "\$dispatch('switch-tab', 'overview')"
 };
 
 $initialTab = match((int)$currentJourneyStage) {
@@ -93,7 +93,8 @@ default => 'overview'
 
 @endphp
 
-<div class="animate-in fade-in slide-in-from-bottom-4 duration-700" x-data="{ activeTab: '{{ $initialTab }}' }">
+<div class="animate-in fade-in slide-in-from-bottom-4 duration-700" x-data="{ activeTab: '{{ $initialTab }}' }"
+    @switch-tab.window="activeTab = $event.detail">
     <x-journey-header :stage="'Journey: ' . $journeyStageName" :nextStep="$journeyNextStep" :progress="$journeyProgress"
         :statusColor="$journeyColor" :ctaLabel="$ctaLabel" :ctaAction="$ctaAction" />
 
@@ -539,363 +540,352 @@ default => 'overview'
         </div>
 
         {{-- 3. Execution Tab --}}
-        <div>
-            <div x-show="activeTab === 'tasks'" x-cloak class="animate-in fade-in duration-500 space-y-8">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Operational Execution</h3>
-                    <a href="{{ route('reports.index', $client->id) }}"
-                        class="px-5 py-2.5 bg-brand-50 text-brand-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-brand-100 transition flex items-center gap-2">Daily
-                        Reports (DPR)</a>
-                </div>
-                <div
-                    class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead
-                            class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
-                            <tr>
-                                <th
-                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
-                                    Task Description</th>
-                                <th
-                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
-                                    Deadline</th>
-                                <th
-                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
-                                    Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
-                            @forelse($client->tasks as $task)
-                            <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
-                                <td class="px-7 py-4">
-                                    <div class="font-bold text-slate-800 dark:text-white text-[14px]">{{
-                                        $task->description }}</div>
-                                    <div class="text-[11px] text-slate-500 mt-0.5 font-medium">Agent: {{
-                                        $task->assigned_to ?: 'Unassigned' }}</div>
-                                </td>
-                                <td class="px-7 py-4 text-[13px] text-slate-500">{{ $task->deadline ?
-                                    $task->deadline->format('d M, Y') : '-' }}</td>
-                                <td class="px-7 py-4 text-right">
-                                    <span
-                                        class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest @if($task->status == 'Completed') bg-emerald-50 text-emerald-600 @else bg-slate-100 text-slate-500 @endif">
-                                        {{ $task->status }}
-                                    </span>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="3" class="px-7 py-12 text-center text-slate-400 italic">No tasks assigned.
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+        <div x-show="activeTab === 'tasks'" x-cloak class="animate-in fade-in duration-500 space-y-8">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Operational Execution</h3>
+                <a href="{{ route('reports.index', $client->id) }}"
+                    class="px-5 py-2.5 bg-brand-50 text-brand-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-brand-100 transition flex items-center gap-2">Daily
+                    Reports (DPR)</a>
             </div>
-
-            {{-- 4. Inventory Tab --}}
-            <div x-show="activeTab === 'materials'" x-cloak class="animate-in fade-in duration-500">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display mb-6">Material Allocation</h3>
-                <div
-                    class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead
-                            class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
-                            <tr>
-                                <th
-                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
-                                    Item SKU</th>
-                                <th
-                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
-                                    Status</th>
-                                <th
-                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
-                                    Qty Dispatched</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
-                            @forelse($client->projectMaterials as $mat)
-                            <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
-                                <td class="px-7 py-4 font-bold text-slate-800 dark:text-white text-[14px]">{{
-                                    $mat->inventoryItem->name ?? 'Unknown' }}</td>
-                                <td class="px-7 py-4"><span
-                                        class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[11px] font-bold uppercase text-slate-500">{{
-                                        $mat->status }}</span></td>
-                                <td class="px-7 py-4 text-right font-bold text-slate-900 dark:text-white text-[15px]">{{
-                                    $mat->quantity_dispatched }} {{ $mat->inventoryItem->unit ?? '' }}</td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="3" class="px-7 py-12 text-center text-slate-400 italic">No inventory
-                                    records.</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+            <div
+                class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                        <tr>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Task Description</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Deadline</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                        @forelse($client->tasks as $task)
+                        <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                            <td class="px-7 py-4">
+                                <div class="font-bold text-slate-800 dark:text-white text-[14px]">{{
+                                    $task->description }}</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5 font-medium">Agent: {{
+                                    $task->assigned_to ?: 'Unassigned' }}</div>
+                            </td>
+                            <td class="px-7 py-4 text-[13px] text-slate-500">{{ $task->deadline ?
+                                $task->deadline->format('d M, Y') : '-' }}</td>
+                            <td class="px-7 py-4 text-right">
+                                <span
+                                    class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest @if($task->status == 'Completed') bg-emerald-50 text-emerald-600 @else bg-slate-100 text-slate-500 @endif">
+                                    {{ $task->status }}
+                                </span>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="px-7 py-12 text-center text-slate-400 italic">No tasks assigned.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+        </div>
 
-            {{-- 5. Financials Tab --}}
-            <div x-show="activeTab === 'payments'" x-cloak class="animate-in fade-in duration-500 space-y-8">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Capital Management</h3>
-                <div
-                    class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead
-                            class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
-                            <tr>
-                                <th
-                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
-                                    Journal Ref</th>
-                                <th
-                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
-                                    Date</th>
-                                <th
-                                    class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
-                                    Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
-                            @forelse($client->payments as $payment)
-                            <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
-                                <td class="px-7 py-4 font-bold text-slate-900 dark:text-white text-[14px]">#PAY-{{
-                                    $payment->id }}</td>
-                                <td class="px-7 py-4 text-[14px] text-slate-500 font-medium">{{ $payment->payment_date ?
-                                    $payment->payment_date->format('d M, Y') : '-' }}</td>
-                                <td class="px-7 py-4 text-right font-bold text-emerald-600 text-[15px]">₹{{
-                                    number_format($payment->amount) }}</td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="3" class="px-7 py-12 text-center text-slate-400 italic">No payment logs
-                                    found.</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+        {{-- 4. Inventory Tab --}}
+        <div x-show="activeTab === 'materials'" x-cloak class="animate-in fade-in duration-500">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display mb-6">Material Allocation</h3>
+            <div
+                class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                        <tr>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Item SKU</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Status</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                Qty Dispatched</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                        @forelse($client->projectMaterials as $mat)
+                        <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                            <td class="px-7 py-4 font-bold text-slate-800 dark:text-white text-[14px]">{{
+                                $mat->inventoryItem->name ?? 'Unknown' }}</td>
+                            <td class="px-7 py-4"><span
+                                    class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg text-[11px] font-bold uppercase text-slate-500">{{
+                                    $mat->status }}</span></td>
+                            <td class="px-7 py-4 text-right font-bold text-slate-900 dark:text-white text-[15px]">{{
+                                $mat->quantity_dispatched }} {{ $mat->inventoryItem->unit ?? '' }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="px-7 py-12 text-center text-slate-400 italic">No inventory
+                                records.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+        </div>
 
-            {{-- 7. Handover Tab --}}
-            <div x-show="activeTab === 'handover'" x-cloak class="animate-in fade-in duration-500 space-y-10">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    {{-- Checklist --}}
-                    <div class="space-y-6">
-                        <div class="flex items-center justify-between">
-                            <h3
-                                class="text-xl font-bold text-slate-900 dark:text-white font-display uppercase tracking-widest">
-                                Handover Checklist</h3>
-                            <button
-                                onclick="document.getElementById('add-handover-item-modal').classList.remove('hidden')"
-                                class="text-[10px] font-black uppercase tracking-widest text-brand-600 hover:text-brand-700">+
-                                Add Requirement</button>
-                        </div>
+        {{-- 5. Financials Tab --}}
+        <div x-show="activeTab === 'payments'" x-cloak class="animate-in fade-in duration-500 space-y-8">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Capital Management</h3>
+            <div
+                class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                        <tr>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Journal Ref</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Date</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                        @forelse($client->payments as $payment)
+                        <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                            <td class="px-7 py-4 font-bold text-slate-900 dark:text-white text-[14px]">#PAY-{{
+                                $payment->id }}</td>
+                            <td class="px-7 py-4 text-[14px] text-slate-500 font-medium">{{ $payment->payment_date ?
+                                $payment->payment_date->format('d M, Y') : '-' }}</td>
+                            <td class="px-7 py-4 text-right font-bold text-emerald-600 text-[15px]">₹{{
+                                number_format($payment->amount) }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="px-7 py-12 text-center text-slate-400 italic">No payment logs
+                                found.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-                        <div
-                            class="bg-white dark:bg-slate-900/40 rounded-[2.5rem] border border-slate-100 dark:border-dark-border shadow-premium p-8 space-y-4">
-                            @php
-                            $totalHandover = $client->handover?->items?->count() ?? 0;
-                            $completedHandover = $client->handover?->items?->where('is_completed', true)->count() ?? 0;
-                            $allHandoverDone = $totalHandover > 0 && $totalHandover === $completedHandover;
-                            @endphp
-
-                            @forelse($client->handover?->items ?? [] as $item)
-                            <div
-                                class="flex items-center justify-between p-4 bg-slate-50/50 dark:bg-dark-bg/30 rounded-2xl border border-slate-100 dark:border-dark-border group">
-                                <form action="{{ route('handover.item.update', $item) }}" method="POST"
-                                    class="flex items-center gap-4 flex-1">
-                                    @csrf @method('PATCH')
-                                    <button type="submit"
-                                        class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all {{ $item->is_completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 dark:border-slate-700 hover:border-brand-500' }}">
-                                        @if($item->is_completed)
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                                d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        @endif
-                                    </button>
-                                    <span
-                                        class="text-sm font-bold {{ $item->is_completed ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-200' }}">{{
-                                        $item->item_name }}</span>
-                                </form>
-                            </div>
-                            @empty
-                            <div class="py-10 text-center text-slate-400 italic text-sm">No handover requirements
-                                indexed.</div>
-                            @endforelse
-                        </div>
-                    </div>
-
-                    {{-- Completion Form --}}
-                    <div class="space-y-6">
+        {{-- 7. Handover Tab --}}
+        <div x-show="activeTab === 'handover'" x-cloak class="animate-in fade-in duration-500 space-y-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                {{-- Checklist --}}
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
                         <h3
                             class="text-xl font-bold text-slate-900 dark:text-white font-display uppercase tracking-widest">
-                            Finalization</h3>
+                            Handover Checklist</h3>
+                        <button onclick="document.getElementById('add-handover-item-modal').classList.remove('hidden')"
+                            class="text-[10px] font-black uppercase tracking-widest text-brand-600 hover:text-brand-700">+
+                            Add Requirement</button>
+                    </div>
 
+                    <div
+                        class="bg-white dark:bg-slate-900/40 rounded-[2.5rem] border border-slate-100 dark:border-dark-border shadow-premium p-8 space-y-4">
+                        @php
+                        $totalHandover = $client->handover?->items?->count() ?? 0;
+                        $completedHandover = $client->handover?->items?->where('is_completed', true)->count() ?? 0;
+                        $allHandoverDone = $totalHandover > 0 && $totalHandover === $completedHandover;
+                        @endphp
+
+                        @forelse($client->handover?->items ?? [] as $item)
                         <div
-                            class="bg-slate-900 dark:bg-dark-surface rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
-                            <div
-                                class="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 blur-[100px] -mr-16 -mt-16 rounded-full">
-                            </div>
-
-                            @if($client->handover?->status === 'completed')
-                            <div class="text-center py-8">
-                                <div
-                                    class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/20">
-                                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                            class="flex items-center justify-between p-4 bg-slate-50/50 dark:bg-dark-bg/30 rounded-2xl border border-slate-100 dark:border-dark-border group">
+                            <form action="{{ route('handover.item.update', $item) }}" method="POST"
+                                class="flex items-center gap-4 flex-1">
+                                @csrf @method('PATCH')
+                                <button type="submit"
+                                    class="w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all {{ $item->is_completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 dark:border-slate-700 hover:border-brand-500' }}">
+                                    @if($item->is_completed)
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
                                             d="M5 13l4 4L19 7" />
                                     </svg>
-                                </div>
-                                <h4 class="text-2xl font-black text-white mb-2 font-display">Project Decommissioned</h4>
-                                <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest">Warranty
-                                    Certificate Issued</p>
+                                    @endif
+                                </button>
+                                <span
+                                    class="text-sm font-bold {{ $item->is_completed ? 'text-slate-400 line-through' : 'text-slate-700 dark:text-slate-200' }}">{{
+                                    $item->item_name }}</span>
+                            </form>
+                        </div>
+                        @empty
+                        <div class="py-10 text-center text-slate-400 italic text-sm">No handover requirements
+                            indexed.</div>
+                        @endforelse
+                    </div>
+                </div>
 
-                                <div class="mt-8 pt-8 border-t border-white/10 grid grid-cols-2 gap-4">
-                                    <div class="text-left">
-                                        <span
-                                            class="text-[10px] font-black text-white/40 uppercase tracking-widest block">Handover
-                                            Date</span>
-                                        <div class="text-sm font-bold text-white">{{
-                                            $client->handover->handover_date->format('d M, Y') }}</div>
-                                    </div>
-                                    <div class="text-left">
-                                        <span
-                                            class="text-[10px] font-black text-white/40 uppercase tracking-widest block">Warranty
-                                            Expiry</span>
-                                        <div class="text-sm font-bold text-white">{{
-                                            $client->handover->warranty_expiry->format('d M, Y') }}</div>
-                                    </div>
+                {{-- Completion Form --}}
+                <div class="space-y-6">
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display uppercase tracking-widest">
+                        Finalization</h3>
+
+                    <div
+                        class="bg-slate-900 dark:bg-dark-surface rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
+                        <div
+                            class="absolute top-0 right-0 w-32 h-32 bg-brand-500/10 blur-[100px] -mr-16 -mt-16 rounded-full">
+                        </div>
+
+                        @if($client->handover?->status === 'completed')
+                        <div class="text-center py-8">
+                            <div
+                                class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/20">
+                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <h4 class="text-2xl font-black text-white mb-2 font-display">Project Decommissioned</h4>
+                            <p class="text-emerald-400 text-xs font-bold uppercase tracking-widest">Warranty
+                                Certificate Issued</p>
+
+                            <div class="mt-8 pt-8 border-t border-white/10 grid grid-cols-2 gap-4">
+                                <div class="text-left">
+                                    <span
+                                        class="text-[10px] font-black text-white/40 uppercase tracking-widest block">Handover
+                                        Date</span>
+                                    <div class="text-sm font-bold text-white">{{
+                                        $client->handover->handover_date->format('d M, Y') }}</div>
+                                </div>
+                                <div class="text-left">
+                                    <span
+                                        class="text-[10px] font-black text-white/40 uppercase tracking-widest block">Warranty
+                                        Expiry</span>
+                                    <div class="text-sm font-bold text-white">{{
+                                        $client->handover->warranty_expiry->format('d M, Y') }}</div>
                                 </div>
                             </div>
-                            @else
-                            <form action="{{ route('handover.complete', $client) }}" method="POST"
-                                class="space-y-6 relative z-10">
-                                @csrf
-                                <div class="space-y-4">
-                                    <div class="space-y-2">
-                                        <label
-                                            class="text-[10px] font-black text-white/50 uppercase tracking-widest">Warranty
-                                            Period (Years)</label>
-                                        <select name="warranty_years"
-                                            class="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white text-sm font-bold focus:ring-brand-500 transition-all">
-                                            <option value="1">1 Year Limited Warranty</option>
-                                            <option value="2">2 Year Standard Warranty</option>
-                                            <option value="5">5 Year Premium Warranty</option>
-                                            <option value="10">10 Year Lifetime Structure</option>
-                                        </select>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <label
-                                            class="block text-[10px] font-black text-white/50 uppercase tracking-widest">Client
-                                            Acknowledgement</label>
-                                        <input type="text" name="client_signature" required
-                                            placeholder="Type full name as digital signature"
-                                            class="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white text-sm font-bold focus:ring-brand-500 transition-all placeholder:text-white/20">
-                                    </div>
-                                </div>
-
-                                <div class="pt-4">
-                                    @if($allHandoverDone)
-                                    <button type="submit"
-                                        class="w-full bg-brand-500 hover:bg-brand-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand-500/30 transition hover:scale-[1.02] active:scale-95">Finalize
-                                        Portfolio Maturity</button>
-                                    @else
-                                    <div
-                                        class="w-full bg-white/5 border border-white/10 text-white/40 py-4 rounded-2xl font-black uppercase tracking-widest text-center cursor-not-allowed text-[11px]">
-                                        Complete Checklist to Unlock Finalization
-                                    </div>
-                                    @endif
-                                </div>
-                            </form>
-                            @endif
                         </div>
+                        @else
+                        <form action="{{ route('handover.complete', $client) }}" method="POST"
+                            class="space-y-6 relative z-10">
+                            @csrf
+                            <div class="space-y-4">
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-[10px] font-black text-white/50 uppercase tracking-widest">Warranty
+                                        Period (Years)</label>
+                                    <select name="warranty_years"
+                                        class="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white text-sm font-bold focus:ring-brand-500 transition-all">
+                                        <option value="1">1 Year Limited Warranty</option>
+                                        <option value="2">2 Year Standard Warranty</option>
+                                        <option value="5">5 Year Premium Warranty</option>
+                                        <option value="10">10 Year Lifetime Structure</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-2">
+                                    <label
+                                        class="block text-[10px] font-black text-white/50 uppercase tracking-widest">Client
+                                        Acknowledgement</label>
+                                    <input type="text" name="client_signature" required
+                                        placeholder="Type full name as digital signature"
+                                        class="w-full bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white text-sm font-bold focus:ring-brand-500 transition-all placeholder:text-white/20">
+                                </div>
+                            </div>
+
+                            <div class="pt-4">
+                                @if($allHandoverDone)
+                                <button type="submit"
+                                    class="w-full bg-brand-500 hover:bg-brand-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-brand-500/30 transition hover:scale-[1.02] active:scale-95">Finalize
+                                    Portfolio Maturity</button>
+                                @else
+                                <div
+                                    class="w-full bg-white/5 border border-white/10 text-white/40 py-4 rounded-2xl font-black uppercase tracking-widest text-center cursor-not-allowed text-[11px]">
+                                    Complete Checklist to Unlock Finalization
+                                </div>
+                                @endif
+                            </div>
+                        </form>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- Universal Modals for Project --}}
-        @if(!auth()->user()->isViewer() && !auth()->user()->isClient())
-        {{-- Add Scope Unit Modal --}}
-        <div id="add-scope-modal"
-            class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    {{-- Universal Modals for Project --}}
+    @if(!auth()->user()->isViewer() && !auth()->user()->isClient())
+    {{-- Add Scope Unit Modal --}}
+    <div id="add-scope-modal"
+        class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-dark-surface rounded-[40px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
             <div
-                class="bg-white dark:bg-dark-surface rounded-[40px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
-                <div
-                    class="px-8 py-6 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Add Scope Unit</h3>
-                    <button onclick="document.getElementById('add-scope-modal').classList.add('hidden')"
-                        class="text-slate-400 hover:text-slate-600 transition">&times;</button>
-                </div>
-                <form action="{{ route('scope.store', $client) }}" method="POST" class="p-8 space-y-6">
-                    @csrf
-                    <div class="space-y-4">
-                        <div>
-                            <label
-                                class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Area
-                                / Category</label>
-                            <input type="text" name="area_name" required placeholder="e.g. Living Room, Master Toilet"
-                                class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all">
-                        </div>
-                        <div>
-                            <label
-                                class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Scope
-                                Details</label>
-                            <textarea name="description" rows="4" required
-                                placeholder="Describe the specific work to be done..."
-                                class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all"></textarea>
-                        </div>
-                    </div>
-                    <div class="flex justify-end gap-3 pt-4">
-                        <button type="button"
-                            @click="document.getElementById('add-scope-modal').classList.add('hidden')"
-                            class="px-6 py-2 text-slate-400 font-bold hover:text-slate-600 transition uppercase text-[10px] tracking-widest">Cancel</button>
-                        <button type="submit"
-                            class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition active:scale-95">Save
-                            Unit</button>
-                    </div>
-                </form>
+                class="px-8 py-6 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Add Scope Unit</h3>
+                <button onclick="document.getElementById('add-scope-modal').classList.add('hidden')"
+                    class="text-slate-400 hover:text-slate-600 transition">&times;</button>
             </div>
-        </div>
-        @endif
-
-        {{-- Add Handover Item Modal --}}
-        @if(!auth()->user()->isViewer() && !auth()->user()->isClient())
-        <div id="add-handover-item-modal"
-            class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div
-                class="bg-white dark:bg-dark-surface rounded-[40px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
-                <div
-                    class="px-8 py-6 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Add Handover Requirement
-                    </h3>
-                    <button onclick="document.getElementById('add-handover-item-modal').classList.add('hidden')"
-                        class="text-slate-400 hover:text-slate-600 transition">&times;</button>
-                </div>
-                <form action="{{ route('handover.item.store', $client->handover ?? 0) }}" method="POST"
-                    class="p-8 space-y-6">
-                    @csrf
+            <form action="{{ route('scope.store', $client) }}" method="POST" class="p-8 space-y-6">
+                @csrf
+                <div class="space-y-4">
                     <div>
-                        <label
-                            class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Requirement
-                            Name</label>
-                        <input type="text" name="item_name" required
-                            placeholder="e.g. Balcony Waterproofing Certificate"
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Area
+                            / Category</label>
+                        <input type="text" name="area_name" required placeholder="e.g. Living Room, Master Toilet"
                             class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all">
                     </div>
-                    <div class="flex justify-end gap-3 pt-4">
-                        <button type="button"
-                            onclick="document.getElementById('add-handover-item-modal').classList.add('hidden')"
-                            class="px-6 py-2 text-slate-400 font-bold hover:text-slate-600 transition uppercase text-[10px] tracking-widest">Cancel</button>
-                        <button type="submit"
-                            class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition active:scale-95">Add
-                            to Checklist</button>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Scope
+                            Details</label>
+                        <textarea name="description" rows="4" required
+                            placeholder="Describe the specific work to be done..."
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all"></textarea>
                     </div>
-                </form>
-            </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" @click="document.getElementById('add-scope-modal').classList.add('hidden')"
+                        class="px-6 py-2 text-slate-400 font-bold hover:text-slate-600 transition uppercase text-[10px] tracking-widest">Cancel</button>
+                    <button type="submit"
+                        class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition active:scale-95">Save
+                        Unit</button>
+                </div>
+            </form>
         </div>
-        @endif
     </div>
-    @endsection
+    @endif
+
+    {{-- Add Handover Item Modal --}}
+    @if(!auth()->user()->isViewer() && !auth()->user()->isClient())
+    <div id="add-handover-item-modal"
+        class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div
+            class="bg-white dark:bg-dark-surface rounded-[40px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
+            <div
+                class="px-8 py-6 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Add Handover Requirement
+                </h3>
+                <button onclick="document.getElementById('add-handover-item-modal').classList.add('hidden')"
+                    class="text-slate-400 hover:text-slate-600 transition">&times;</button>
+            </div>
+            <form action="{{ route('handover.item.store', $client->handover ?? 0) }}" method="POST"
+                class="p-8 space-y-6">
+                @csrf
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Requirement
+                        Name</label>
+                    <input type="text" name="item_name" required placeholder="e.g. Balcony Waterproofing Certificate"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button"
+                        onclick="document.getElementById('add-handover-item-modal').classList.add('hidden')"
+                        class="px-6 py-2 text-slate-400 font-bold hover:text-slate-600 transition uppercase text-[10px] tracking-widest">Cancel</button>
+                    <button type="submit"
+                        class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition active:scale-95">Add
+                        to Checklist</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
+</div>
+@endsection
