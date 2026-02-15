@@ -569,13 +569,24 @@
                     <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1"
                         x-text="selectedLead?.name + ' • ' + selectedLead?.lead_number"></p>
                 </div>
-                <button @click="showRequirementsModal = false"
-                    class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 transition shadow-sm">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                </button>
+                <div class="flex items-center gap-3">
+                    <a x-show="reqForm.locked" :href="'/leads/' + selectedLead.id + '/requirements/print'"
+                        target="_blank"
+                        class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition shadow-lg flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Print
+                    </a>
+                    <button @click="showRequirementsModal = false"
+                        class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 transition shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M6 18L18 6M6 6l12 12" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             {{-- Modal Body --}}
