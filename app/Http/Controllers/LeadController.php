@@ -269,4 +269,12 @@ class LeadController extends Controller
             'all_leads' => Lead::all()
         ]);
     }
+    /**
+     * Print requirements dossier
+     */
+    public function printRequirements(Lead $lead)
+    {
+        $requirements = $lead->metadata['requirements'] ?? [];
+        return view('leads.requirements-print', compact('lead', 'requirements'));
+    }
 }

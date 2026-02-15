@@ -1113,7 +1113,9 @@
                         start_date: '',
                         timeline: '3-4 Months',
                         urgency: 'Normal',
-                        notes: ''
+                        urgency: 'Normal',
+                        notes: '',
+                        locked: false
                     };
                 }
                 this.showRequirementsModal = true;
@@ -1127,7 +1129,11 @@
                 }
             },
 
-            async saveRequirements() {
+            async saveRequirements(lock = false) {
+                if (lock && !confirm('Lock Dossier for Quotation? \n\nExisting limits will be frozen to ensure accuracy. This action cannot be undone.')) return;
+
+                if (lock) this.reqForm.locked = true;
+
                 try {
                     const res = await fetch(`/leads/${this.selectedLead.id}/requirements`, {
                         method: 'POST',
