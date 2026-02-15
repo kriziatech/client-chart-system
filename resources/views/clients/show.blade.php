@@ -25,70 +25,70 @@ $riskScore = $risk['score'];
 // Journey Mapping (8 Stages)
 $currentJourneyStage = (int) $client->journey_stage;
 $journeyStageName = match($currentJourneyStage) {
-    1 => 'New Client',
-    2 => 'Site Visit',
-    3 => 'Quotation',
-    4 => 'Credit',
-    5 => 'Work Assigned',
-    6 => 'Timeline',
-    7 => 'Work Completed',
-    8 => 'Final Payment',
-    default => 'New Client',
+1 => 'New Client',
+2 => 'Site Visit',
+3 => 'Quotation',
+4 => 'Credit',
+5 => 'Work Assigned',
+6 => 'Timeline',
+7 => 'Work Completed',
+8 => 'Final Payment',
+default => 'New Client',
 };
 
 $journeyColor = match($currentJourneyStage) {
-    8 => 'green',
-    7 => 'green',
-    default => ($riskScore > 60 ? 'red' : 'blue'),
+8 => 'green',
+7 => 'green',
+default => ($riskScore > 60 ? 'red' : 'blue'),
 };
 
 $journeyProgress = ($currentJourneyStage / 8) * 100;
 
 $journeyNextStep = match($currentJourneyStage) {
-    1 => 'Schedule a site visit to understand requirements.',
-    2 => 'Create a BOQ (Quotation) for the client.',
-    3 => 'Follow up for advance payment (Credit).',
-    4 => 'Assign team and create initial tasks.',
-    5 => 'Lock the project timeline/delivery date.',
-    6 => 'Monitor execution and daily DPRs.',
-    7 => 'Collect final payment and initiate handover.',
-    8 => 'Project successfully closed. Collect feedback.',
-    default => 'Proceed to next phase.',
+1 => 'Schedule a site visit to understand requirements.',
+2 => 'Create a BOQ (Quotation) for the client.',
+3 => 'Follow up for advance payment (Credit).',
+4 => 'Assign team and create initial tasks.',
+5 => 'Lock the project timeline/delivery date.',
+6 => 'Monitor execution and daily DPRs.',
+7 => 'Collect final payment and initiate handover.',
+8 => 'Project successfully closed. Collect feedback.',
+default => 'Proceed to next phase.',
 };
 
 $ctaLabel = match($currentJourneyStage) {
-    1 => 'Set Site Info',
-    2 => 'Create BOQ',
-    3 => 'View Estimates',
-    4 => 'Assign Team',
-    5 => 'Set Timeline',
-    6 => 'Track Execution',
-    7 => 'Collect Final',
-    8 => 'Issue Handover',
-    default => 'Next Step',
+1 => 'Set Site Info',
+2 => 'Create BOQ',
+3 => 'View Estimates',
+4 => 'Assign Team',
+5 => 'Set Timeline',
+6 => 'Track Execution',
+7 => 'Collect Final',
+8 => 'Issue Handover',
+default => 'Next Step',
 };
 
 $ctaAction = match($currentJourneyStage) {
-    1 => "activeTab = 'overview'",
-    2 => "activeTab = 'quotations'",
-    3 => "activeTab = 'quotations'",
-    4 => "activeTab = 'tasks'",
-    5 => "activeTab = 'overview'",
-    6 => "window.location = '" . route('reports.index', $client->id) . "'",
-    7 => "activeTab = 'payments'",
-    8 => "activeTab = 'handover'",
-    default => "activeTab = 'overview'",
+1 => "activeTab = 'overview'",
+2 => "activeTab = 'quotations'",
+3 => "activeTab = 'quotations'",
+4 => "activeTab = 'tasks'",
+5 => "activeTab = 'overview'",
+6 => "window.location = '" . route('reports.index', $client->id) . "'",
+7 => "activeTab = 'payments'",
+8 => "activeTab = 'handover'",
+default => "activeTab = 'overview'",
 };
 
 $initialTab = match($currentJourneyStage) {
-    1, 2 => 'overview',
-    3 => 'quotations',
-    4 => 'payments',
-    5 => 'overview',
-    6 => 'tasks',
-    7 => 'payments',
-    8 => 'handover',
-    default => 'overview',
+1, 2 => 'overview',
+3 => 'quotations',
+4 => 'payments',
+5 => 'overview',
+6 => 'tasks',
+7 => 'payments',
+8 => 'handover',
+default => 'overview',
 };
 @endphp
 
@@ -162,16 +162,7 @@ $initialTab = match($currentJourneyStage) {
                 Execution
                 </button>
 
-                {{-- Chat Tab --}}
-                <button @click="activeTab = 'chat'"
-                    :class="activeTab === 'chat' ? 'bg-white dark:bg-slate-700 shadow-premium text-brand-600 dark:text-brand-400' : 'text-slate-500'"
-                    class="px-6 py-2 rounded-xl text-sm font-bold transition-all duration-300 font-display whitespace-nowrap flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                    </svg>
-                    Chat
-                </button>
+
 
                 {{-- Inventory Tab (Locked until Stage 5) --}}
                 @php $inventoryLocked = $currentJourneyStage < 5; @endphp <button @if(!$inventoryLocked)
@@ -899,158 +890,4 @@ $initialTab = match($currentJourneyStage) {
     @endif
 </div>
 
-<script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('workspaceChat', (config) => ({
-            messages: [],
-            newMessage: '',
-            isSending: false,
-            projectId: config.project_id,
-            attachmentFile: null,
-            attachmentName: '',
-            attachmentPreview: false,
-
-            init() {
-                this.fetchMessages();
-                setInterval(() => {
-                    if (this.$store.activeTab === 'chat' || document.querySelector('[x-data]').__x.$data.activeTab === 'chat') {
-                        this.fetchMessages();
-                    }
-                }, 5000);
-            },
-
-            fetchMessages() {
-                fetch('/chat/fetch?project_id=' + this.projectId)
-                    .then(res => res.json())
-                    .then(data => {
-                        this.messages = data;
-                        this.$nextTick(() => this.scrollToBottom());
-                    });
-            },
-
-            sendMessage() {
-                if (!this.newMessage.trim() && !this.attachmentFile) return;
-                this.isSending = true;
-
-                const formData = new FormData();
-                formData.append('message', this.newMessage);
-                formData.append('project_id', this.projectId);
-                if (this.attachmentFile) formData.append('attachment', this.attachmentFile);
-
-                fetch('/chat/send', {
-                    method: 'POST',
-                    headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-                    body: formData
-                })
-                    .then(() => {
-                        this.newMessage = '';
-                        this.clearAttachment();
-                        this.fetchMessages();
-                    })
-                    .finally(() => this.isSending = false);
-            },
-
-            handleFileSelect(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                this.attachmentFile = file;
-                this.attachmentName = file.name;
-                this.attachmentPreview = true;
-            },
-
-            clearAttachment() {
-                this.attachmentFile = null;
-                this.attachmentName = '';
-                this.attachmentPreview = false;
-                if (this.$refs.wsFileInput) this.$refs.wsFileInput.value = '';
-            },
-
-            formatDate(d) {
-                if (!d) return '';
-                const date = new Date(d);
-                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            },
-
-            scrollToBottom() {
-                const c = document.getElementById('workspaceChatContainer');
-                if (c) c.scrollTop = c.scrollHeight;
-            }
-        }));
-    });
-</script>
-{{-- Universal Modals for Project --}}
-@if(!auth()->user()->isViewer() && !auth()->user()->isClient())
-{{-- Add Scope Unit Modal --}}
-<div id="add-scope-modal"
-    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-    <div
-        class="bg-white dark:bg-dark-surface rounded-[40px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
-        <div
-            class="px-8 py-6 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Add Scope Unit</h3>
-            <button onclick="document.getElementById('add-scope-modal').classList.add('hidden')"
-                class="text-slate-400 hover:text-slate-600 transition">&times;</button>
-        </div>
-        <form action="{{ route('scope.store', $client) }}" method="POST" class="p-8 space-y-6">
-            @csrf
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Area
-                        / Category</label>
-                    <input type="text" name="area_name" required placeholder="e.g. Living Room, Master Toilet"
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Scope
-                        Details</label>
-                    <textarea name="description" rows="4" required
-                        placeholder="Describe the specific work to be done..."
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all"></textarea>
-                </div>
-            </div>
-            <div class="flex justify-end gap-3 pt-4">
-                <button type="button" @click="document.getElementById('add-scope-modal').classList.add('hidden')"
-                    class="px-6 py-2 text-slate-400 font-bold hover:text-slate-600 transition uppercase text-[10px] tracking-widest">Cancel</button>
-                <button type="submit"
-                    class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition active:scale-95">Save
-                    Unit</button>
-            </div>
-        </form>
-    </div>
-</div>
-@endif
-
-{{-- Add Handover Item Modal --}}
-@if(!auth()->user()->isViewer() && !auth()->user()->isClient())
-<div id="add-handover-item-modal"
-    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-    <div
-        class="bg-white dark:bg-dark-surface rounded-[40px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
-        <div
-            class="px-8 py-6 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Add Handover Requirement
-            </h3>
-            <button onclick="document.getElementById('add-handover-item-modal').classList.add('hidden')"
-                class="text-slate-400 hover:text-slate-600 transition">&times;</button>
-        </div>
-        <form action="{{ route('handover.item.store', $client->handover ?? 0) }}" method="POST" class="p-8 space-y-6">
-            @csrf
-            <div>
-                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Requirement
-                    Name</label>
-                <input type="text" name="item_name" required placeholder="e.g. Balcony Waterproofing Certificate"
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all">
-            </div>
-            <div class="flex justify-end gap-3 pt-4">
-                <button type="button"
-                    onclick="document.getElementById('add-handover-item-modal').classList.add('hidden')"
-                    class="px-6 py-2 text-slate-400 font-bold hover:text-slate-600 transition uppercase text-[10px] tracking-widest">Cancel</button>
-                <button type="submit"
-                    class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition active:scale-95">Add
-                    to Checklist</button>
-            </div>
-        </form>
-    </div>
-</div>
-@endif
-</div>
+@endsection
