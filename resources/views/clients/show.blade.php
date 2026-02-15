@@ -69,15 +69,15 @@ default => 'Next Step'
 };
 
 $ctaAction = match((int)$currentJourneyStage) {
-1 => "\$dispatch('switch-tab', 'overview')",
-2 => "\$dispatch('switch-tab', 'quotations')",
-3 => "\$dispatch('switch-tab', 'quotations')",
-4 => "\$dispatch('switch-tab', 'tasks')",
-5 => "\$dispatch('switch-tab', 'overview')",
-6 => "\$dispatch('switch-tab', 'tasks')",
-7 => "\$dispatch('switch-tab', 'payments')",
-8 => "\$dispatch('switch-tab', 'handover')",
-default => "\$dispatch('switch-tab', 'overview')"
+1 => "activeTab = 'overview'",
+2 => "activeTab = 'quotations'",
+3 => "activeTab = 'quotations'",
+4 => "activeTab = 'tasks'",
+5 => "activeTab = 'tasks'",
+6 => "activeTab = 'tasks'",
+7 => "activeTab = 'payments'",
+8 => "activeTab = 'handover'",
+default => "activeTab = 'overview'"
 };
 
 $initialTab = match((int)$currentJourneyStage) {
