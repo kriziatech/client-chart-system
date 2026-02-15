@@ -153,6 +153,14 @@
             <!-- Header Text -->
             <div class="text-center space-y-2">
                 <p class="text-slate-500">Welcome back! Please login to your account.</p>
+
+                @if($errors->any())
+                <div class="mt-4 p-3 bg-rose-50 border border-rose-100 rounded-xl animate-shake">
+                    @foreach($errors->all() as $error)
+                    <p class="text-xs font-bold text-rose-600 italic tracking-tight">{{ $error }}</p>
+                    @endforeach
+                </div>
+                @endif
             </div>
 
             <!-- Form -->
