@@ -94,7 +94,7 @@ default => 'overview'
 @endphp
 
 <div class="animate-in fade-in slide-in-from-bottom-4 duration-700" x-data="{ activeTab: '{{ $initialTab }}' }"
-    @switch-tab.window="activeTab = $event.detail">
+    x-on:switch-tab.window="activeTab = $event.detail">
     <x-journey-header :stage="'Journey: ' . $journeyStageName" :nextStep="$journeyNextStep" :progress="$journeyProgress"
         :statusColor="$journeyColor" :ctaLabel="$ctaLabel" :ctaAction="$ctaAction" />
 
