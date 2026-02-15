@@ -31,7 +31,7 @@ docker compose exec -T app php artisan migrate --force
 docker compose exec -T app php artisan config:cache
 docker compose exec -T app php artisan route:cache
 docker compose exec -T app php artisan view:cache
-docker-compose exec -T app php artisan storage:link || true
+docker compose exec -T app php artisan storage:link || true
 
 # 5. Success message
 echo "✅ Deployment Successful!"

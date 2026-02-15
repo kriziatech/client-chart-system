@@ -103,16 +103,30 @@ class DashboardController extends Controller
         $pendingApprovalCount = $pendingApprovalQuery->count();
 
         $rmQuery = \App\Models\ProjectMaterial::with(['client', 'inventoryItem'])->latest()->take(5);
-        if ($isViewer)
+        if ($isViewer) {
             $rmQuery->whereIn('client_id', $clientIds ?? []);
+        }
         $recentMaterials = $rmQuery->get();
+
+        $drQuery = \App\Models\DailyReport::with('client')->latest()->take(4);
+        if ($isViewer) {
+            $drQuery->whereIn('client_id', $clientIds ?? []);
+        }
+        $recentReports = $drQuery->get();
+
+        $payQuery = \App\Models\Payment::with('client')->latest()->take(5);
+        if ($isViewer) {
+            $payQuery->whereIn('client_id', $clientIds ?? []);
+        }
+        $recentPayments = $payQuery->get();
 
         return view('dashboard', compact(
             'totalProjects', 'totalRevenue', 'activeTasks', 'completedProjects',
             'months', 'projectCounts',
             'taskLabels', 'taskData',
             'recentProjects', 'recentQuotations', 'totalQuoted', 'totalApproved', 'pendingApprovalCount',
-            'recentMaterials', 'revenueGrowth', 'sparklineQuery'
+            'recentMaterials', 'revenueGrowth', 'sparklineQuery',
+            'recentReports', 'recentPayments'
         ));
     }
 }
