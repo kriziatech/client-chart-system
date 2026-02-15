@@ -74,8 +74,7 @@ $ctaAction = match((int)$currentJourneyStage) {
 3 => "activeTab = 'quotations'",
 4 => "activeTab = 'tasks'",
 5 => "activeTab = 'overview'", // Stage 5: Set Timeline (Timeline is in Overview)
-6 => "window.location = '" . route('reports.index', $client->id) . "'", // Stage 6: Track Execution (Navigate to
-Reports)
+6 => "window.location = '" . route('reports.index', $client->id) . "'", // Stage 6: Track Execution (Navigate to Reports)
 7 => "activeTab = 'payments'",
 8 => "activeTab = 'handover'",
 default => "activeTab = 'overview'"
