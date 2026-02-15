@@ -23,7 +23,10 @@ class ClientPortalController extends Controller
             'projectMaterials.inventoryItem',
             'handover.checklistItems',
             'feedback',
-            'scopeOfWork.items'
+            'scopeOfWork.items',
+            'quotations.items', // NEW
+            'payments', // NEW
+            'galleries', // NEW
         ]);
 
         // Calculate progress
@@ -32,6 +35,24 @@ class ClientPortalController extends Controller
         $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
 
         return view('portal.index', compact('client', 'progress'));
+    }
+
+    /**
+     * Approve Quotation
+     */
+    public function approveQuotation(Client $client, \App\Models\Quotation $quotation)
+    {
+        // Security: Ensure quotation belongs to client
+        if ($quotation->client_id !== $client->id) {
+            abort(403);
+        }
+
+        $quotation->update([
+            'status' => 'Signed',
+            'signed_at' => now(),
+        ]);
+
+        return back()->with('success', 'Quotation approved successfully.');
     }
 
     /**

@@ -25,30 +25,22 @@ class Client extends Model
     protected static function boot()
     {
         parent::boot();
+
         static::creating(function ($model) {
             if (empty($model->uuid)) {
                 $model->uuid = (string)\Illuminate\Support\Str::uuid();
             }
-
+            // Assign temporary file_number to pass database constraint
             if (empty($model->file_number)) {
-                $datePart = now()->format('dmY'); // DDMMYYYY
-                // User asked for IT-DDMMYY-001, so DDMMYY
-                $datePartShort = now()->format('dmy');
+                $model->file_number = 'TEMP-' . \Illuminate\Support\Str::random(10);
+            }
+        });
 
-                $prefix = "IT-{$datePartShort}-";
-
-                $latestClient = static::where('file_number', 'like', "{$prefix}%")
-                    ->orderBy('file_number', 'desc')
-                    ->first();
-
-                $sequence = 1;
-                if ($latestClient) {
-                    $parts = explode('-', $latestClient->file_number);
-                    $lastSeq = (int)end($parts);
-                    $sequence = $lastSeq + 1;
-                }
-
-                $model->file_number = $prefix . str_pad($sequence, 3, '0', STR_PAD_LEFT);
+        static::created(function ($model) {
+            // Update to P-{id} format if it was a temporary value
+            if (str_starts_with($model->file_number, 'TEMP-')) {
+                $model->file_number = 'P-' . str_pad($model->id, 4, '0', STR_PAD_LEFT);
+                $model->saveQuietly();
             }
         });
     }
@@ -136,8 +128,35 @@ class Client extends Model
     }
 
     /**
-     * AI Risk Analysis
+     * Journey Stage Detection (8 Stages)
+     * 1: New Client, 2: Site Visit, 3: Quotation, 4: Credit, 5: Work Assigned, 6: Timeline, 7: Work Completed, 8: Final Payment
      */
+    public function getJourneyStageAttribute(): int
+    {
+        if ($this->handover && $this->handover->status === 'completed') {
+            return 8; // Final Payment
+        }
+        if ($this->status === 'Completed') {
+            return 7; // Work Completed
+        }
+        if ($this->delivery_date) {
+            return 6; // Timeline
+        }
+        if ($this->tasks()->exists()) {
+            return 5; // Work Assigned
+        }
+        if ($this->payments()->exists() || $this->paymentRequests()->exists()) {
+            return 4; // Credit
+        }
+        if ($this->quotations()->exists()) {
+            return 3; // Quotation
+        }
+        if ($this->siteInfo()->exists()) {
+            return 2; // Site Visit
+        }
+        return 1; // New Client
+    }
+
     public function getRiskAnalysisAttribute()
     {
         $overdueTasks = $this->tasks()->where('status', '!=', 'Completed')->where('deadline', '<', now())->count();

@@ -21,4 +21,9 @@ class Task extends Model
     {
         return $this->belongsTo(Client::class);
     }
+
+    public function dailyReport()
+    {
+        return $this->belongsTo(DailyReport::class);
+    }
 }

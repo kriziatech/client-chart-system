@@ -9,7 +9,11 @@ class InventoryController extends Controller
 {
     public function index()
     {
-        $items = InventoryItem::orderBy('name')->paginate(20);
+        if (auth()->user()->isViewer()) {
+            abort(403);
+        }
+        // Eager load projectMaterials to calculate available stock
+        $items = InventoryItem::with(['projectMaterials.client'])->orderBy('name')->paginate(20);
         return view('inventory.index', compact('items'));
     }
 
@@ -20,11 +24,15 @@ class InventoryController extends Controller
 
     public function store(Request $request)
     {
+        if (auth()->user()->isViewer()) {
+            abort(403);
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'nullable|string|max:255',
             'unit' => 'required|string|max:50',
             'unit_price' => 'nullable|numeric|min:0',
+            'total_stock' => 'nullable|integer|min:0',
             'stock_alert_level' => 'nullable|integer|min:0',
         ]);
 
@@ -45,6 +53,7 @@ class InventoryController extends Controller
             'category' => 'nullable|string|max:255',
             'unit' => 'required|string|max:50',
             'unit_price' => 'nullable|numeric|min:0',
+            'total_stock' => 'nullable|integer|min:0',
             'stock_alert_level' => 'nullable|integer|min:0',
         ]);
 

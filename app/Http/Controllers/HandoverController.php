@@ -15,6 +15,9 @@ class HandoverController extends Controller
      */
     public function storeChecklistItem(Request $request, Handover $handover)
     {
+        if (auth()->user()->isViewer() && $handover->client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $request->validate(['item_name' => 'required|string']);
 
         HandoverChecklistItem::create([
@@ -30,6 +33,9 @@ class HandoverController extends Controller
      */
     public function updateChecklistStatus(Request $request, HandoverChecklistItem $item)
     {
+        if (auth()->user()->isViewer() && $item->handover->client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $item->update(['is_completed' => !$item->is_completed]);
         return back();
     }
@@ -39,6 +45,9 @@ class HandoverController extends Controller
      */
     public function completeHandover(Request $request, Client $client)
     {
+        if (auth()->user()->isViewer() && $client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $handover = $client->handover ?? Handover::create(['client_id' => $client->id]);
 
         $request->validate([
@@ -65,6 +74,9 @@ class HandoverController extends Controller
      */
     public function storeFeedback(Request $request, Client $client)
     {
+        if (auth()->user()->isViewer() && $client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string'

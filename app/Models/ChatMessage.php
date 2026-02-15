@@ -13,8 +13,12 @@ class ChatMessage extends Model
 
     protected $casts = [
         'is_system' => 'boolean',
+        'is_pinned' => 'boolean',
+        'is_decision' => 'boolean',
+        'reactions' => 'array',
+        'metadata' => 'array',
         'read_at' => 'datetime',
-        'created_at' => 'datetime', // Already default, but good to be explicit
+        'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
@@ -26,5 +30,20 @@ class ChatMessage extends Model
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(ChatMessage::class , 'parent_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(ChatMessage::class , 'parent_id');
+    }
+
+    public function linkedTask()
+    {
+        return $this->belongsTo(Task::class , 'linked_task_id');
     }
 }

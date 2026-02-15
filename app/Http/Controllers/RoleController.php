@@ -25,7 +25,7 @@ class RoleController extends Controller
         $request->validate([
             'name' => 'required|string|unique:roles,name|max:255',
             'description' => 'required|string|max:255',
-            'type' => 'required|in:admin,editor,viewer',
+            'type' => 'required|in:admin,editor,viewer,sales',
         ]);
 
         \App\Models\Role::create($request->all());

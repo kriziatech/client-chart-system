@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'daily_rate',
     ];
 
     public function role()
@@ -30,9 +31,30 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function hasRole(string|array $roles): bool
+    {
+        if (!$this->role)
+            return false;
+
+        $roleType = $this->role->type;
+
+        // Super Admin always has access
+        if ($roleType === 'super_admin')
+            return true;
+
+        $roles = is_array($roles) ? $roles : explode(',', $roles);
+
+        return in_array($roleType, $roles);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role && $this->role->type === 'super_admin';
+    }
+
     public function isAdmin(): bool
     {
-        return $this->role && $this->role->type === 'admin';
+        return $this->role && in_array($this->role->type, ['admin', 'super_admin']);
     }
 
     public function isEditor(): bool
@@ -43,6 +65,16 @@ class User extends Authenticatable
     public function isViewer(): bool
     {
         return $this->role && $this->role->type === 'viewer';
+    }
+
+    public function isSales(): bool
+    {
+        return $this->role && $this->role->type === 'sales';
+    }
+
+    public function isClient(): bool
+    {
+        return $this->role && $this->role->type === 'client';
     }
 
     public function chatMessages()

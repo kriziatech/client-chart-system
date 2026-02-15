@@ -19,6 +19,13 @@ class ProjectMaterialController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        if (auth()->user()->isViewer()) {
+            $client = Client::find($request->client_id);
+            if ($client && $client->user_id !== auth()->id()) {
+                abort(403);
+            }
+        }
+
         ProjectMaterial::create($validated);
 
         return back()->with('success', 'Material dispatch recorded.');
@@ -26,6 +33,9 @@ class ProjectMaterialController extends Controller
 
     public function updateStatus(Request $request, ProjectMaterial $material)
     {
+        if (auth()->user()->isViewer() && $material->client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $request->validate([
             'status' => 'required|in:Stocked,In Use,Consumed'
         ]);
@@ -37,6 +47,9 @@ class ProjectMaterialController extends Controller
 
     public function destroy(ProjectMaterial $material)
     {
+        if (auth()->user()->isViewer() && $material->client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $material->delete();
         return back()->with('success', 'Dispatch entry removed.');
     }

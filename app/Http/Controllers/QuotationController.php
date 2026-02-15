@@ -2,154 +2,268 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Client;
 use App\Models\Quotation;
 use App\Models\QuotationItem;
+use App\Models\Client;
+use App\Models\Lead;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class QuotationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $query = Quotation::with('client')->latest();
+        $clientId = $request->get('client_id');
+        $quotations = Quotation::when($clientId, function ($q) use ($clientId) {
+            return $q->where('client_id', $clientId);
+        })->with('client')->latest()->get();
 
-        if (auth()->user()->role === 'viewer') {
-            $clientIds = Client::where('user_id', auth()->id())->pluck('id');
-            $query->whereIn('client_id', $clientIds);
-        }
-
-        $quotations = $query->paginate(10);
         return view('quotations.index', compact('quotations'));
     }
 
     public function create(Request $request)
     {
-        $clients = Client::orderBy('first_name')->get();
-        $selectedClientId = $request->query('client_id');
-
-        // Generate a quotation number Q-YYYYMMDD-RAND
-        $quotationNumber = 'Q-' . date('Ymd') . '-' . strtoupper(Str::random(4));
-
-        return view('quotations.create', compact('clients', 'selectedClientId', 'quotationNumber'));
+        $clients = Client::all();
+        $leads = Lead::whereNotIn('status', ['Won', 'Lost'])->get();
+        $selectedClientId = $request->get('client_id');
+        $selectedLeadId = $request->get('lead_id');
+        return view('quotations.boq-builder', compact('clients', 'leads', 'selectedClientId', 'selectedLeadId'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'quotation_number' => 'required|unique:quotations,quotation_number',
+            'client_id' => 'nullable|exists:clients,id',
+            'lead_id' => 'nullable|exists:leads,id',
             'date' => 'required|date',
             'valid_until' => 'nullable|date',
-            'notes' => 'nullable|string',
+            'gst_percentage' => 'required|numeric|min:0',
+            'discount_amount' => 'required|numeric|min:0',
             'items' => 'required|array|min:1',
             'items.*.description' => 'required|string',
-            'items.*.type' => 'required|in:material,labour,work',
-            'items.*.unit' => 'nullable|string',
-            'items.*.quantity' => 'required|numeric|min:0.01',
+            'items.*.category' => 'required|string',
+            'items.*.quantity' => 'required|numeric|min:0',
             'items.*.rate' => 'required|numeric|min:0',
+            'notes' => 'nullable|string',
         ]);
 
-        $subtotal = 0;
-        foreach ($request->items as $item) {
-            $subtotal += $item['quantity'] * $item['rate'];
+        if (empty($validated['client_id']) && empty($validated['lead_id'])) {
+            return back()->withErrors(['client_id' => 'Please select a Client or a Lead.'])->withInput();
         }
 
-        // Apply 18% GST by default for construction projects or can be dynamic
-        $taxAmount = $subtotal * 0.18;
-        $totalAmount = $subtotal + $taxAmount;
+        return DB::transaction(function () use ($validated) {
+            $subtotal = collect($validated['items'])->sum(function ($item) {
+                    return $item['quantity'] * $item['rate'];
+                }
+                );
 
-        $quotation = Quotation::create([
-            'client_id' => $request->client_id,
-            'quotation_number' => $request->quotation_number,
-            'date' => $request->date,
-            'valid_until' => $request->valid_until,
-            'subtotal' => $subtotal,
-            'tax_amount' => $taxAmount,
-            'total_amount' => $totalAmount,
-            'notes' => $request->notes,
-            'status' => 'draft'
-        ]);
+                $taxAmount = ($subtotal - $validated['discount_amount']) * ($validated['gst_percentage'] / 100);
+                $totalAmount = $subtotal - $validated['discount_amount'] + $taxAmount;
 
-        foreach ($request->items as $itemData) {
-            $quotation->items()->create([
-                'description' => $itemData['description'],
-                'type' => $itemData['type'],
-                'unit' => $itemData['unit'],
-                'quantity' => $itemData['quantity'],
-                'rate' => $itemData['rate'],
-                'amount' => $itemData['quantity'] * $itemData['rate'],
-            ]);
-        }
+                $quotation = Quotation::create([
+                    'client_id' => $validated['client_id'] ?? null,
+                    'lead_id' => $validated['lead_id'] ?? null,
+                    'quotation_number' => 'TEMP-' . Str::uuid(), // Temporary, will be updated immediately
+                    'date' => $validated['date'],
+                    'valid_until' => $validated['valid_until'] ?? null,
+                    'subtotal' => $subtotal,
+                    'discount_amount' => $validated['discount_amount'],
+                    'gst_percentage' => $validated['gst_percentage'],
+                    'tax_amount' => $taxAmount,
+                    'total_amount' => $totalAmount,
+                    'status' => 'draft',
+                    'version' => 1,
+                    'notes' => $validated['notes'],
+                ]);
 
-        return redirect()->route('quotations.show', $quotation)->with('success', 'Quotation created successfully.');
+                // Update with sequential ID format
+                $quotation->update([
+                    'quotation_number' => 'Q-' . str_pad($quotation->id, 4, '0', STR_PAD_LEFT)
+                ]);
+
+                foreach ($validated['items'] as $item) {
+                    $quotation->items()->create([
+                        'description' => $item['description'],
+                        'category' => $item['category'],
+                        'type' => 'work', // default
+                        'quantity' => $item['quantity'],
+                        'rate' => $item['rate'],
+                        'amount' => $item['quantity'] * $item['rate'],
+                    ]);
+                }
+
+                return redirect()->route('quotations.show', $quotation->id)
+                    ->with('success', 'Quotation/BOQ created successfully.');
+            });
     }
 
     public function show(Quotation $quotation)
     {
-        // Restriction for viewers
-        if (auth()->user()->role === 'viewer' && $quotation->client->user_id !== auth()->id()) {
-            abort(403, 'Unauthorized access to this quotation.');
-        }
-
-        $quotation->load(['client', 'items']);
+        $quotation->load(['client', 'items', 'versions']);
         return view('quotations.show', compact('quotation'));
     }
 
-    public function updateStatus(Request $request, Quotation $quotation)
+    public function edit(Quotation $quotation)
     {
-        $oldStatus = $quotation->status;
-        $request->validate([
-            'status' => 'required|in:draft,sent,approved,rejected'
-        ]);
-
-        // ... (viewer check remains same)
-        if (auth()->user()->role === 'viewer') {
-            if ($quotation->client->user_id !== auth()->id()) {
-                abort(403);
-            }
-            if (!in_array($request->status, ['approved', 'rejected'])) {
-                abort(403, 'Invalid status update for client.');
-            }
-        }
-
-        $updateData = ['status' => $request->status];
-
-        if ($request->status === 'approved' && $request->has('signature_data')) {
-            $updateData['signature_data'] = $request->signature_data;
-            $updateData['signed_at'] = now();
-        }
-
-        $quotation->update($updateData);
-
-        // Custom Log Entry for easier visibility
-        \App\Models\AuditLog::create([
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()->name,
-            'user_role' => auth()->user()->role,
-            'action' => ucfirst($request->status),
-            'module' => 'Quotation',
-            'model_type' => get_class($quotation),
-            'model_id' => $quotation->id,
-            'description' => "Quotation #{$quotation->quotation_number} was {$request->status} by " . auth()->user()->name,
-            'old_values' => ['status' => $oldStatus],
-            'new_values' => ['status' => $request->status],
-            'status' => 'success',
-            'ip_address' => request()->ip(),
-            'created_at' => now(),
-        ]);
-
-        $message = 'Quotation status updated to ' . ucfirst($request->status);
-        if ($request->status === 'approved') {
-            $message = 'Quotation approved! You can now proceed with the work.';
-        }
-
-        return back()->with('success', $message);
+        $clients = Client::all();
+        $leads = Lead::whereNotIn('status', ['Won', 'Lost'])->get();
+        $quotation->load('items');
+        return view('quotations.boq-builder', compact('quotation', 'clients', 'leads'));
     }
 
-    public function destroy(Quotation $quotation)
+    public function update(Request $request, Quotation $quotation)
     {
-        $quotation->delete();
-        return redirect()->route('quotations.index')->with('success', 'Quotation deleted successfully.');
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'valid_until' => 'nullable|date',
+            'gst_percentage' => 'required|numeric|min:0',
+            'discount_amount' => 'required|numeric|min:0',
+            'items' => 'required|array|min:1',
+            'items.*.description' => 'required|string',
+            'items.*.category' => 'required|string',
+            'items.*.quantity' => 'required|numeric|min:0',
+            'items.*.rate' => 'required|numeric|min:0',
+            'notes' => 'nullable|string',
+            'create_version' => 'nullable|boolean'
+        ]);
+
+        return DB::transaction(function () use ($validated, $quotation, $request) {
+            // Determine if we should create a new version
+            // If already sent or approved, or explicitly requested
+            $shouldCreateVersion = $request->has('create_version') || $quotation->status !== 'draft';
+
+            $subtotal = collect($validated['items'])->sum(function ($item) {
+                    return $item['quantity'] * $item['rate'];
+                }
+                );
+
+                $taxAmount = ($subtotal - $validated['discount_amount']) * ($validated['gst_percentage'] / 100);
+                $totalAmount = $subtotal - $validated['discount_amount'] + $taxAmount;
+
+                if ($shouldCreateVersion) {
+                    // Create new version
+                    $newQuotation = Quotation::create([
+                        'client_id' => $quotation->client_id,
+                        'quotation_number' => $quotation->quotation_number, // Same number, different ID/version
+                        'date' => $validated['date'],
+                        'valid_until' => $validated['valid_until'] ?? null,
+                        'subtotal' => $subtotal,
+                        'discount_amount' => $validated['discount_amount'],
+                        'gst_percentage' => $validated['gst_percentage'],
+                        'tax_amount' => $taxAmount,
+                        'total_amount' => $totalAmount,
+                        'status' => 'draft', // Reset to draft
+                        'version' => $quotation->version + 1,
+                        'parent_id' => $quotation->parent_id ?? $quotation->id,
+                        'notes' => $validated['notes'],
+                    ]);
+
+                    foreach ($validated['items'] as $item) {
+                        $newQuotation->items()->create([
+                            'description' => $item['description'],
+                            'category' => $item['category'],
+                            'type' => 'work',
+                            'quantity' => $item['quantity'],
+                            'rate' => $item['rate'],
+                            'amount' => $item['quantity'] * $item['rate'],
+                        ]);
+                    }
+
+                    return redirect()->route('quotations.show', $newQuotation->id)
+                        ->with('success', 'Quotation version v' . $newQuotation->version . ' created successfully.');
+                }
+                else {
+                    // Update existing draft
+                    $quotation->update([
+                        'date' => $validated['date'],
+                        'valid_until' => $validated['valid_until'],
+                        'subtotal' => $subtotal,
+                        'discount_amount' => $validated['discount_amount'],
+                        'gst_percentage' => $validated['gst_percentage'],
+                        'tax_amount' => $taxAmount,
+                        'total_amount' => $totalAmount,
+                        'notes' => $validated['notes'],
+                    ]);
+
+                    $quotation->items()->delete();
+                    foreach ($validated['items'] as $item) {
+                        $quotation->items()->create([
+                            'description' => $item['description'],
+                            'category' => $item['category'],
+                            'type' => 'work',
+                            'quantity' => $item['quantity'],
+                            'rate' => $item['rate'],
+                            'amount' => $item['quantity'] * $item['rate'],
+                        ]);
+                    }
+
+                    return redirect()->route('quotations.show', $quotation->id)
+                        ->with('success', 'Quotation updated successfully.');
+                }
+            });
+    }
+
+    public function approve(Request $request, Quotation $quotation)
+    {
+        $validated = $request->validate([
+            'signature_data' => 'required|string', // Base64 signature
+        ]);
+
+        $quotation->update([
+            'status' => 'accepted',
+            'signed_at' => now(),
+            'signature_data' => $validated['signature_data'],
+        ]);
+
+        return back()->with('success', 'Quotation approved and signed successfully.');
+    }
+
+    /**
+     * Convert an approved quotation to a Project (Client)
+     */
+    public function convertToProject(Quotation $quotation)
+    {
+        if ($quotation->status !== 'accepted') {
+            return back()->with('error', 'Only accepted quotations can be converted to projects.');
+        }
+
+        if ($quotation->client_id) {
+            return redirect()->route('clients.show', $quotation->client_id)
+                ->with('info', 'This quotation is already linked to a project.');
+        }
+
+        return DB::transaction(function () use ($quotation) {
+            $lead = $quotation->lead;
+
+            if (!$lead) {
+                return back()->with('error', 'No lead associated with this quotation.');
+            }
+
+            // Create Project (Client)
+            $client = Client::create([
+                'first_name' => explode(' ', $lead->name)[0],
+                'last_name' => str_contains($lead->name, ' ') ? substr($lead->name, strpos($lead->name, ' ') + 1) : '',
+                'mobile' => $lead->phone,
+                'email' => $lead->email,
+                'address' => $lead->address ?: $lead->location,
+                'status' => 'Sales', // Initial stage after conversion
+                'user_id' => $lead->assigned_to_id ?: auth()->id(),
+                'start_date' => now(),
+            ]);
+
+            // Auto-generate project number
+            $client->update(['file_number' => 'P-' . str_pad($client->id, 4, '0', STR_PAD_LEFT)]);
+
+            // Link quotation to the new project
+            $quotation->update(['client_id' => $client->id]);
+
+            // Mark lead as Won
+            $lead->update(['status' => 'Won']);
+
+            return redirect()->route('clients.show', $client->id)
+                ->with('success', 'Project created successfully from quotation!');
+        });
     }
 }

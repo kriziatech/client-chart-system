@@ -24,4 +24,14 @@ class DailyReport extends Model
     {
         return $this->hasMany(DailyReportImage::class);
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function expenses()
+    {
+        return $this->hasMany(Expense::class);
+    }
 }

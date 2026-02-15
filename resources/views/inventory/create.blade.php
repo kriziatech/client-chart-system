@@ -85,8 +85,18 @@
 
                     <div class="space-y-2">
                         <label
+                            class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Initial
+                            Stock Balance</label>
+                        <input type="number" name="total_stock" value="0"
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm font-black text-emerald-600 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white transition-all">
+                        <p class="text-[10px] text-ui-muted dark:text-dark-muted mt-1 italic">Current quantity available
+                            in warehouse.</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label
                             class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Procurement
-                            Alert Level</label>
+                            Threshold (Alert)</label>
                         <input type="number" name="stock_alert_level" value="0"
                             class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-brand-500/10 focus:bg-white transition-all">
                         <p class="text-[10px] text-ui-muted dark:text-dark-muted mt-1 italic">Triggers visual alerts

@@ -1,393 +1,445 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="animate-in fade-in slide-in-from-bottom-4 duration-700 print:p-0">
-    <!-- Top Action Bar (Non-Printable) -->
-    <div class="max-w-5xl mx-auto mb-8 no-print">
-        <div
-            class="bg-white dark:bg-dark-surface rounded-3xl border border-ui-border dark:border-dark-border shadow-premium overflow-hidden">
-            <div
-                class="px-8 py-5 flex justify-between items-center bg-slate-50/50 dark:bg-dark-bg/50 border-b border-ui-border dark:border-dark-border">
-                <div class="flex items-center gap-4">
-                    <h2 class="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">Proposal
-                        Review (Ref #{{ $quotation->quotation_number }})</h2>
-                    <span
-                        class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest
-                        {{ $quotation->status === 'approved' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10' : 
-                           ($quotation->status === 'rejected' ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10' : 
-                           ($quotation->status === 'sent' ? 'bg-blue-50 text-blue-600 dark:bg-blue-500/10' : 'bg-slate-50 text-slate-500 dark:bg-slate-500/10')) }}">
-                        {{ $quotation->status }}
-                    </span>
-                </div>
-                <div class="flex items-center gap-3">
-                    @if(auth()->user()->role === 'viewer' && $quotation->status === 'sent')
-                    <button onclick="approveQuotation()"
-                        class="px-5 py-2.5 bg-brand-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/20 active:scale-95">
-                        Approve & Signature
-                    </button>
-                    @endif
+<div class="h-full bg-gray-50 dark:bg-gray-900" x-data="quotationShow()">
+    <x-journey-header stage="Estimate & Quotation"
+        nextStep="{{ $quotation->status === 'accepted' ? 'Convert this approved estimate to a live Project Workspace' : 'Get client approval and signature' }}"
+        progress="30" statusColor="{{ $quotation->status === 'accepted' ? 'green' : 'blue' }}" />
 
-                    @if(!auth()->user()->isViewer() && $quotation->status === 'draft')
-                    <form action="{{ route('quotations.updateStatus', $quotation) }}" method="POST" class="inline">
-                        @csrf @method('PATCH')
-                        <input type="hidden" name="status" value="sent">
-                        <button type="submit"
-                            class="px-5 py-2.5 bg-brand-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 active:scale-95 transition-all">
-                            Release to Client
-                        </button>
-                    </form>
-                    @endif
-
-                    <button onclick="shareQuotation()"
-                        class="px-5 py-2.5 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884a9.82 9.82 0 017.008 2.899 9.825 9.825 0 012.879 7.03c-.002 5.45-4.437 9.884-9.89 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z">
-                            </path>
-                        </svg>
-                        WhatsApp
-                    </button>
-
-                    <button onclick="window.print()"
-                        class="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
-                            </path>
-                        </svg>
-                        Export
-                    </button>
-                </div>
-            </div>
-
-            <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="space-y-1">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-ui-muted">Client Account</p>
-                    <p class="text-sm font-black text-slate-900 dark:text-white">{{ $quotation->client->first_name }} {{
-                        $quotation->client->last_name }}</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-ui-muted">Issued Valuation</p>
-                    <p class="text-sm font-black text-brand-600">₹{{ number_format($quotation->total_amount, 2) }}</p>
-                </div>
-                <div class="space-y-1">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-ui-muted">Validation End</p>
-                    <p class="text-sm font-black text-slate-900 dark:text-white">{{ $quotation->valid_until ?
-                        $quotation->valid_until->format('d M, Y') : 'Rolling' }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Printable Quotation (Paper Style) -->
-    <div
-        class="max-w-5xl mx-auto bg-white p-16 shadow-2xl print:shadow-none print:p-0 min-h-[1100px] border border-slate-100 flex flex-col font-['Roboto'] scale-[0.98] origin-top transition-transform hover:scale-100 duration-500">
-        <!-- Brand Header -->
-        <div class="flex justify-between items-start mb-16">
-            <div class="space-y-2">
-                <h1 class="text-3xl font-black text-slate-900 uppercase tracking-tighter">{{ config('app.name') }}</h1>
-                <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Project Charter & Valuation
-                </p>
-                <div class="pt-4 text-xs font-bold text-slate-600 space-y-1">
-                    <p class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
-                        Contact: +91 91155 00057</p>
-                    <p class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span> URL:
-                        www.interiortouch.in</p>
-                </div>
-            </div>
-            <div class="text-right">
-                <div class="bg-slate-900 text-white px-6 py-3 inline-block rounded-2xl mb-6">
-                    <h2 class="text-2xl font-black uppercase tracking-widest">Quotation</h2>
-                </div>
-                <div class="text-xs font-bold space-y-1.5">
-                    <p><span class="text-slate-400 uppercase tracking-widest mr-2">Serial ID:</span> <span
-                            class="text-slate-900 font-black">#{{ $quotation->quotation_number }}</span></p>
-                    <p><span class="text-slate-400 uppercase tracking-widest mr-2">Emission:</span> <span
-                            class="text-slate-900">{{ $quotation->date->format('d M, Y') }}</span></p>
-                    <p><span class="text-slate-400 uppercase tracking-widest mr-2">Validity:</span> <span
-                            class="text-slate-900">{{ $quotation->valid_until ? $quotation->valid_until->format('d M,
-                            Y') : '30 Calendar Days' }}</span></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stakeholders -->
-        <div class="grid grid-cols-2 gap-16 mb-16">
-            <div class="p-8 bg-slate-50 rounded-3xl">
-                <h4
-                    class="text-[10px] font-black text-brand-600 uppercase tracking-widest mb-4 border-b border-brand-100 pb-2">
-                    Issued To (Stakeholder)</h4>
-                <div class="space-y-1">
-                    <p class="text-lg font-black text-slate-900">{{ $quotation->client->first_name }} {{
-                        $quotation->client->last_name }}</p>
-                    <p class="text-xs font-bold text-slate-500">Dossier Ref: #{{ $quotation->client->file_number }}</p>
-                    <p class="text-xs font-medium text-slate-600 leading-relaxed mt-2">{{ $quotation->client->address }}
+    <!-- Header -->
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <a href="{{ route('quotations.index') }}"
+                    class="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ $quotation?->quotation_number }}
+                        </h1>
+                        <span
+                            class="px-2 py-0.5 text-[10px] font-bold bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-400 rounded uppercase tracking-wider">
+                            v{{ $quotation?->version }}
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Issued to {{ $quotation?->client?->first_name ?? $quotation?->lead?->name ?? 'Unknown' }} {{
+                        $quotation?->client?->last_name ?? '' }} on {{
+                        $quotation?->date?->format('M d, Y') }}
                     </p>
-                    <p class="text-xs font-black text-slate-900 mt-2">M: {{ $quotation->client->mobile }}</p>
                 </div>
             </div>
-            <div class="py-8">
-                <h4
-                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">
-                    Scope Summary</h4>
-                <p class="text-xs font-medium text-slate-700 leading-relaxed italic pr-4">{{
-                    $quotation->client->work_description ?: 'No specific project summary provided in primary charter.'
-                    }}</p>
+
+            <div class="flex items-center gap-3">
+                @if($quotation->status == 'draft')
+                <a href="{{ route('quotations.edit', $quotation->id) }}"
+                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600">
+                    Edit Draft
+                </a>
+                @else
+                <a href="{{ route('quotations.edit', $quotation->id) }}"
+                    class="px-4 py-2 text-sm font-medium text-brand-600 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 dark:bg-brand-900/30 dark:text-brand-400 dark:border-brand-800">
+                    Revise & Create v{{ $quotation->version + 1 }}
+                </a>
+                @endif
+
+                @if($quotation->status === 'accepted' && !$quotation->client_id)
+                <form action="{{ route('quotations.convertToProject', $quotation->id) }}" method="POST">
+                    @csrf
+                    <button type="submit"
+                        class="px-6 py-2 text-sm font-black text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 shadow-lg shadow-indigo-500/20 transition-all flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        🚀 CREATE PROJECT
+                    </button>
+                </form>
+                @endif
+
+                @if($quotation->status !== 'accepted')
+                <button @click="showSignaturePad = true"
+                    class="px-6 py-2 text-sm font-bold text-white bg-brand-600 rounded-lg hover:bg-brand-700 shadow-lg shadow-brand-500/20 transition-all flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                        </path>
+                    </svg>
+                    Approve & Sign
+                </button>
+                @endif
             </div>
         </div>
+    </header>
 
-        <!-- Ledger Items -->
-        <div class="flex-grow">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest">
-                        <th class="px-5 py-4 first:rounded-l-2xl">Ref</th>
-                        <th class="px-5 py-4">Detailed Description</th>
-                        <th class="px-5 py-4 text-center">Unit</th>
-                        <th class="px-5 py-4 text-right">Qty</th>
-                        <th class="px-5 py-4 text-right">Base Rate</th>
-                        <th class="px-5 py-4 text-right last:rounded-r-2xl">Net Total</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @foreach($quotation->items as $index => $item)
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="px-5 py-6 text-[10px] font-bold text-slate-400 font-mono">{{ sprintf('%02d', $index +
-                            1) }}</td>
-                        <td class="px-5 py-6">
-                            <p class="text-sm font-black text-slate-900 leading-tight">{{ $item->description }}</p>
+    <main class="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Left: Main Content -->
+            <div class="lg:col-span-3 space-y-6">
+                <!-- Status & High Level Info -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 dark:text-brand-400">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</p>
                             <span
-                                class="inline-block mt-1.5 text-[9px] font-black uppercase tracking-widest text-slate-400 border border-slate-100 px-2 py-0.5 rounded leading-none">
-                                {{ $item->type }}
+                                @class([ 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1'
+                                , 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'=>
+                                $quotation->status == 'draft',
+                                'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' =>
+                                $quotation->status == 'accepted',
+                                'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' => $quotation->status
+                                == 'sent',
+                                ])>
+                                {{ ucfirst($quotation->status) }}
                             </span>
-                        </td>
-                        <td
-                            class="px-5 py-6 text-center text-[10px] font-black text-slate-400 uppercase tracking-tighter">
-                            {{ $item->unit ?: 'pcs' }}
-                        </td>
-                        <td class="px-5 py-6 text-right text-sm font-bold text-slate-700">
-                            {{ round($item->quantity, 2) }}
-                        </td>
-                        <td class="px-5 py-6 text-right text-sm font-bold text-slate-700">₹{{ number_format($item->rate)
-                            }}</td>
-                        <td class="px-5 py-6 text-right text-sm font-black text-slate-900">₹{{
-                            number_format($item->amount) }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                        </div>
+                    </div>
 
-        <!-- Valuation Summary -->
-        <div class="mt-16 flex justify-between items-start pt-12 border-t-2 border-slate-900 border-dotted">
-            <div class="w-1/2">
-                <h4 class="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Terms & Mutual
-                    Indemnity</h4>
-                <div class="text-[11px] font-medium text-slate-500 leading-loose italic pr-12 space-y-2">
-                    {!! nl2br(e($quotation->notes ?: "1. Advance: 50% required upon mobilization.\n2. Taxes: GST as per
-                    statutory norms.\n3. Alterations: Deviations from BOQ billed at standard rates.")) !!}
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Valid Until</p>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
+                                {{ $quotation->valid_until ? $quotation->valid_until->format('M d, Y') : 'N/A' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 flex items-center gap-4">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-1.173-1.173c2.274-1.275 4.39-2.275 6.347-3.003L12 12V3c0-1.105.895-2 2-2h1">
+                                </path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Value</p>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
+                                ₹{{ number_format($quotation->total_amount) }}
+                            </p>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- BOQ Table -->
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                    <div class="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                        <h3
+                            class="font-bold text-gray-900 dark:text-white uppercase tracking-wider text-xs flex items-center gap-2">
+                            <svg class="w-4 h-4 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                            </svg>
+                            Detailed Bill of Quantities
+                        </h3>
+                    </div>
+
+                    <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @foreach($quotation->items->groupBy('category') as $category => $items)
+                        <div
+                            class="bg-gray-50/50 dark:bg-gray-900/20 px-4 py-2 text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
+                            {{ $category ?: 'General' }}
+                        </div>
+                        @foreach($items as $item)
+                        <div class="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div class="flex-1">
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $item->description }}
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-tighter">{{
+                                    $item->type }} / {{ $item->unit ?: 'Nos' }}</p>
+                            </div>
+                            <div class="flex items-center gap-8">
+                                <div class="text-right">
+                                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Quantity
+                                    </p>
+                                    <p class="text-sm text-gray-900 dark:text-white font-medium">{{ $item->quantity }}
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Rate</p>
+                                    <p class="text-sm text-gray-900 dark:text-white font-medium">₹{{
+                                        number_format($item->rate) }}</p>
+                                </div>
+                                <div class="text-right w-24">
+                                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Amount</p>
+                                    <p class="text-sm text-brand-600 dark:text-brand-400 font-boldital">₹{{
+                                        number_format($item->amount) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                        @endforeach
+                    </div>
+
+                    <!-- Totals Section -->
+                    <div class="p-6 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+                        <div class="max-w-xs ml-auto space-y-3">
+                            <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                                <span>Subtotal</span>
+                                <span class="font-bold">₹{{ number_format($quotation->subtotal) }}</span>
+                            </div>
+                            @if($quotation->discount_amount > 0)
+                            <div class="flex justify-between text-sm text-emerald-600">
+                                <span>Discount</span>
+                                <span class="font-bold">-₹{{ number_format($quotation->discount_amount) }}</span>
+                            </div>
+                            @endif
+                            <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                                <span>GST ({{ $quotation->gst_percentage }}%)</span>
+                                <span class="font-bold">₹{{ number_format($quotation->tax_amount) }}</span>
+                            </div>
+                            <div class="flex justify-between pt-3 border-t border-gray-300 dark:border-gray-600">
+                                <span class="font-bold text-gray-900 dark:text-white">Total Amount</span>
+                                <span class="font-black text-xl text-brand-600 dark:text-brand-400">₹{{
+                                    number_format($quotation->total_amount) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if($quotation->notes)
+                <div
+                    class="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 rounded-2xl p-6">
+                    <h4 class="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest mb-2">
+                        Terms & Notes</h4>
+                    <p class="text-sm text-amber-900/70 dark:text-amber-300/70 whitespace-pre-wrap leading-relaxed">{{
+                        $quotation->notes }}</p>
+                </div>
+                @endif
             </div>
-            <div class="w-5/12 space-y-4">
-                <div class="flex justify-between items-center text-xs font-bold text-slate-500">
-                    <span class="uppercase tracking-widest">Consolidated Base</span>
-                    <span class="text-slate-900">₹{{ number_format($quotation->subtotal, 2) }}</span>
+
+            <!-- Right: Metadata & History -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Client Card -->
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Client Detail</h4>
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900 flex items-center justify-center text-brand-700 dark:text-brand-400 font-bold">
+                            @if($quotation->client)
+                            {{ substr($quotation->client->first_name, 0, 1) }}{{ substr($quotation->client->last_name,
+                            0, 1) }}
+                            @elseif($quotation->lead)
+                            {{ substr($quotation->lead->name, 0, 1) }}
+                            @else
+                            ?
+                            @endif
+                        </div>
+                        <div>
+                            @if($quotation->client)
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $quotation->client->first_name
+                                }} {{ $quotation->client->last_name }}</p>
+                            <p class="text-xs text-gray-500">#{{ $quotation->client->file_number }}</p>
+                            @elseif($quotation->lead)
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $quotation->lead->name }}</p>
+                            <p class="text-xs text-gray-500">#{{ $quotation->lead->lead_number }}</p>
+                            @else
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">Unknown Entity</p>
+                            @endif
+                        </div>
+                    </div>
                 </div>
-                <div class="flex justify-between items-center bg-slate-50 px-6 py-3 rounded-2xl">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">GST Levy (18.0)</span>
-                    <span class="text-xs font-black text-slate-900">₹{{ number_format($quotation->tax_amount, 2)
-                        }}</span>
+
+                <!-- Version History -->
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Version History</h4>
+                    <div class="space-y-4">
+                        @php
+                        $allVersions = collect([$quotation->parent ?: $quotation])
+                        ->concat($quotation->parent ? $quotation->parent->versions : $quotation->versions)
+                        ->sortByDesc('version');
+                        @endphp
+
+                        @foreach($allVersions as $version)
+                        <a href="{{ route('quotations.show', $version->id) }}"
+                            @class([ 'flex items-center justify-between p-3 rounded-xl transition-all border'
+                            , 'bg-brand-50 border-brand-200 dark:bg-brand-900/20 dark:border-brand-800'=> $version->id
+                            == $quotation->id,
+                            'border-transparent hover:bg-gray-50 dark:hover:bg-gray-700/50' => $version->id !=
+                            $quotation->id
+                            ])>
+                            <div>
+                                <p @class([ 'text-xs font-bold' , 'text-brand-700 dark:text-brand-400'=> $version->id ==
+                                    $quotation->id,
+                                    'text-gray-900 dark:text-white' => $version->id != $quotation->id
+                                    ])>Version {{ $version->version }}</p>
+                                <p class="text-[10px] text-gray-400">{{ $version->created_at->format('M d, Y') }}</p>
+                            </div>
+                            <span @class([ 'px-1.5 py-0.5 text-[8px] font-black uppercase rounded'
+                                , 'bg-green-100 text-green-700'=> $version->status == 'accepted',
+                                'bg-gray-100 text-gray-500' => $version->status != 'accepted'
+                                ])>
+                                {{ $version->status }}
+                            </span>
+                        </a>
+                        @endforeach
+                    </div>
                 </div>
-                <div class="flex justify-between items-center pt-6">
-                    <span class="text-[11px] font-black text-brand-600 uppercase tracking-[0.2em]">Grand
-                        Valuation</span>
-                    <span class="text-3xl font-black text-brand-600 tracking-tighter">₹{{
-                        number_format($quotation->total_amount, 2) }}</span>
+
+                @if($quotation->signature_data)
+                <!-- Completion Evidence -->
+                <div
+                    class="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl p-6">
+                    <h4 class="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-widest mb-4">
+                        Digital Approval</h4>
+                    <img src="{{ $quotation->signature_data }}" class="max-h-24 mx-auto dark:invert dark:opacity-80"
+                        alt="Signature">
+                    <p class="text-[10px] text-emerald-700 dark:text-emerald-500 text-center mt-3 font-medium italic">
+                        Signed on {{ $quotation->signed_at->format('M d, Y h:i A') }}
+                    </p>
                 </div>
+                @endif
             </div>
         </div>
+    </main>
 
-        <!-- Authorization Block -->
-        <div class="mt-24 flex justify-between items-end">
-            <div class="w-48 text-center space-y-6">
-                <!-- Accept Signature Area -->
-                <div class="h-16 flex items-end justify-center">
-                    @if($quotation->signature_data)
-                    <img src="{{ $quotation->signature_data }}" class="max-h-full opacity-80" alt="Client Signature">
-                    @else
-                    <div class="w-32 border-b border-slate-200 border-dotted"></div>
-                    @endif
-                </div>
-                <div class="pt-4 border-t border-slate-100">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Endorsement</p>
-                </div>
+    <!-- Signature Pad Modal -->
+    <div x-show="showSignaturePad"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-sm" x-cloak>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl"
+            @click.away="showSignaturePad = false">
+            <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Draw Signature</h3>
+                <button @click="showSignaturePad = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
             </div>
-            <div class="w-64 text-center">
-                <p class="text-[11px] font-black text-slate-400 italic mb-8">Generated by InteriorTouch ERP</p>
-                <div class="pt-6 border-t-2 border-slate-900">
-                    <p class="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">Authorized Signatory</p>
+
+            <div class="p-6">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">By signing, you agree to the Bill of Quantities
+                    and costings provided above.</p>
+
+                <div
+                    class="relative bg-gray-50 dark:bg-gray-900 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 h-48">
+                    <canvas id="signature-canvas" class="w-full h-full cursor-crosshair"></canvas>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button @click="clearSignature()"
+                        class="flex-1 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-xl transition-all">
+                        Clear
+                    </button>
+                    <button @click="saveSignature()"
+                        class="flex-1 px-4 py-3 text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-lg shadow-brand-500/20 transition-all">
+                        Confirm & Sign
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Hidden form for signature submission -->
+    <form id="signature-form" action="{{ route('quotations.approve', $quotation->id) }}" method="POST"
+        style="display:none">
+        @csrf
+        <input type="hidden" name="signature_data" id="signature_data_input">
+    </form>
 </div>
 
 <script>
-    function shareQuotation() {
-        const quoteNum = '{{ $quotation->quotation_number }}';
-        const clientName = '{{ $quotation->client->first_name }} {{ $quotation->client->last_name }}';
-        const total = '₹{{ number_format($quotation->total_amount, 2) }}';
-        const link = window.location.href;
+    function quotationShow() {
+        return {
+            showSignaturePad: false,
+            canvas: null,
+            ctx: null,
+            drawing: false,
 
-        const message = `*InteriorTouch - Proposal Notification*\n\n` +
-            `Ref ID: ${quoteNum}\n` +
-            `Client: ${clientName}\n` +
-            `Evaluation: ${total}\n\n` +
-            `Review detailed project charter here:\n${link}`;
+            init() {
+                this.$watch('showSignaturePad', value => {
+                    if (value) {
+                        this.$nextTick(() => {
+                            this.initCanvas();
+                        });
+                    }
+                });
+            },
 
-        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-    }
+            initCanvas() {
+                this.canvas = document.getElementById('signature-canvas');
+                this.ctx = this.canvas.getContext('2d');
 
-    let canvas, ctx, drawing = false;
+                // Adjust for DPI
+                const rect = this.canvas.getBoundingClientRect();
+                this.canvas.width = rect.width;
+                this.canvas.height = rect.height;
 
-    function approveQuotation() {
-        document.getElementById('signatureModal').classList.remove('hidden');
-        document.getElementById('signatureModal').classList.add('flex');
-        initCanvas();
-    }
+                this.ctx.lineWidth = 3;
+                this.ctx.lineJoin = 'round';
+                this.ctx.lineCap = 'round';
+                this.ctx.strokeStyle = window.matchMedia('(prefers-color-scheme: dark)').matches ? '#ffffff' : '#000000';
 
-    function closeModal() {
-        document.getElementById('signatureModal').classList.add('hidden');
-        document.getElementById('signatureModal').classList.remove('flex');
-    }
+                const startDrawing = (e) => {
+                    this.drawing = true;
+                    const pos = this.getMousePos(e);
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(pos.x, pos.y);
+                };
 
-    function initCanvas() {
-        canvas = document.getElementById('signaturePad');
-        ctx = canvas.getContext('2d');
+                const draw = (e) => {
+                    if (!this.drawing) return;
+                    const pos = this.getMousePos(e);
+                    this.ctx.lineTo(pos.x, pos.y);
+                    this.ctx.stroke();
+                };
 
-        // Handle resize/retina
-        const ratio = window.devicePixelRatio || 1;
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        ctx.scale(ratio, ratio);
+                const stopDrawing = () => {
+                    this.drawing = false;
+                };
 
-        ctx.strokeStyle = '#023E8A';
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
+                this.canvas.addEventListener('mousedown', startDrawing);
+                this.canvas.addEventListener('mousemove', draw);
+                this.canvas.addEventListener('mouseup', stopDrawing);
+                this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e.touches[0]); });
+                this.canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); });
+                this.canvas.addEventListener('touchend', stopDrawing);
+            },
 
-        const getPos = (e) => {
-            const rect = canvas.getBoundingClientRect();
-            return {
-                x: (e.clientX || e.touches[0].clientX) - rect.left,
-                y: (e.clientY || e.touches[0].clientY) - rect.top
-            };
-        };
+            getMousePos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                return {
+                    x: (e.clientX || e.pageX) - rect.left,
+                    y: (e.clientY || e.pageY) - rect.top
+                };
+            },
 
-        const start = (e) => { drawing = true; draw(e); };
-        const end = () => { drawing = false; ctx.beginPath(); };
-        const draw = (e) => {
-            if (!drawing) return;
-            e.preventDefault();
-            const pos = getPos(e);
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-        };
+            clearSignature() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            },
 
-        canvas.addEventListener('mousedown', start);
-        canvas.addEventListener('touchstart', start);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('touchmove', draw);
-        canvas.addEventListener('mouseup', end);
-        canvas.addEventListener('touchend', end);
-    }
-
-    function clearSignature() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
-
-    function submitSignature() {
-        const signatureData = canvas.toDataURL('image/png');
-        const form = document.getElementById('approvalForm');
-        document.getElementById('signatureInput').value = signatureData;
-        form.submit();
+            saveSignature() {
+                const dataUrl = this.canvas.toDataURL();
+                document.getElementById('signature_data_input').value = dataUrl;
+                document.getElementById('signature-form').submit();
+            }
+        }
     }
 </script>
-
-<!-- Signature Modal -->
-<div id="signatureModal"
-    class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-    <div
-        class="bg-white dark:bg-dark-surface w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden border border-ui-border">
-        <div class="p-10">
-            <h3 class="text-2xl font-black text-ui-primary dark:text-white tracking-tight mb-2">Authorize Proposal</h3>
-            <p class="text-sm text-ui-muted mb-8">Please provide your digital endorsement below to initialize
-                mobilization.</p>
-
-            <div class="bg-slate-50 dark:bg-dark-bg rounded-2xl border-2 border-dashed border-ui-border p-4">
-                <canvas id="signaturePad" class="w-full h-48 bg-transparent cursor-crosshair touch-none"></canvas>
-            </div>
-
-            <div class="flex items-center justify-between mt-6">
-                <button type="button" onclick="clearSignature()"
-                    class="text-[10px] font-black uppercase text-rose-500 hover:underline tracking-widest">Clear
-                    Canvas</button>
-                <div class="flex gap-3">
-                    <button onclick="closeModal()"
-                        class="px-6 py-3 text-xs font-black uppercase tracking-widest text-ui-muted hover:text-ui-primary transition-colors">Abort</button>
-                    <button onclick="submitSignature()"
-                        class="px-8 py-3 bg-brand-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all active:scale-95">Confirm
-                        & Sign</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<form id="approvalForm" action="{{ route('quotations.updateStatus', $quotation) }}" method="POST" class="hidden">
-    @csrf @method('PATCH')
-    <input type="hidden" name="status" value="approved">
-    <input type="hidden" name="signature_data" id="signatureInput">
-</form>
-
-<style>
-    @font-face {
-        font-family: 'Roboto';
-        src: url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
-    }
-
-    @media print {
-        @page {
-            size: A4;
-            margin: 0;
-        }
-
-        body {
-            background: white !important;
-        }
-
-        .min-h-screen {
-            background: white !important;
-            px: 0 !important;
-        }
-
-        .no-print {
-            display: none !important;
-        }
-
-        .print\:shadow-none {
-            box-shadow: none !important;
-        }
-
-        .print\:p-0 {
-            padding: 0 !important;
-        }
-
-        .scale-\[0\.98\] {
-            scale: 1 !important;
-            transform: none !important;
-        }
-    }
-</style>
 @endsection

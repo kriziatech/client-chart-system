@@ -12,7 +12,7 @@ class PaymentRequestController extends Controller
     {
         $query = PaymentRequest::with(['client', 'quotation'])->latest();
 
-        if (auth()->user()->role === 'viewer') {
+        if (auth()->user()->isViewer()) {
             $clientIds = Client::where('user_id', auth()->id())->pluck('id');
             $query->whereIn('client_id', $clientIds);
         }
@@ -53,6 +53,9 @@ class PaymentRequestController extends Controller
 
     public function updateStatus(Request $request, PaymentRequest $paymentRequest)
     {
+        if (auth()->user()->isViewer() && $paymentRequest->client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $oldStatus = $paymentRequest->status;
         $request->validate([
             'status' => 'required|in:pending,paid,cancelled'
@@ -97,6 +100,9 @@ class PaymentRequestController extends Controller
 
     public function destroy(PaymentRequest $paymentRequest)
     {
+        if (auth()->user()->isViewer() && $paymentRequest->client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $clientId = $paymentRequest->client_id;
         $paymentRequest->delete();
         return redirect()->route('clients.show', $clientId)->with('success', 'Request deleted.');

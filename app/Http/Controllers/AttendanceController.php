@@ -47,6 +47,7 @@ class AttendanceController extends Controller
         $request->validate([
             'lat' => 'required',
             'lng' => 'required',
+            'client_id' => 'nullable|exists:clients,id',
         ]);
 
         $today = Carbon::today();
@@ -60,14 +61,19 @@ class AttendanceController extends Controller
             return response()->json(['message' => 'Already checked in for today.'], 400);
         }
 
+        $user = auth()->user();
+        $dailyRate = $user->daily_rate ?? 0;
+
         $attendance = Attendance::create([
-            'user_id' => auth()->id(),
+            'user_id' => $user->id,
+            'client_id' => $request->client_id,
             'date' => $today,
             'check_in_time' => now(),
             'check_in_lat' => $request->lat,
             'check_in_lng' => $request->lng,
-            'check_in_address' => 'GPS: ' . $request->lat . ', ' . $request->lng, // Could geocode later
-            'status' => 'present'
+            'check_in_address' => 'GPS: ' . $request->lat . ', ' . $request->lng,
+            'status' => 'present',
+            'daily_cost' => $dailyRate,
         ]);
 
         return response()->json(['message' => 'Checked In successfully!', 'data' => $attendance]);
@@ -110,7 +116,11 @@ class AttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Attendance::with('user')->latest('date');
+        $view = $request->get('view', 'list');
+        $month = $request->get('month', date('n'));
+        $year = $request->get('year', date('Y'));
+
+        $query = Attendance::with(['user', 'client'])->latest('date');
 
         if ($request->filled('date')) {
             $query->where('date', $request->date);
@@ -120,9 +130,30 @@ class AttendanceController extends Controller
             $query->where('user_id', $request->user_id);
         }
 
-        $attendances = $query->paginate(20);
-        $users = \App\Models\User::orderBy('name')->get();
+        // For Calendar View, we need all records for the month
+        if ($view === 'calendar') {
+            $query->whereMonth('date', $month)->whereYear('date', $year);
+            $attendances = $query->get();
+        }
+        else {
+            $attendances = $query->paginate(20);
+        }
 
-        return view('attendances.index', compact('attendances', 'users'));
+        $users = \App\Models\User::orderBy('name')->get();
+        $projects = \App\Models\Client::orderBy('first_name')->get();
+
+        // Calculate Analytics for the selected filters
+        $analytics = [
+            'total_present' => Attendance::whereMonth('date', $month)->whereYear('date', $year)->where('status', 'present')->count(),
+            'total_cost' => Attendance::whereMonth('date', $month)->whereYear('date', $year)->sum('daily_cost'),
+            'project_breakdown' => Attendance::whereMonth('date', $month)->whereYear('date', $year)
+            ->whereNotNull('client_id')
+            ->selectRaw('client_id, SUM(daily_cost) as cost')
+            ->groupBy('client_id')
+            ->with('client')
+            ->get()
+        ];
+
+        return view('attendances.index', compact('attendances', 'users', 'projects', 'view', 'month', 'year', 'analytics'));
     }
 }

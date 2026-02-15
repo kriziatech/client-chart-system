@@ -8,7 +8,7 @@ class InventoryItem extends Model
 {
     use \App\Traits\Auditable;
 
-    protected $fillable = ['name', 'category', 'unit', 'unit_price', 'stock_alert_level'];
+    protected $fillable = ['name', 'category', 'unit', 'unit_price', 'total_stock', 'stock_alert_level'];
 
     public function projectMaterials()
     {

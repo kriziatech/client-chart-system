@@ -14,6 +14,9 @@ class ScopeOfWorkController extends Controller
      */
     public function store(Request $request, Client $client)
     {
+        if (auth()->user()->isViewer() && $client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $request->validate(['version_name' => 'required|string']);
 
         $sow = ScopeOfWork::updateOrCreate(
@@ -29,6 +32,9 @@ class ScopeOfWorkController extends Controller
      */
     public function storeItem(Request $request, ScopeOfWork $scope)
     {
+        if (auth()->user()->isViewer() && $scope->client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $request->validate([
             'area_name' => 'required|string',
             'description' => 'required|string'

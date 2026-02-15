@@ -44,6 +44,7 @@
                         class="bg-slate-50/50 dark:bg-dark-bg/50 text-[10px] font-black uppercase tracking-[0.2em] text-ui-muted dark:text-dark-muted border-b border-ui-border dark:border-dark-border">
                         <th class="py-5 px-8">ID</th>
                         <th class="py-5 px-8">Full Name / Profile</th>
+                        <th class="py-5 px-6">Daily Rate</th>
                         <th class="py-5 px-6">Access Credentials</th>
                         <th class="py-5 px-6">Operational Role</th>
                         <th class="py-5 px-6">Onboard Date</th>
@@ -77,6 +78,11 @@
                                     </span>
                                 </div>
                             </div>
+                        </td>
+                        <td class="py-6 px-8">
+                            <span
+                                class="text-xs font-black text-slate-900 dark:text-white font-mono tracking-tighter">₹{{
+                                number_format($usr->daily_rate ?? 0, 0) }}</span>
                         </td>
                         <td class="py-6 px-6">
                             <span class="text-xs font-bold text-slate-500 dark:text-dark-muted">{{ $usr->email }}</span>
@@ -171,8 +177,16 @@
             <div class="space-y-2">
                 <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email
                     Identifier</label>
-                <input type="email" name="email" required placeholder="name@krizia.in"
+                <input type="email" name="email" required placeholder="name@interiortouch.in"
                     class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all placeholder:text-slate-300">
+            </div>
+            <div class="space-y-2">
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Daily Labor Cost
+                    (Rate)</label>
+                <input type="number" name="daily_rate" required value="0"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 transition-all placeholder:text-slate-300">
+                <p class="text-[9px] text-ui-muted mt-1 uppercase font-bold tracking-widest italic ml-1">Standard cost
+                    applied to project budgets for a full-day shift.</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-2">
@@ -208,6 +222,5 @@
             </div>
         </form>
     </div>
-</div>
 </div>
 @endsection

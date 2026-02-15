@@ -68,6 +68,7 @@
                             <option value="viewer">Viewer (Read Only)</option>
                             <option value="editor">Editor (Write Access)</option>
                             <option value="admin">Admin (System Global)</option>
+                            <option value="sales">Sales (Leads & Pitching)</option>
                         </select>
                     </div>
 
@@ -119,6 +120,12 @@
                                     class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 dark:bg-blue-500/10 flex items-center gap-2 w-fit">
                                     <div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
                                     Operational Editor
+                                </span>
+                                @elseif($role->type === 'sales')
+                                <span
+                                    class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-green-50 text-green-600 dark:bg-green-500/10 flex items-center gap-2 w-fit">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                    Sales Team Scope
                                 </span>
                                 @else
                                 <span

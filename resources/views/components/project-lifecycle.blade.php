@@ -1,28 +1,15 @@
 @props(['client'])
 
 @php
-// Determine the current stage based on project properties
-// 1: Pitching, 2: Planning, 3: Execution, 4: Financial, 5: Handover
-
-$currentStage = 1;
-
-if ($client->feedback || ($client->handover && $client->handover->status === 'Completed')) {
-$currentStage = 5;
-} elseif ($client->payments->count() > 0 || $client->paymentRequests->count() > 0) {
-$currentStage = 4;
-} elseif ($client->tasks->count() > 0 || $client->dailyReports->count() > 0) {
-$currentStage = 3;
-} elseif ($client->quotations->where('status', 'approved')->count() > 0) {
-$currentStage = 2;
-}
+$currentStage = $client->journey_stage;
 
 $stages = [
 [
 'id' => 1,
-'label' => 'Pitching Phase',
-'subtext' => 'Portfolio shared, Estimate sent',
-'icon' => 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5
-20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+'label' => 'New Client',
+'subtext' => 'Lead received, Initial contact',
+'icon' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7
+20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z',
 'color' => 'blue',
 'bgColor' => 'bg-blue-500',
 'textColor' => 'text-blue-500',
@@ -31,8 +18,20 @@ $stages = [
 ],
 [
 'id' => 2,
-'label' => 'Planning Phase',
-'subtext' => 'Client approval, Roadmap locked',
+'label' => 'Site Visit',
+'subtext' => 'Physical inspection, Discovery',
+'icon' => 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0
+016 0z',
+'color' => 'cyan',
+'bgColor' => 'bg-cyan-500',
+'textColor' => 'text-cyan-500',
+'borderColor' => 'border-cyan-500',
+'glowColor' => 'shadow-cyan-500/50'
+],
+[
+'id' => 3,
+'label' => 'Quotation',
+'subtext' => 'BOQ created, Estimate shared',
 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0
 01-2 2z',
 'color' => 'indigo',
@@ -42,25 +41,12 @@ $stages = [
 'glowColor' => 'shadow-indigo-500/50'
 ],
 [
-'id' => 3,
-'label' => 'Execution Phase',
-'subtext' => 'DPR updates, Change requests',
-'icon' => 'M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1
-1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1
-0 001-1V4z',
-'color' => 'orange',
-'bgColor' => 'bg-orange-500',
-'textColor' => 'text-orange-500',
-'borderColor' => 'border-orange-500',
-'glowColor' => 'shadow-orange-500/50'
-],
-[
 'id' => 4,
-'label' => 'Financial Phase',
-'subtext' => 'Invoices, Payments, P&L',
-'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2
-0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z',
-'color' => 'green',
+'label' => 'Credit',
+'subtext' => 'Advance received, Financial lock',
+'icon' => 'M9 8h6m4 2a2 2 0 110 4m0 4a2 2 0 110-4m0 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2m4 0h14M5 22V10a2 2 0 012-2h12a2 2
+0 012 2v10',
+'color' => 'emerald',
 'bgColor' => 'bg-emerald-500',
 'textColor' => 'text-emerald-500',
 'borderColor' => 'border-emerald-500',
@@ -68,9 +54,44 @@ $stages = [
 ],
 [
 'id' => 5,
-'label' => 'Handover Phase',
-'subtext' => 'Warranty, Feedback, Closure',
-'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+'label' => 'Work Assigned',
+'subtext' => 'Team allocated, Execution start',
+'icon' => 'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0
+4a2 2 0 110-4m0 4v2m0-6V4',
+'color' => 'orange',
+'bgColor' => 'bg-orange-500',
+'textColor' => 'text-orange-500',
+'borderColor' => 'border-orange-500',
+'glowColor' => 'shadow-orange-500/50'
+],
+[
+'id' => 6,
+'label' => 'Timeline',
+'subtext' => 'Gantt Chart locked, Schedule fixed',
+'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+'color' => 'amber',
+'bgColor' => 'bg-amber-500',
+'textColor' => 'text-amber-500',
+'borderColor' => 'border-amber-500',
+'glowColor' => 'shadow-amber-500/50'
+],
+[
+'id' => 7,
+'label' => 'Work Completed',
+'subtext' => 'Physical site completion',
+'icon' => 'M5 13l4 4L19 7',
+'color' => 'rose',
+'bgColor' => 'bg-rose-500',
+'textColor' => 'text-rose-500',
+'borderColor' => 'border-rose-500',
+'glowColor' => 'shadow-rose-500/50'
+],
+[
+'id' => 8,
+'label' => 'Final Payment',
+'subtext' => 'Handover, Settlement, Feedback',
+'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0
+0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
 'color' => 'purple',
 'bgColor' => 'bg-purple-500',
 'textColor' => 'text-purple-500',
@@ -131,7 +152,7 @@ $progressPercent = ($currentStage / count($stages)) * 100;
         <!-- Stage Nodes -->
         @foreach($stages as $index => $stage)
         @php
-        $angle = ($index * 72) - 90; // Start from top
+        $angle = ($index * 45) - 90; // Spacing for 8 nodes (360/8 = 45)
         $x = 50 + 45 * cos(deg2rad($angle));
         $y = 50 + 45 * sin(deg2rad($angle));
 

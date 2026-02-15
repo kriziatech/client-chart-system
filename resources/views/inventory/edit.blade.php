@@ -7,7 +7,7 @@
             <div>
                 <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Adjust Material Specs</h1>
                 <p class="text-sm text-ui-muted dark:text-dark-muted font-medium mt-1">Modify properties or standard
-                    pricing for {{ $item->name }}.</p>
+                    pricing for {{ $item?->name }}.</p>
             </div>
             <a href="{{ route('inventory.index') }}"
                 class="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-2">
@@ -35,7 +35,7 @@
                 </h3>
             </div>
 
-            <form action="{{ route('inventory.update', $item) }}" method="POST" class="p-8 space-y-8">
+            <form action="{{ route('inventory.update', $item?->id ?? 0) }}" method="POST" class="p-8 space-y-8">
                 @csrf
                 @method('PUT')
 
@@ -44,7 +44,7 @@
                         <label
                             class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Nomenclature
                             (Material Name) <span class="text-rose-500">*</span></label>
-                        <input type="text" name="name" required value="{{ $item->name }}"
+                        <input type="text" name="name" required value="{{ $item?->name }}"
                             class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-2xl px-5 py-4 text-sm font-black text-slate-900 dark:text-white focus:ring-4 focus:ring-brand-500/10 focus:bg-white transition-all placeholder:text-slate-400">
                     </div>
 
@@ -54,16 +54,22 @@
                             Category</label>
                         <select name="category"
                             class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-brand-500/10 focus:bg-white transition-all appearance-none cursor-pointer font-bold text-slate-700 dark:text-slate-300">
-                            <option value="" {{ $item->category == '' ? 'selected' : '' }}>-- Generic --</option>
-                            <option value="Civil" {{ $item->category == 'Civil' ? 'selected' : '' }}>Civil</option>
-                            <option value="Wood/Interior" {{ $item->category == 'Wood/Interior' ? 'selected' : ''
-                                }}>Wood/Interior</option>
-                            <option value="Electrical" {{ $item->category == 'Electrical' ? 'selected' : ''
-                                }}>Electrical</option>
-                            <option value="Plumbing" {{ $item->category == 'Plumbing' ? 'selected' : '' }}>Plumbing
+                            <option value="" {{ ($item?->category ?? '') == '' ? 'selected' : '' }}>-- Generic --
                             </option>
-                            <option value="Paint" {{ $item->category == 'Paint' ? 'selected' : '' }}>Paint</option>
-                            <option value="Hardware" {{ $item->category == 'Hardware' ? 'selected' : '' }}>Hardware
+                            <option value="Civil" {{ ($item?->category ?? '') == 'Civil' ? 'selected' : '' }}>Civil
+                            </option>
+                            <option value="Wood/Interior" {{ ($item?->category ?? '') == 'Wood/Interior' ? 'selected' :
+                                ''
+                                }}>Wood/Interior</option>
+                            <option value="Electrical" {{ ($item?->category ?? '') == 'Electrical' ? 'selected' : ''
+                                }}>Electrical</option>
+                            <option value="Plumbing" {{ ($item?->category ?? '') == 'Plumbing' ? 'selected' : ''
+                                }}>Plumbing
+                            </option>
+                            <option value="Paint" {{ ($item?->category ?? '') == 'Paint' ? 'selected' : '' }}>Paint
+                            </option>
+                            <option value="Hardware" {{ ($item?->category ?? '') == 'Hardware' ? 'selected' : ''
+                                }}>Hardware
                             </option>
                         </select>
                     </div>
@@ -72,7 +78,7 @@
                         <label
                             class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Measurement
                             Unit <span class="text-rose-500">*</span></label>
-                        <input type="text" name="unit" required value="{{ $item->unit }}"
+                        <input type="text" name="unit" required value="{{ $item?->unit }}"
                             class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-brand-500/10 focus:bg-white transition-all placeholder:text-slate-300">
                     </div>
 
@@ -83,16 +89,26 @@
                         <div class="relative">
                             <span
                                 class="absolute left-4 top-1/2 -translate-y-1/2 text-ui-muted dark:text-dark-muted font-bold">₹</span>
-                            <input type="number" step="0.01" name="unit_price" value="{{ $item->unit_price }}"
+                            <input type="number" step="0.01" name="unit_price" value="{{ $item?->unit_price }}"
                                 class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl pl-9 pr-4 py-3 text-sm font-black text-brand-600 focus:ring-4 focus:ring-brand-500/10 focus:bg-white transition-all">
                         </div>
                     </div>
 
                     <div class="space-y-2">
                         <label
+                            class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Total
+                            Warehouse Stock</label>
+                        <input type="number" name="total_stock" value="{{ $item?->total_stock }}"
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm font-black text-emerald-600 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white transition-all">
+                        <p class="text-[10px] text-ui-muted dark:text-dark-muted mt-1 italic">Current total quantity
+                            held in stock.</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label
                             class="text-[11px] font-bold uppercase tracking-widest text-ui-muted dark:text-dark-muted">Procurement
-                            Alert Level</label>
-                        <input type="number" name="stock_alert_level" value="{{ $item->stock_alert_level }}"
+                            Threshold (Alert)</label>
+                        <input type="number" name="stock_alert_level" value="{{ $item?->stock_alert_level }}"
                             class="w-full bg-slate-50 dark:bg-dark-bg border-transparent rounded-xl px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300 focus:ring-4 focus:ring-brand-500/10 focus:bg-white transition-all">
                         <p class="text-[10px] text-ui-muted dark:text-dark-muted mt-1 italic">Triggers visual alerts
                             when stock falls below this value. (0 = Disabled)</p>

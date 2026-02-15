@@ -1,9 +1,18 @@
 <section x-data="{ confirmingDeletion: false }">
     <div class="space-y-6">
+        @if(auth()->user()->isViewer() || auth()->user()->isClient())
+        <div class="bg-rose-100/50 dark:bg-rose-500/10 p-6 rounded-2xl border border-rose-200 dark:border-rose-500/30">
+            <p class="text-xs font-bold text-rose-600 uppercase tracking-widest leading-relaxed">
+                Account termination is restricted for Viewer and Client roles.
+                Please contact your assigned Project Manager or Support to initiate account closure.
+            </p>
+        </div>
+        @else
         <button x-on:click.prevent="confirmingDeletion = true"
             class="bg-rose-600 text-white px-8 py-3 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-rose-700 transition-all shadow-xl shadow-rose-500/20 active:scale-95">
             Terminate Identity
         </button>
+        @endif
     </div>
 
     <!-- Termination Confirmation Modal -->

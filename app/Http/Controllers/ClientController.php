@@ -14,8 +14,8 @@ class ClientController extends Controller
     {
         $query = Client::latest();
 
-        // If viewer (client), only show their own projects
-        if (auth()->user()->role === 'viewer') {
+        // If viewer or client, only show their own projects
+        if (auth()->user()->isViewer() || auth()->user()->isClient()) {
             $query->where('user_id', auth()->id());
         }
 
@@ -62,6 +62,11 @@ class ClientController extends Controller
                 'address', 'work_description', 'start_date', 'delivery_date', 'user_id'
             ]));
 
+            // Auto-generate project number if not provided
+            if (empty($client->file_number)) {
+                $client->update(['file_number' => 'P-' . str_pad($client->id, 4, '0', STR_PAD_LEFT)]);
+            }
+
             $client->siteInfo()->create($request->input('site_info', []));
             $client->permission()->create($request->input('permission', []));
 
@@ -100,8 +105,8 @@ class ClientController extends Controller
 
     public function show(Client $client)
     {
-        // Restriction for viewers
-        if (auth()->user()->role === 'viewer' && $client->user_id !== auth()->id()) {
+        // Restriction for viewers and clients
+        if ((auth()->user()->isViewer() || auth()->user()->isClient()) && $client->user_id !== auth()->id()) {
             abort(403, 'Unauthorized access to this project.');
         }
 
@@ -116,7 +121,9 @@ class ClientController extends Controller
             'scopeOfWork.items',
             'projectMaterials.inventoryItem',
             'galleries',
-            'paymentRequests'
+            'paymentRequests',
+            'handover.items',
+            'feedback'
         ]);
 
         // Failsafe: Ensure relationships are collections (not null)

@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     image: interiortouch-pm
+    platform: linux/amd64
     container_name: itpm_app
     restart: unless-stopped
     ports:
@@ -29,8 +30,7 @@ services:
       - /var/www/html/node_modules
 
   db:
-    image: mysql:8.0
-    platform: linux/amd64
+    image: mariadb:10.6
     container_name: itpm_db
     restart: unless-stopped
     environment:
@@ -49,7 +49,7 @@ services:
     container_name: itpm_pma
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "8082:80"
     environment:
       PMA_HOST: db
       MYSQL_ROOT_PASSWORD: "${DB_PASSWORD:-secret}"

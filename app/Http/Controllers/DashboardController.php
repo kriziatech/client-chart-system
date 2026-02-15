@@ -14,7 +14,7 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $isViewer = $user->role === 'viewer';
+        $isViewer = $user->isViewer() || $user->isClient();
 
         // 1. Key Metrics with Trends
         if ($isViewer) {
@@ -50,8 +50,9 @@ class DashboardController extends Controller
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->toDateString();
             $dailySum = Payment::whereDate('date', $date);
-            if ($isViewer)
+            if ($isViewer) {
                 $dailySum->whereIn('client_id', $clientIds ?? []);
+            }
             $sparklineQuery[] = $dailySum->sum('amount') ?: rand(1000, 5000); // Random data if empty for sparkline effect
         }
 
@@ -62,23 +63,26 @@ class DashboardController extends Controller
             $month = Carbon::now()->subMonths($i);
             $months[] = $month->format('M Y');
             $pQuery = Client::whereYear('created_at', $month->year)->whereMonth('created_at', $month->month);
-            if ($isViewer)
+            if ($isViewer) {
                 $pQuery->where('user_id', $user->id);
+            }
             $projectCounts[] = $pQuery->count();
         }
 
         // 3. Chart Data: Tasks Status
         $tQuery = Task::select('status', DB::raw('count(*) as total'));
-        if ($isViewer)
+        if ($isViewer) {
             $tQuery->whereIn('client_id', $clientIds ?? []);
+        }
         $taskStats = $tQuery->groupBy('status')->pluck('total', 'status')->toArray();
         $taskLabels = array_keys($taskStats);
         $taskData = array_values($taskStats);
 
         // 4. Recent Data
         $rpQuery = Client::latest()->take(5);
-        if ($isViewer)
+        if ($isViewer) {
             $rpQuery->where('user_id', $user->id);
+        }
         $recentProjects = $rpQuery->get();
 
         $qQuery = \App\Models\Quotation::with('client')->latest()->take(3);

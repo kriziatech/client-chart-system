@@ -9,7 +9,25 @@ class Quotation extends Model
 {
     use HasFactory, \App\Traits\Auditable;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'client_id',
+        'lead_id',
+        'quotation_number',
+        'date',
+        'valid_until',
+        'subtotal',
+        'tax_amount',
+        'discount_amount',
+        'gst_percentage',
+        'total_amount',
+        'status',
+        'version',
+        'parent_id',
+        'notes',
+        'signature_path',
+        'signed_at',
+        'signature_data'
+    ];
 
     protected $casts = [
         'date' => 'date',
@@ -22,8 +40,23 @@ class Quotation extends Model
         return $this->belongsTo(Client::class);
     }
 
+    public function lead()
+    {
+        return $this->belongsTo(Lead::class);
+    }
+
     public function items()
     {
         return $this->hasMany(QuotationItem::class);
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Quotation::class , 'parent_id');
+    }
+
+    public function versions()
+    {
+        return $this->hasMany(Quotation::class , 'parent_id');
     }
 }

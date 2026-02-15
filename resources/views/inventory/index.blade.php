@@ -29,9 +29,10 @@
                         class="bg-slate-50/50 dark:bg-dark-bg/50 text-[10px] font-black uppercase tracking-[0.2em] text-ui-muted dark:text-dark-muted border-b border-ui-border dark:border-dark-border">
                         <th class="py-5 px-8">Material Identity</th>
                         <th class="py-5 px-8">Logistics Category</th>
-                        <th class="py-5 px-6">Measurement Unit</th>
-                        <th class="py-5 px-6 text-right">Market Price (₹)</th>
-                        <th class="py-5 px-8 text-center">Procurement Alert</th>
+                        <th class="py-5 px-6">Warehouse Stock</th>
+                        <th class="py-5 px-6">Available</th>
+                        <th class="py-5 px-6">Distribution</th>
+                        <th class="py-5 px-8 text-center" width="200">Alert Status</th>
                         <th class="py-5 px-8 text-right">Edit/Manage</th>
                     </tr>
                 </thead>
@@ -54,25 +55,62 @@
                             </span>
                         </td>
                         <td class="py-6 px-6">
-                            <div class="text-xs font-bold text-slate-400 tracking-tighter uppercase">
-                                {{ $item->unit }}
+                            <div class="text-sm font-black text-slate-900 dark:text-white">
+                                {{ $item->total_stock }} <span class="text-[10px] text-slate-400 font-bold uppercase">{{
+                                    $item->unit }}</span>
                             </div>
                         </td>
-                        <td class="py-6 px-6 text-right">
-                            <div class="text-sm font-black text-slate-900 dark:text-white">
-                                ₹{{ number_format($item->unit_price, 2) }}
+                        <td class="py-6 px-6">
+                            @php
+                            $consumed = $item->projectMaterials->sum('quantity_dispatched');
+                            $available = $item->total_stock - $consumed;
+                            $status = 'ok';
+                            if ($available <= 0) $status='out' ; else if ($available <=$item->stock_alert_level) $status
+                                = 'low';
+                                @endphp
+                                <div
+                                    class="text-sm font-black @if($status === 'out') text-rose-600 @elseif($status === 'low') text-amber-500 @else text-emerald-600 @endif">
+                                    {{ $available }}
+                                </div>
+                        </td>
+                        <td class="py-6 px-6">
+                            <div class="flex -space-x-2 overflow-hidden"
+                                title="Assigned to {{ $item->projectMaterials->unique('client_id')->count() }} projects">
+                                @forelse($item->projectMaterials->unique('client_id')->take(3) as $pm)
+                                <div class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-dark-surface bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-[8px] font-black text-brand-600"
+                                    title="{{ $pm->client->first_name }}">
+                                    {{ substr($pm->client->first_name, 0, 1) }}
+                                </div>
+                                @empty
+                                <span class="text-[10px] text-slate-300 italic font-bold">Unallocated</span>
+                                @endforelse
+                                @if($item->projectMaterials->unique('client_id')->count() > 3)
+                                <div
+                                    class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-dark-surface bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[8px] font-black text-slate-400">
+                                    +{{ $item->projectMaterials->unique('client_id')->count() - 3 }}
+                                </div>
+                                @endif
                             </div>
                         </td>
                         <td class="py-6 px-8 text-center">
-                            @if($item->stock_alert_level > 0)
+                            @if($status === 'out')
                             <div
-                                class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-600 font-black text-[10px] tracking-widest uppercase">
-                                <div class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>
-                                Level: {{ $item->stock_alert_level }}
+                                class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-rose-100 dark:bg-rose-500/20 text-rose-600 font-black text-[10px] tracking-widest uppercase">
+                                <div class="w-1.5 h-1.5 rounded-full bg-rose-600 animate-ping"></div>
+                                🔴 Out of Stock
+                            </div>
+                            @elseif($status === 'low')
+                            <div
+                                class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-amber-100 dark:bg-amber-500/20 text-amber-600 font-black text-[10px] tracking-widest uppercase">
+                                <div class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+                                ⚠️ Low Stock
                             </div>
                             @else
-                            <span
-                                class="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic">Standard</span>
+                            <div
+                                class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 font-black text-[10px] tracking-widest uppercase">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                ✅ Optimized
+                            </div>
                             @endif
                         </td>
                         <td class="py-6 px-8 text-right">

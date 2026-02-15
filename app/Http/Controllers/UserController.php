@@ -39,6 +39,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role_id' => 'required|exists:roles,id',
+            'daily_rate' => 'nullable|numeric|min:0',
         ]);
 
         User::create([
@@ -46,6 +47,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
             'role_id' => $request->role_id,
+            'daily_rate' => $request->daily_rate ?? 0,
         ]);
 
         return back()->with('success', 'User created successfully.');

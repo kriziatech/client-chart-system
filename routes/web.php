@@ -11,11 +11,14 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class , 'index'])->middleware(['auth'])->name('dashboard');
+Route::get('/dashboard', function () {
+    return (new \App\Http\Controllers\DashboardController)->index();
+})->middleware(['auth'])->name('dashboard');
 
 // Client Portal (Public)
 Route::get('/portal/{client:uuid}', [\App\Http\Controllers\ClientPortalController::class , 'show'])->name('portal.show');
 Route::get('/portal/{client:uuid}/print', [\App\Http\Controllers\ClientPortalController::class , 'downloadPdf'])->name('portal.print');
+Route::post('/portal/{client:uuid}/quotation/{quotation}/approve', [\App\Http\Controllers\ClientPortalController::class , 'approveQuotation'])->name('portal.quotation.approve');
 
 // All client routes require authentication
 Route::middleware(['auth'])->group(function () {
@@ -27,15 +30,25 @@ Route::middleware(['auth'])->group(function () {
         }
         );
 
-        // --- Team Chat Routes ---
-        Route::get('/chat', [\App\Http\Controllers\ChatController::class , 'index'])->name('chat.index');
-        Route::get('/chat/fetch', [\App\Http\Controllers\ChatController::class , 'fetch'])->name('chat.fetch');
-        Route::post('/chat/send', [\App\Http\Controllers\ChatController::class , 'store'])->name('chat.store');
+        // --- Team Chat Routes --- (Allowed for sales)
+        Route::middleware('role:admin,editor,sales')->group(function () {
+            Route::get('/chat', [\App\Http\Controllers\ChatController::class , 'index'])->name('chat.index');
+            Route::get('/chat/fetch', [\App\Http\Controllers\ChatController::class , 'fetch'])->name('chat.fetch');
+            Route::post('/chat/send', [\App\Http\Controllers\ChatController::class , 'store'])->name('chat.store');
+            Route::post('/chat/{message}/pin', [\App\Http\Controllers\ChatController::class , 'togglePin'])->name('chat.pin');
+            Route::post('/chat/{message}/decision', [\App\Http\Controllers\ChatController::class , 'toggleDecision'])->name('chat.decision');
+            Route::post('/chat/{message}/link-task', [\App\Http\Controllers\ChatController::class , 'linkTask'])->name('chat.link-task');
+            Route::post('/chat/{message}/react', [\App\Http\Controllers\ChatController::class , 'addReaction'])->name('chat.react');
+        }
+        );
 
-        // View routes — all authenticated users
-        Route::get('/clients', [ClientController::class , 'index'])->name('clients.index');
-        Route::get('/clients/{client}', [ClientController::class , 'show'])->name('clients.show');
-        Route::get('/clients/{client}/print', [ClientController::class , 'print'])->name('clients.print');
+        // View routes — restricted from sales
+        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            Route::get('/clients', [ClientController::class , 'index'])->name('clients.index');
+            Route::get('/clients/{client}', [ClientController::class , 'show'])->name('clients.show');
+            Route::get('/clients/{client}/print', [ClientController::class , 'print'])->name('clients.print');
+        }
+        );
 
         // Edit — admin and editor only
         Route::middleware('role:admin,editor')->group(function () {
@@ -72,62 +85,108 @@ Route::middleware(['auth'])->group(function () {
         }
         );
 
-        // Attendance Actions (All Authenticated Users)
-        Route::get('/attendance/status', [AttendanceController::class , 'status'])->name('attendance.status');
-        Route::post('/attendance/check-in', [AttendanceController::class , 'checkIn'])->name('attendance.check-in');
-        Route::post('/attendance/check-out', [AttendanceController::class , 'checkOut'])->name('attendance.check-out');
+        // Attendance Actions (All Authenticated Users except sales)
+        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            Route::get('/attendance/status', [AttendanceController::class , 'status'])->name('attendance.status');
+            Route::post('/attendance/check-in', [AttendanceController::class , 'checkIn'])->name('attendance.check-in');
+            Route::post('/attendance/check-out', [AttendanceController::class , 'checkOut'])->name('attendance.check-out');
+        }
+        );
 
-        // Profile routes (from Breeze)
+        // Profile routes (Auto-allowed for all roles via auth)
         Route::get('/profile', [ProfileController::class , 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class , 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class , 'destroy'])->name('profile.destroy');
 
-        // Payment Routes
-        Route::get('/payments/{payment}/receipt', [\App\Http\Controllers\PaymentController::class , 'receipt'])->name('payments.receipt');
+        // Payment Routes (Restricted from sales)
+        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            Route::get('/payments/{payment}/receipt', [\App\Http\Controllers\PaymentController::class , 'receipt'])->name('payments.receipt');
+        }
+        );
 
-        // Inventory Catalog
-        Route::resource('inventory', \App\Http\Controllers\InventoryController::class);
+        // Inventory Catalog (Restricted from sales)
+        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            Route::resource('inventory', \App\Http\Controllers\InventoryController::class);
+        }
+        );
 
-        // Site Materials
-        Route::post('/project-materials', [\App\Http\Controllers\ProjectMaterialController::class , 'store'])->name('project-materials.store');
-        Route::patch('/project-materials/{material}/status', [\App\Http\Controllers\ProjectMaterialController::class , 'updateStatus'])->name('project-materials.updateStatus');
-        Route::delete('/project-materials/{material}', [\App\Http\Controllers\ProjectMaterialController::class , 'destroy'])->name('project-materials.destroy');
+        // Site Materials (Restricted from sales)
+        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            Route::post('/project-materials', [\App\Http\Controllers\ProjectMaterialController::class , 'store'])->name('project-materials.store');
+            Route::patch('/project-materials/{material}/status', [\App\Http\Controllers\ProjectMaterialController::class , 'updateStatus'])->name('project-materials.updateStatus');
+            Route::delete('/project-materials/{material}', [\App\Http\Controllers\ProjectMaterialController::class , 'destroy'])->name('project-materials.destroy');
+        }
+        );
 
-        // Payment Request Routes
-        Route::patch('/payment-requests/{payment_request}/status', [\App\Http\Controllers\PaymentRequestController::class , 'updateStatus'])->name('payment-requests.updateStatus');
-        Route::resource('payment-requests', \App\Http\Controllers\PaymentRequestController::class);
+        // Payment Request Routes (Restricted from sales)
+        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            Route::patch('/payment-requests/{payment_request}/status', [\App\Http\Controllers\PaymentRequestController::class , 'updateStatus'])->name('payment-requests.updateStatus');
+            Route::resource('payment-requests', \App\Http\Controllers\PaymentRequestController::class);
+        }
+        );
 
-        // Quotation Routes
-        Route::patch('/quotations/{quotation}/status', [\App\Http\Controllers\QuotationController::class , 'updateStatus'])->name('quotations.updateStatus');
-        Route::resource('quotations', \App\Http\Controllers\QuotationController::class);
+        // Quotation Routes (Allowed for sales)
+        Route::middleware('role:admin,editor,sales')->group(function () {
+            Route::patch('/quotations/{quotation}/status', [\App\Http\Controllers\QuotationController::class , 'updateStatus'])->name('quotations.updateStatus');
+            Route::post('/quotations/{quotation}/approve', [\App\Http\Controllers\QuotationController::class , 'approve'])->name('quotations.approve');
+            Route::post('/quotations/{quotation}/convert', [\App\Http\Controllers\QuotationController::class , 'convertToProject'])->name('quotations.convertToProject');
+            Route::resource('quotations', \App\Http\Controllers\QuotationController::class);
+        }
+        );
 
-        // --- Pitching Phase Features ---
-        // Estimate Builder
-        Route::get('/estimate-builder', [\App\Http\Controllers\EstimateBuilderController::class , 'index'])->name('estimate-builder.index');
-        Route::post('/estimate-builder/calculate', [\App\Http\Controllers\EstimateBuilderController::class , 'calculate'])->name('estimate-builder.calculate');
+        // --- Pitching Phase Features --- (Allowed for sales)
+        Route::middleware('role:admin,editor,sales,viewer')->group(function () {
+            // Estimate Builder
+            Route::get('/estimate-builder', [\App\Http\Controllers\EstimateBuilderController::class , 'index'])->name('estimate-builder.index');
+            Route::post('/estimate-builder/calculate', [\App\Http\Controllers\EstimateBuilderController::class , 'calculate'])->name('estimate-builder.calculate');
 
-        // Portfolio Board
-        Route::get('/portfolio', [\App\Http\Controllers\PortfolioController::class , 'index'])->name('portfolio.index');
+            // Portfolio Board
+            Route::get('/portfolio', [\App\Http\Controllers\PortfolioController::class , 'index'])->name('portfolio.index');
+        }
+        );
 
-        // --- Execution Phase Features ---
-        Route::post('/clients/{client}/dpr', [\App\Http\Controllers\ExecutionController::class , 'storeDPR'])->name('execution.dpr.store');
-        Route::post('/clients/{client}/change-requests', [\App\Http\Controllers\ExecutionController::class , 'storeChangeRequest'])->name('execution.change-request.store');
-        Route::patch('/change-requests/{changeRequest}/status', [\App\Http\Controllers\ExecutionController::class , 'updateChangeRequestStatus'])->name('execution.change-request.update');
+        // --- Execution Phase Features --- (Restricted from sales)
+        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            Route::post('/clients/{client}/dpr', [\App\Http\Controllers\ExecutionController::class , 'storeDPR'])->name('execution.dpr.store');
+            Route::post('/clients/{client}/change-requests', [\App\Http\Controllers\ExecutionController::class , 'storeChangeRequest'])->name('execution.change-request.store');
+            Route::patch('/change-requests/{changeRequest}/status', [\App\Http\Controllers\ExecutionController::class , 'updateChangeRequestStatus'])->name('execution.change-request.update');
+        }
+        );
 
-        // --- Financial Management Features ---
-        Route::post('/clients/{client}/expenses', [\App\Http\Controllers\FinanceController::class , 'storeExpense'])->name('finance.expense.store');
-        Route::get('/clients/{client}/analytics', [\App\Http\Controllers\FinanceController::class , 'analytics'])->name('finance.analytics');
-        Route::post('/payment-requests/{paymentRequest}/reminder', [\App\Http\Controllers\FinanceController::class , 'sendReminder'])->name('finance.reminder.send');
+        // --- Financial Management Features --- (Restricted from sales)
+        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            Route::get('/finance', [\App\Http\Controllers\FinanceController::class , 'summary'])->name('finance.summary');
+            Route::post('/clients/{client}/expenses', [\App\Http\Controllers\FinanceController::class , 'storeExpense'])->name('finance.expense.store');
+            Route::get('/clients/{client}/analytics', [\App\Http\Controllers\FinanceController::class , 'analytics'])->name('finance.analytics');
+            Route::post('/payment-requests/{paymentRequest}/reminder', [\App\Http\Controllers\FinanceController::class , 'sendReminder'])->name('finance.reminder.send');
+        }
+        );
 
-        // --- Handover & Feedback ---
-        Route::post('/handovers/{handover}/items', [\App\Http\Controllers\HandoverController::class , 'storeChecklistItem'])->name('handover.item.store');
-        Route::patch('/handover-items/{item}', [\App\Http\Controllers\HandoverController::class , 'updateChecklistStatus'])->name('handover.item.update');
-        Route::post('/clients/{client}/handover/complete', [\App\Http\Controllers\HandoverController::class , 'completeHandover'])->name('handover.complete');
-        Route::post('/clients/{client}/feedback', [\App\Http\Controllers\HandoverController::class , 'storeFeedback'])->name('feedback.store');
+        // --- Daily Reports (DPR) ---
+        Route::get('/clients/{client}/reports', [\App\Http\Controllers\DailyReportController::class , 'index'])->name('reports.index');
+        Route::post('/clients/{client}/reports', [\App\Http\Controllers\DailyReportController::class , 'store'])->name('reports.store');
+        Route::put('/reports/{report}', [\App\Http\Controllers\DailyReportController::class , 'update'])->name('reports.update');
+        Route::delete('/reports/{report}', [\App\Http\Controllers\DailyReportController::class , 'destroy'])->name('reports.destroy');
 
-        // --- Scope of Work ---
-        Route::post('/clients/{client}/scope', [\App\Http\Controllers\ScopeOfWorkController::class , 'store'])->name('scope.store');
-        Route::post('/scope/{scope}/item', [\App\Http\Controllers\ScopeOfWorkController::class , 'storeItem'])->name('scope.item.store');
+        // --- Task Management ---
+        Route::get('/tasks', [\App\Http\Controllers\TaskManagementController::class , 'index'])->name('tasks.index');
+        Route::patch('/tasks/{task}/status', [\App\Http\Controllers\TaskManagementController::class , 'updateStatus'])->name('tasks.status.update');
+
+        // --- Handover & Feedback --- (Restricted from sales)
+        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            Route::post('/handovers/{handover}/items', [\App\Http\Controllers\HandoverController::class , 'storeChecklistItem'])->name('handover.item.store');
+            Route::patch('/handover-items/{item}', [\App\Http\Controllers\HandoverController::class , 'updateChecklistStatus'])->name('handover.item.update');
+            Route::post('/clients/{client}/handover/complete', [\App\Http\Controllers\HandoverController::class , 'completeHandover'])->name('handover.complete');
+            Route::post('/clients/{client}/feedback', [\App\Http\Controllers\HandoverController::class , 'storeFeedback'])->name('feedback.store');
+        }
+        );
+
+        // --- Scope of Work --- (Restricted from sales)
+        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            Route::post('/clients/{client}/scope', [\App\Http\Controllers\ScopeOfWorkController::class , 'store'])->name('scope.store');
+            Route::post('/scope/{scope}/item', [\App\Http\Controllers\ScopeOfWorkController::class , 'storeItem'])->name('scope.item.store');
+        }
+        );
 
         Route::get('/test-notification', function () {
             auth()->user()->notify(new \App\Notifications\SystemTestNotification('Test Notification at ' . now()->format('h:i A')));
@@ -140,7 +199,43 @@ Route::middleware(['auth'])->group(function () {
             return back();
         }
         )->name('notifications.markAllRead');
-    });
+
+
+        // --- Lead Management ---
+        Route::middleware('role:admin,editor,sales')->group(function () {
+            Route::get('/leads', [\App\Http\Controllers\LeadController::class , 'index'])->name('leads.index');
+            Route::get('/pipeline', [\App\Http\Controllers\PipelineController::class , 'index'])->name('pipeline.index');
+            Route::post('/leads', [\App\Http\Controllers\LeadController::class , 'store'])->name('leads.store');
+            Route::put('/leads/{lead}', [\App\Http\Controllers\LeadController::class , 'update'])->name('leads.update');
+            Route::patch('/leads/{lead}/status', [\App\Http\Controllers\LeadController::class , 'updateStatus'])->name('leads.updateStatus');
+            Route::post('/leads/{lead}/note', [\App\Http\Controllers\LeadController::class , 'addNote'])->name('leads.addNote');
+            Route::post('/leads/{lead}/follow-up', [\App\Http\Controllers\LeadController::class , 'setFollowUp'])->name('leads.setFollowUp');
+            Route::delete('/leads/{lead}', [\App\Http\Controllers\LeadController::class , 'destroy'])->name('leads.destroy');
+            Route::post('/leads/sync', [\App\Http\Controllers\LeadController::class , 'sync'])->name('leads.sync');
+        }
+        );
+
+        // --- Lead & Project Pitch Module (Plug-in) ---
+        if (env('PITCH_MODULE_ENABLED', false)) {
+            Route::middleware(['auth'])->prefix('pitch')->name('pitch.')->group(function () {
+                    Route::get('/leads', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'index'])->name('leads.index');
+                    Route::get('/leads/create', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'create'])->name('leads.create');
+                    Route::post('/leads', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'store'])->name('leads.store');
+                    Route::get('/leads/{lead}', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'show'])->name('leads.show');
+                    Route::patch('/leads/{lead}/status', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'updateStatus'])->name('leads.updateStatus');
+                    Route::post('/leads/{lead}/sites', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'storeSite'])->name('leads.sites.store');
+                    Route::post('/leads/{lead}/visits', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'storeVisit'])->name('leads.visits.store');
+                    Route::post('/leads/{lead}/convert', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'convert'])->name('leads.convert');
+
+                    // Design & Concept Routes
+                    Route::post('/leads/{lead}/concepts', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'storeDesignConcept'])->name('leads.concepts.store');
+                    Route::post('/concepts/{concept}/assets', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'storeDesignAsset'])->name('concepts.assets.store');
+                    Route::post('/assets/{asset}/feedback', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'storeDesignFeedback'])->name('assets.feedback.store');
+                    Route::patch('/concepts/{concept}/status', [\App\Http\Controllers\Pitch\PitchLeadController::class , 'updateDesignStatus'])->name('concepts.updateStatus');
+                }
+                );
+            }
+        });
 
 
 require __DIR__ . '/auth.php';

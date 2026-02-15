@@ -312,7 +312,8 @@
                                 <p class="text-[13px] font-black text-ui-primary dark:text-white">{{
                                     $quote->quotation_number }}</p>
                                 <p class="text-[10px] text-ui-muted font-bold uppercase tracking-widest mt-0.5">₹{{
-                                    number_format($quote->total_amount) }} • {{ $quote->client->first_name }}</p>
+                                    number_format($quote->total_amount) }} • {{ $quote->client ?
+                                    $quote->client->first_name : ($quote->lead ? $quote->lead->name : 'Unknown') }}</p>
                             </div>
                         </div>
                         <span

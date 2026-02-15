@@ -22,6 +22,11 @@ class Attendance extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     // Helper calculate hours worked
     public function getDurationAttribute()
     {

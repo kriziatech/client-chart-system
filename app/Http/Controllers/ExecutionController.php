@@ -16,6 +16,9 @@ class ExecutionController extends Controller
      */
     public function storeDPR(Request $request, Client $client)
     {
+        if (auth()->user()->isViewer() && $client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $request->validate([
             'content' => 'required|string',
             'report_date' => 'required|date',
@@ -46,6 +49,9 @@ class ExecutionController extends Controller
      */
     public function storeChangeRequest(Request $request, Client $client)
     {
+        if (auth()->user()->isViewer() && $client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -68,6 +74,9 @@ class ExecutionController extends Controller
      */
     public function updateChangeRequestStatus(Request $request, ChangeRequest $changeRequest)
     {
+        if (auth()->user()->isViewer() && $changeRequest->client->user_id !== auth()->id()) {
+            abort(403);
+        }
         $request->validate(['status' => 'required|in:approved,rejected']);
 
         $changeRequest->update([

@@ -48,6 +48,10 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        if ($user->isViewer()) {
+            return Redirect::route('profile.edit')->with('error', 'Viewer accounts cannot be terminated directly. Please contact your assigned Project Manager.');
+        }
+
         Auth::logout();
 
         $user->delete();
