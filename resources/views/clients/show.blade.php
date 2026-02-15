@@ -23,74 +23,73 @@ $riskLevel = $risk['level'];
 $riskScore = $risk['score'];
 
 // Journey Mapping (8 Stages)
-$currentJourneyStage = $client->journey_stage;
+$currentJourneyStage = (int) $client->journey_stage;
 $journeyStageName = match($currentJourneyStage) {
-1 => 'New Client',
-2 => 'Site Visit',
-3 => 'Quotation',
-4 => 'Credit',
-5 => 'Work Assigned',
-6 => 'Timeline',
-7 => 'Work Completed',
-8 => 'Final Payment',
-default => 'New Client'
+    1 => 'New Client',
+    2 => 'Site Visit',
+    3 => 'Quotation',
+    4 => 'Credit',
+    5 => 'Work Assigned',
+    6 => 'Timeline',
+    7 => 'Work Completed',
+    8 => 'Final Payment',
+    default => 'New Client',
 };
 
 $journeyColor = match($currentJourneyStage) {
-8 => 'green',
-7 => 'green',
-default => ($riskScore > 60 ? 'red' : 'blue')
+    8 => 'green',
+    7 => 'green',
+    default => ($riskScore > 60 ? 'red' : 'blue'),
 };
 
 $journeyProgress = ($currentJourneyStage / 8) * 100;
 
 $journeyNextStep = match($currentJourneyStage) {
-1 => 'Schedule a site visit to understand requirements.',
-2 => 'Create a BOQ (Quotation) for the client.',
-3 => 'Follow up for advance payment (Credit).',
-4 => 'Assign team and create initial tasks.',
-5 => 'Lock the project timeline/delivery date.',
-6 => 'Monitor execution and daily DPRs.',
-7 => 'Collect final payment and initiate handover.',
-8 => 'Project successfully closed. Collect feedback.',
-default => 'Proceed to next phase.'
+    1 => 'Schedule a site visit to understand requirements.',
+    2 => 'Create a BOQ (Quotation) for the client.',
+    3 => 'Follow up for advance payment (Credit).',
+    4 => 'Assign team and create initial tasks.',
+    5 => 'Lock the project timeline/delivery date.',
+    6 => 'Monitor execution and daily DPRs.',
+    7 => 'Collect final payment and initiate handover.',
+    8 => 'Project successfully closed. Collect feedback.',
+    default => 'Proceed to next phase.',
 };
 
 $ctaLabel = match($currentJourneyStage) {
-1 => 'Set Site Info',
-2 => 'Create BOQ',
-3 => 'View Estimates',
-4 => 'Assign Team',
-5 => 'Set Timeline',
-6 => 'Track Execution',
-7 => 'Collect Final',
-8 => 'Issue Handover',
-default => 'Next Step'
+    1 => 'Set Site Info',
+    2 => 'Create BOQ',
+    3 => 'View Estimates',
+    4 => 'Assign Team',
+    5 => 'Set Timeline',
+    6 => 'Track Execution',
+    7 => 'Collect Final',
+    8 => 'Issue Handover',
+    default => 'Next Step',
 };
 
-$ctaAction = match((int)$currentJourneyStage) {
-1 => "activeTab = 'overview'",
-2 => "activeTab = 'quotations'",
-3 => "activeTab = 'quotations'",
-4 => "activeTab = 'tasks'",
-5 => "activeTab = 'overview'", // Stage 5: Set Timeline (Timeline is in Overview)
-6 => "window.location = '" . route('reports.index', $client->id) . "'", // Stage 6: Track Execution (Navigate to Reports)
-7 => "activeTab = 'payments'",
-8 => "activeTab = 'handover'",
-default => "activeTab = 'overview'"
+$ctaAction = match($currentJourneyStage) {
+    1 => "activeTab = 'overview'",
+    2 => "activeTab = 'quotations'",
+    3 => "activeTab = 'quotations'",
+    4 => "activeTab = 'tasks'",
+    5 => "activeTab = 'overview'",
+    6 => "window.location = '" . route('reports.index', $client->id) . "'",
+    7 => "activeTab = 'payments'",
+    8 => "activeTab = 'handover'",
+    default => "activeTab = 'overview'",
 };
 
-$initialTab = match((int)$currentJourneyStage) {
-1, 2 => 'overview',
-3 => 'quotations',
-4 => 'payments',
-5 => 'overview', // Current stage is Set Timeline
-6 => 'tasks', // Current stage is Track Execution
-7 => 'payments',
-8 => 'handover',
-default => 'overview'
+$initialTab = match($currentJourneyStage) {
+    1, 2 => 'overview',
+    3 => 'quotations',
+    4 => 'payments',
+    5 => 'overview',
+    6 => 'tasks',
+    7 => 'payments',
+    8 => 'handover',
+    default => 'overview',
 };
-
 @endphp
 
 <div class="animate-in fade-in slide-in-from-bottom-4 duration-700" x-data="{ activeTab: '{{ $initialTab }}' }"
