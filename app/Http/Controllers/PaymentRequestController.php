@@ -28,7 +28,7 @@ class PaymentRequestController extends Controller
         $quotations = [];
 
         if ($selectedClientId) {
-            $quotations = \App\Models\Quotation::where('client_id', $selectedClientId)->where('status', 'approved')->get();
+            $quotations = \App\Models\Quotation::where('client_id', $selectedClientId)->whereIn('status', ['approved', 'accepted'])->get();
         }
 
         return view('payment-requests.create', compact('clients', 'selectedClientId', 'quotations'));

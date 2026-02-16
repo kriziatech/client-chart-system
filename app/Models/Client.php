@@ -64,7 +64,7 @@ class Client extends Model
 
     public function getTotalBudgetAttribute()
     {
-        return $this->quotations()->where('status', 'approved')->sum('total_amount');
+        return $this->quotations()->whereIn('status', ['approved', 'accepted'])->sum('total_amount');
     }
 
     public function getOutstandingBalanceAttribute()
