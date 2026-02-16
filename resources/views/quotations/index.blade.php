@@ -104,8 +104,8 @@
                         <div>
                             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Total Amount
                             </p>
-                            <p class="text-xl font-black text-brand-600 dark:text-brand-400">₹{{
-                                @indian_format($quotation->total_amount)</p>
+                            <p class="text-xl font-black text-brand-600 dark:text-brand-400">
+                                ₹@indian_format($quotation->total_amount)</p>
                         </div>
                         <div class="text-right">
                             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Issued On</p>

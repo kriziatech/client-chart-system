@@ -26,7 +26,7 @@
             <span class="text-[10px] font-black text-white/60 uppercase tracking-[2px] block mb-2">Aggregate
                 Revenue</span>
             <div class="text-3xl font-black text-white tracking-tight">₹@indian_format($globalStats['total_revenue'])
-                }}</div>
+            </div>
             <div class="mt-4 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span class="text-[10px] font-bold text-white/40 uppercase">Payments Realized</span>
@@ -37,8 +37,8 @@
             class="bg-white dark:bg-dark-surface p-8 rounded-[2.5rem] border border-slate-100 dark:border-dark-border shadow-premium group">
             <span class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] block mb-2">Direct
                 Expenses</span>
-            <div class="text-3xl font-black text-rose-500 tracking-tight">₹{{
-                @indian_format($globalStats['total_expenses'])</div>
+            <div class="text-3xl font-black text-rose-500 tracking-tight">
+                ₹@indian_format($globalStats['total_expenses'])</div>
             <div class="mt-4 h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div class="bg-rose-500 h-full w-[45%]"></div>
             </div>
@@ -48,8 +48,8 @@
             class="bg-white dark:bg-dark-surface p-8 rounded-[2.5rem] border border-slate-100 dark:border-dark-border shadow-premium">
             <span class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] block mb-2">Material
                 Value</span>
-            <div class="text-3xl font-black text-amber-500 tracking-tight">₹{{
-                @indian_format($globalStats['total_material'])</div>
+            <div class="text-3xl font-black text-amber-500 tracking-tight">
+                ₹@indian_format($globalStats['total_material'])</div>
             <p class="text-[10px] text-slate-400 mt-4 font-bold uppercase tracking-widest">Inventory Dispatched</p>
         </div>
 
@@ -57,8 +57,8 @@
             class="bg-white dark:bg-dark-surface p-8 rounded-[2.5rem] border-2 border-brand-500 shadow-premium group hover:bg-brand-50/30 transition-colors">
             <span class="text-[10px] font-black text-brand-600 uppercase tracking-[2px] block mb-2">Net Portfolio
                 Profit</span>
-            <div class="text-3xl font-black text-brand-600 tracking-tight">₹{{
-                @indian_format($globalStats['total_profit'])</div>
+            <div class="text-3xl font-black text-brand-600 tracking-tight">₹@indian_format($globalStats['total_profit'])
+            </div>
             <div class="mt-4 flex items-center gap-2">
                 <span class="text-[10px] font-black text-brand-400 uppercase tracking-widest">Margin Analysis 📈</span>
             </div>
@@ -112,8 +112,8 @@
                         </td>
                         <td class="py-6 px-8 text-sm font-bold text-rose-500">₹@indian_format($data['expenses'])
                         </td>
-                        <td class="py-6 px-8 text-sm font-bold text-amber-500">₹{{
-                            @indian_format($data['material_costs'])</td>
+                        <td class="py-6 px-8 text-sm font-bold text-amber-500">₹@indian_format($data['material_costs'])
+                        </td>
                         <td class="py-6 px-10 text-right">
                             <span
                                 class="text-lg font-black {{ $data['profit'] >= 0 ? 'text-brand-600' : 'text-rose-600' }}">

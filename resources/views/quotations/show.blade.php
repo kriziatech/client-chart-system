@@ -180,13 +180,13 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Rate</p>
-                                    <p class="text-sm text-gray-900 dark:text-white font-medium">₹{{
-                                        @indian_format($item->rate)</p>
+                                    <p class="text-sm text-gray-900 dark:text-white font-medium">
+                                        ₹@indian_format($item->rate)</p>
                                 </div>
                                 <div class="text-right w-24">
                                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Amount</p>
-                                    <p class="text-sm text-brand-600 dark:text-brand-400 font-boldital">₹{{
-                                        @indian_format($item->amount)</p>
+                                    <p class="text-sm text-brand-600 dark:text-brand-400 font-boldital">
+                                        ₹@indian_format($item->amount)</p>
                                 </div>
                             </div>
                         </div>
@@ -213,8 +213,8 @@
                             </div>
                             <div class="flex justify-between pt-3 border-t border-gray-300 dark:border-gray-600">
                                 <span class="font-bold text-gray-900 dark:text-white">Total Amount</span>
-                                <span class="font-black text-xl text-brand-600 dark:text-brand-400">₹{{
-                                    @indian_format($quotation->total_amount)</span>
+                                <span
+                                    class="font-black text-xl text-brand-600 dark:text-brand-400">₹@indian_format($quotation->total_amount)</span>
                             </div>
                         </div>
                     </div>
