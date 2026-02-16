@@ -1208,7 +1208,59 @@ default => 'overview',
     </div>
 </div>
 @endif
+
+{{-- 4. Add Material Payment Modal --}}
+<div id="material-payment-modal"
+    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div
+        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 dark:border-dark-border">
+        <div
+            class="px-8 py-5 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display">Record Payment</h3>
+            <button onclick="document.getElementById('material-payment-modal').classList.add('hidden')"
+                class="text-slate-400 hover:text-slate-600 transition">&times;</button>
+        </div>
+        <form action="{{ route('finance.material-payment.store', $client) }}" method="POST" class="p-8 space-y-5">
+            @csrf
+            <input type="hidden" name="material_inward_id" id="modal_inward_id">
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Paying
+                    To</label>
+                <input type="text" id="modal_supplier_name" readonly
+                    class="w-full bg-slate-100 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-slate-500 font-bold">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
+                    <input type="date" name="payment_date" required value="{{ date('Y-m-d') }}"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Amount</label>
+                    <input type="number" step="0.01" name="amount_paid" id="modal_pending_amount" required
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                </div>
+            </div>
+            <button type="submit"
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-emerald-500/20 transition">
+                Confirm Payment
+            </button>
+        </form>
+    </div>
+</div>
 @endif
 
 </div>
+
+<script>
+    function openMaterialPaymentModal(id, supplier, pending) {
+        document.getElementById('modal_inward_id').value = id;
+        document.getElementById('modal_supplier_name').value = supplier;
+        document.getElementById('modal_pending_amount').value = pending;
+        document.getElementById('material-payment-modal').classList.remove('hidden');
+    }
+</script>
+
 @endsection
