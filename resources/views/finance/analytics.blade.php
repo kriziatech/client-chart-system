@@ -34,8 +34,9 @@
         </div>
         <div
             class="p-6 rounded-[2rem] border-2 border-brand-600 shadow-xl shadow-brand-500/10 {{ $netProfit >= 0 ? 'bg-brand-50/50' : 'bg-red-50' }}">
-            <span class="text-[10px] font-black text-brand-600 uppercase tracking-[2px] block mb-2">Net Project
-                Profit</span>
+            <span class="text-[10px] font-black text-brand-600 uppercase tracking-[2px] block mb-2">
+                {{ $netProfit >= 0 ? 'Net Project Profit' : 'Net Project Loss' }}
+            </span>
             <div class="text-3xl font-black {{ $netProfit >= 0 ? 'text-brand-600' : 'text-red-600' }} tracking-tight">
                 ₹{{ number_format($netProfit) }}</div>
             <div class="text-[10px] font-bold uppercase mt-2 {{ $netProfit >= 0 ? 'text-brand-400' : 'text-red-400' }}">
