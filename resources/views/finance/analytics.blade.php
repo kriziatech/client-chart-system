@@ -18,18 +18,18 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="bg-white dark:bg-dark-surface p-6 rounded-[2rem] border border-ui-border shadow-premium">
             <span class="text-[10px] font-black text-ui-muted uppercase tracking-[2px] block mb-2">Total Revenue</span>
-            <div class="text-2xl font-black text-ui-success tracking-tight">₹{{ number_format($totalRevenue) }}</div>
+            <div class="text-2xl font-black text-ui-success tracking-tight">₹@indian_format($totalRevenue)</div>
             <p class="text-[10px] text-ui-muted mt-2 font-bold uppercase">Payments Received</p>
         </div>
         <div class="bg-white dark:bg-dark-surface p-6 rounded-[2rem] border border-ui-border shadow-premium">
             <span class="text-[10px] font-black text-ui-muted uppercase tracking-[2px] block mb-2">Operational
                 Costs</span>
-            <div class="text-2xl font-black text-ui-danger tracking-tight">₹{{ number_format($totalExpenses) }}</div>
+            <div class="text-2xl font-black text-ui-danger tracking-tight">₹@indian_format($totalExpenses)</div>
             <p class="text-[10px] text-ui-muted mt-2 font-bold uppercase">Labor & Site Costs</p>
         </div>
         <div class="bg-white dark:bg-dark-surface p-6 rounded-[2rem] border border-ui-border shadow-premium">
             <span class="text-[10px] font-black text-ui-muted uppercase tracking-[2px] block mb-2">Material Costs</span>
-            <div class="text-2xl font-black text-amber-600 tracking-tight">₹{{ number_format($materialCosts) }}</div>
+            <div class="text-2xl font-black text-amber-600 tracking-tight">₹@indian_format($materialCosts)</div>
             <p class="text-[10px] text-ui-muted mt-2 font-bold uppercase">Inventory Dispatched</p>
         </div>
         <div
@@ -38,7 +38,7 @@
                 {{ $netProfit >= 0 ? 'Net Project Profit' : 'Net Project Loss' }}
             </span>
             <div class="text-3xl font-black {{ $netProfit >= 0 ? 'text-brand-600' : 'text-red-600' }} tracking-tight">
-                ₹{{ number_format($netProfit) }}</div>
+                ₹@indian_format($netProfit)</div>
             <div class="text-[10px] font-bold uppercase mt-2 {{ $netProfit >= 0 ? 'text-brand-400' : 'text-red-400' }}">
                 Margin Analysis </div>
         </div>
@@ -108,7 +108,7 @@
                                 }}</span>
                         </div>
                     </div>
-                    <div class="text-sm font-black text-ui-danger">- ₹{{ number_format($expense->amount) }}</div>
+                    <div class="text-sm font-black text-ui-danger">- ₹@indian_format($expense->amount)</div>
                 </div>
                 @empty
                 <div class="text-center py-20 bg-slate-50/50 rounded-3xl border-2 border-dashed border-ui-border">

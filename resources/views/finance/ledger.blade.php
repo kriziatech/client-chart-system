@@ -54,19 +54,19 @@
     <div class="grid grid-cols-4 gap-6 mb-12">
         <div class="p-6 bg-slate-100 rounded-2xl border border-slate-200">
             <div class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Total Received</div>
-            <div class="text-3xl font-black text-slate-900">₹{{ number_format($client->total_client_received) }}</div>
+            <div class="text-3xl font-black text-slate-900">₹@indian_format($client->total_client_received)</div>
         </div>
         <div class="p-6 bg-slate-100 rounded-2xl border border-slate-200">
             <div class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Total Vendor Paid</div>
-            <div class="text-3xl font-black text-rose-600">₹{{ number_format($client->total_vendor_paid) }}</div>
+            <div class="text-3xl font-black text-rose-600">₹@indian_format($client->total_vendor_paid)</div>
         </div>
         <div class="p-6 bg-slate-100 rounded-2xl border border-slate-200">
             <div class="text-xs font-black uppercase tracking-widest text-slate-400 mb-1">Total Material Cost</div>
-            <div class="text-3xl font-black text-amber-600">₹{{ number_format($client->total_material_cost) }}</div>
+            <div class="text-3xl font-black text-amber-600">₹@indian_format($client->total_material_cost)</div>
         </div>
         <div class="p-6 border-2 border-emerald-500 bg-emerald-50 rounded-2xl">
             <div class="text-xs font-black uppercase tracking-widest text-emerald-600 mb-1">Net Profit</div>
-            <div class="text-3xl font-black text-emerald-700">₹{{ number_format($client->real_time_profit) }}</div>
+            <div class="text-3xl font-black text-emerald-700">₹@indian_format($client->real_time_profit)</div>
         </div>
     </div>
 
@@ -87,12 +87,12 @@
                 <tr>
                     <td class="p-3">{{ $pay->date->format('d M, Y') }}</td>
                     <td class="p-3">#PAY-{{ $pay->id }}</td>
-                    <td class="p-3 text-right font-bold">₹{{ number_format($pay->amount) }}</td>
+                    <td class="p-3 text-right font-bold">₹@indian_format($pay->amount)</td>
                 </tr>
                 @endforeach
                 <tr class="bg-emerald-50 font-bold">
                     <td class="p-3" colspan="2">Total Received</td>
-                    <td class="p-3 text-right">₹{{ number_format($client->total_client_received) }}</td>
+                    <td class="p-3 text-right">₹@indian_format($client->total_client_received)</td>
                 </tr>
             </tbody>
         </table>
@@ -117,12 +117,12 @@
                     <td class="p-3">{{ $pay->payment_date->format('d M, Y') }}</td>
                     <td class="p-3 font-bold">{{ $pay->vendor->name ?? 'Unknown' }}</td>
                     <td class="p-3">{{ $pay->work_type }}</td>
-                    <td class="p-3 text-right font-bold">₹{{ number_format($pay->amount) }}</td>
+                    <td class="p-3 text-right font-bold">₹@indian_format($pay->amount)</td>
                 </tr>
                 @endforeach
                 <tr class="bg-rose-50 font-bold text-rose-900">
                     <td class="p-3" colspan="3">Total Vendor Paid</td>
-                    <td class="p-3 text-right">₹{{ number_format($client->total_vendor_paid) }}</td>
+                    <td class="p-3 text-right">₹@indian_format($client->total_vendor_paid)</td>
                 </tr>
             </tbody>
         </table>
@@ -150,13 +150,13 @@
                     <td class="p-3 font-bold">{{ $inward->supplier_name }}</td>
                     <td class="p-3">{{ $inward->item_name }}</td>
                     <td class="p-3 text-right">{{ $inward->quantity + 0 }} {{ $inward->unit }}</td>
-                    <td class="p-3 text-right">₹{{ number_format($inward->rate) }}</td>
-                    <td class="p-3 text-right font-bold">₹{{ number_format($inward->total_amount) }}</td>
+                    <td class="p-3 text-right">₹@indian_format($inward->rate)</td>
+                    <td class="p-3 text-right font-bold">₹@indian_format($inward->total_amount)</td>
                 </tr>
                 @endforeach
                 <tr class="bg-amber-50 font-bold text-amber-900">
                     <td class="p-3" colspan="5">Total Material Cost</td>
-                    <td class="p-3 text-right">₹{{ number_format($client->total_material_cost) }}</td>
+                    <td class="p-3 text-right">₹@indian_format($client->total_material_cost)</td>
                 </tr>
             </tbody>
         </table>
