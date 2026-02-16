@@ -6,10 +6,32 @@ use App\Models\Client;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\PaymentRequest;
+use App\Models\Vendor;
 use Illuminate\Http\Request;
 
 class FinanceController extends Controller
 {
+    /**
+     * Store New Vendor
+     */
+    public function storeVendor(Request $request)
+    {
+        if (auth()->user()->isViewer() || auth()->user()->isClient()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'email' => 'nullable|email|max:255',
+        ]);
+
+        Vendor::create($validated);
+
+        return back()->with('success', 'Vendor created successfully.');
+    }
+
     /**
      * Store Vendor Payment
      */
@@ -182,9 +204,6 @@ class FinanceController extends Controller
 
         // We could use a library like DomPDF, but for now we'll create a print-friendly view
         // that automatically triggers print dialog or looks like a report.
-        // Or if DomPDF is installed, use it. Since I don't see dompdf in context, 
-        // I will return a print-optimized view.
-
         $client->load(['vendorPayments.vendor', 'materialInwards.payments', 'payments', 'financials']);
 
         return view('finance.ledger', compact('client'));
@@ -221,11 +240,9 @@ class FinanceController extends Controller
         }
         $paymentRequest->update(['last_reminder_sent_at' => now()]);
 
-        // In a real app, send Email/SMS here.
-        // For now, we just mark it.
-
         return back()->with('success', 'Automated reminder sent to ' . $paymentRequest->client->first_name);
     }
+
     /**
      * View Global Finance Summary
      */

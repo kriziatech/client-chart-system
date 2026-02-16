@@ -896,10 +896,16 @@ default => 'overview',
             <div class="flex items-center justify-between mt-12">
                 <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display uppercase tracking-widest">
                     Vendor Ledger</h3>
-                <button onclick="document.getElementById('vendor-payment-modal').classList.remove('hidden')"
-                    class="bg-slate-900 hover:bg-black text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition shadow-lg">
-                    Record Vendor Payment
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="document.getElementById('add-vendor-modal').classList.remove('hidden')"
+                        class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-brand-500/20">
+                        Add Vendor
+                    </button>
+                    <button onclick="document.getElementById('vendor-payment-modal').classList.remove('hidden')"
+                        class="bg-slate-900 hover:bg-black text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition shadow-lg">
+                        Record Vendor Payment
+                    </button>
+                </div>
             </div>
             <div
                 class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
@@ -1319,41 +1325,44 @@ default => 'overview',
         </div>
         <form action="{{ route('finance.vendor.store', $client) }}" method="POST" class="p-8 space-y-5">
             @csrf
-            <div>
-                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Vendor</label>
-                <select name="vendor_id" required
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                    @foreach(App\Models\Vendor::all() as $v)
-                    <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->category }})</option>
-                    @endforeach
-                </select>
+            <div class="flex justify-between items-center mb-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Select
+                    Vendor</label>
+                <button type="button" onclick="document.getElementById('add-vendor-modal').classList.remove('hidden')"
+                    class="text-[9px] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-wider">+ Add New
+                    Vendor</button>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label
-                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
-                    <input type="date" name="payment_date" required
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                </div>
-                <div>
-                    <label
-                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Amount</label>
-                    <input type="number" step="0.01" name="amount" required
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                </div>
-            </div>
-            <div>
-                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Work Type /
-                    Description</label>
-                <input type="text" name="work_type" required placeholder="E.g. Kitchen electrical labor advance"
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-            </div>
-            <button type="submit"
-                class="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
-                Record Payment
-            </button>
-        </form>
+            <select name="vendor_id" required
+                class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                @foreach(App\Models\Vendor::all() as $v)
+                <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->category }})</option>
+                @endforeach
+            </select>
     </div>
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
+            <input type="date" name="payment_date" required
+                class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+        </div>
+        <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Amount</label>
+            <input type="number" step="0.01" name="amount" required
+                class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+        </div>
+    </div>
+    <div>
+        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Work Type /
+            Description</label>
+        <input type="text" name="work_type" required placeholder="E.g. Kitchen electrical labor advance"
+            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+    </div>
+    <button type="submit"
+        class="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
+        Record Payment
+    </button>
+    </form>
+</div>
 </div>
 
 {{-- 3. Profit Lock Confirm Modal --}}
