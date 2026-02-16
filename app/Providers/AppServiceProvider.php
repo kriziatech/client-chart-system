@@ -27,9 +27,12 @@ class AppServiceProvider extends ServiceProvider
                 \$value = (float)trim(\$parts[0]);
                 \$decimals = isset(\$parts[1]) ? (int)trim(\$parts[1]) : 0;
                 
-                \$num = floor(\$value);
-                if (\$num < 1000) {
-                    echo number_format(\$value, \$decimals);
+                \$sign = \$value < 0 ? '-' : '';
+                \$abs_value = abs(\$value);
+                \$num = (string)floor(\$abs_value);
+                
+                if (floor(\$abs_value) < 1000) {
+                    echo \$sign . number_format(\$abs_value, \$decimals);
                 } else {
                     \$lastThree = substr(\$num, -3);
                     \$remaining = substr(\$num, 0, -3);
@@ -37,11 +40,11 @@ class AppServiceProvider extends ServiceProvider
                     \$main = \$remaining . \",\" . \$lastThree;
                     
                     if (\$decimals > 0) {
-                        \$formatted = number_format(\$value, \$decimals);
+                        \$formatted = number_format(\$abs_value, \$decimals);
                         \$dec = substr(\$formatted, strpos(\$formatted, '.'));
-                        echo \$main . \$dec;
+                        echo \$sign . \$main . \$dec;
                     } else {
-                        echo \$main;
+                        echo \$sign . \$main;
                     }
                 }
             ?>";
