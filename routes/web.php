@@ -162,6 +162,7 @@ Route::middleware(['auth'])->group(function () {
 
             // Financial Control Room Routes
             Route::post('/clients/{client}/vendor-payments', [\App\Http\Controllers\FinanceController::class , 'storeVendorPayment'])->name('finance.vendor.store');
+            Route::post('/clients/{client}/client-payments', [\App\Http\Controllers\FinanceController::class , 'storeClientPayment'])->name('finance.client.payment.store');
             Route::post('/clients/{client}/material-inwards', [\App\Http\Controllers\FinanceController::class , 'storeMaterialInward'])->name('finance.material-inward.store');
             Route::post('/clients/{client}/material-payments', [\App\Http\Controllers\FinanceController::class , 'storeMaterialPayment'])->name('finance.material-payment.store');
             Route::post('/clients/{client}/profit-lock', [\App\Http\Controllers\FinanceController::class , 'toggleLock'])->name('finance.profit.lock');

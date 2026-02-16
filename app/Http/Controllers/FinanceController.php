@@ -40,6 +40,37 @@ class FinanceController extends Controller
     }
 
     /**
+     * Store Direct Client Payment
+     */
+    public function storeClientPayment(Request $request, Client $client)
+    {
+        if (auth()->user()->isViewer() || auth()->user()->isClient()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'date' => 'required|date',
+            'payment_method' => 'required|string',
+            'purpose' => 'nullable|string'
+        ]);
+
+        $receiptNumber = 'REC-' . date('Ymd') . '-' . strtoupper(\Illuminate\Support\Str::random(4));
+
+        \App\Models\Payment::create([
+            'client_id' => $client->id,
+            'receipt_number' => $receiptNumber,
+            'name' => auth()->user()->name,
+            'amount' => $request->amount,
+            'date' => $request->date,
+            'purpose' => $request->purpose ?? 'Direct Payment',
+            'payment_method' => $request->payment_method,
+        ]);
+
+        return back()->with('success', 'Client payment recorded successfully.');
+    }
+
+    /**
      * Store Material Inward (Bill Entry)
      */
     public function storeMaterialInward(Request $request, Client $client)

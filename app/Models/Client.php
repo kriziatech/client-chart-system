@@ -62,6 +62,16 @@ class Client extends Model
         return $this->materialPayments()->sum('amount_paid');
     }
 
+    public function getTotalBudgetAttribute()
+    {
+        return $this->quotations()->where('status', 'approved')->sum('total_amount');
+    }
+
+    public function getOutstandingBalanceAttribute()
+    {
+        return $this->total_budget - $this->total_client_received;
+    }
+
     public function getRealTimeProfitAttribute()
     {
         return $this->total_client_received - ($this->total_vendor_paid + $this->total_material_cost);

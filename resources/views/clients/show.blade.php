@@ -803,7 +803,49 @@ default => 'overview',
         {{-- 5. Financials Tab --}}
         <div x-show="activeTab === 'payments'" x-cloak class="animate-in fade-in duration-500 space-y-8">
             {{-- Capital Management --}}
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Capital Management</h3>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Capital Management</h3>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Client Cash Flow &
+                        Budget Tracking</p>
+                </div>
+                @if(!auth()->user()->isViewer() && !auth()->user()->isClient())
+                <button onclick="document.getElementById('client-payment-modal').classList.remove('hidden')"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-emerald-500/20">
+                    Record Client Payment
+                </button>
+                @endif
+            </div>
+
+            {{-- Summary Cards --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div
+                    class="bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Total
+                        Project Budget</span>
+                    <div class="text-2xl font-black text-slate-900 dark:text-white">₹{{
+                        number_format($client->total_budget) }}</div>
+                    <div class="text-[9px] font-bold text-slate-400 uppercase mt-2">Sum of approved quotations</div>
+                </div>
+                <div
+                    class="bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Total
+                        Received</span>
+                    <div class="text-2xl font-black text-emerald-600">₹{{ number_format($client->total_client_received)
+                        }}</div>
+                    <div class="text-[9px] font-bold text-slate-400 uppercase mt-2">Internal ledger credits</div>
+                </div>
+                <div
+                    class="bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Outstanding
+                        Balance</span>
+                    <div
+                        class="text-2xl font-black {{ $client->outstanding_balance > 0 ? 'text-amber-600' : 'text-slate-400' }}">
+                        ₹{{ number_format($client->outstanding_balance) }}</div>
+                    <div class="text-[9px] font-bold text-slate-400 uppercase mt-2">Amount yet to be paid</div>
+                </div>
+            </div>
+
             <div
                 class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
                 <table class="w-full text-left">
@@ -816,6 +858,9 @@ default => 'overview',
                                 class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
                                 Date</th>
                             <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Purpose</th>
+                            <th
                                 class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
                                 Amount</th>
                         </tr>
@@ -823,16 +868,22 @@ default => 'overview',
                     <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
                         @forelse($client->payments as $payment)
                         <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
-                            <td class="px-7 py-4 font-bold text-slate-900 dark:text-white text-[14px]">#PAY-{{
-                                $payment->id }}</td>
+                            <td class="px-7 py-4">
+                                <div class="font-bold text-slate-900 dark:text-white text-[14px]">#PAY-{{ $payment->id
+                                    }}</div>
+                                <div class="text-[10px] text-slate-400 font-black uppercase">{{ $payment->receipt_number
+                                    }}</div>
+                            </td>
                             <td class="px-7 py-4 text-[14px] text-slate-500 font-medium">{{ $payment->date ?
                                 $payment->date->format('d M, Y') : '-' }}</td>
+                            <td class="px-7 py-4 text-[13px] text-slate-600 dark:text-slate-400 font-bold">{{
+                                $payment->purpose }}</td>
                             <td class="px-7 py-4 text-right font-bold text-emerald-600 text-[15px]">₹{{
                                 number_format($payment->amount) }}</td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="3" class="px-7 py-12 text-center text-slate-400 italic">No payment logs
+                            <td colspan="4" class="px-7 py-12 text-center text-slate-400 italic">No payment logs
                                 found.</td>
                         </tr>
                         @endforelse
@@ -1384,8 +1435,7 @@ default => 'overview',
 <script>
     function openMaterialPaymentModal(id, supplier, pending) {
         document.getElementById('modal_inward_id').value = id;
-        document.getElementById('modal_supplier_name').value = supplier;
-        document.getElementById('modal_pnt').value = pending;
+        document.getElementById('modal_supplier_name').value = document.getElementById('modal_pnt').value = pending;
         document.getElementById('material-payment-modal').classList.remove('hidden');
     }
 </script>
