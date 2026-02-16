@@ -824,8 +824,8 @@ default => 'overview',
                         <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
                             <td class="px-7 py-4 font-bold text-slate-900 dark:text-white text-[14px]">#PAY-{{
                                 $payment->id }}</td>
-                            <td class="px-7 py-4 text-[14px] text-slate-500 font-medium">{{ $payment->payment_date ?
-                                $payment->payment_date->format('d M, Y') : '-' }}</td>
+                            <td class="px-7 py-4 text-[14px] text-slate-500 font-medium">{{ $payment->date ?
+                                $payment->date->format('d M, Y') : '-' }}</td>
                             <td class="px-7 py-4 text-right font-bold text-emerald-600 text-[15px]">₹{{
                                 number_format($payment->amount) }}</td>
                         </tr>
@@ -1331,9 +1331,10 @@ default => 'overview',
                         <form action="{{ route('finance.profit.lock', $client) }}" method="POST">
                             @csrf
                             <div class="flex gap-3">
-                                <button type="button"d-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
-                                Record Payment
-                            </button>
+                                <button type="button" d-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold
+                                    uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
+                                    Record Payment
+                                </button>
                         </form>
                     </div>
                 </div>

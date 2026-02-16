@@ -85,7 +85,7 @@
             <tbody class="divide-y divide-slate-100">
                 @foreach($client->payments as $pay)
                 <tr>
-                    <td class="p-3">{{ $pay->payment_date->format('d M, Y') }}</td>
+                    <td class="p-3">{{ $pay->date->format('d M, Y') }}</td>
                     <td class="p-3">#PAY-{{ $pay->id }}</td>
                     <td class="p-3 text-right font-bold">₹{{ number_format($pay->amount) }}</td>
                 </tr>

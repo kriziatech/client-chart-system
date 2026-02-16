@@ -44,7 +44,7 @@ class DashboardController extends Controller
             $lastMonthEnd = now()->subMonth()->endOfMonth();
 
             $lastMonthRevenue = Payment::whereIn('client_id', $clientIds)
-                ->whereBetween('payment_date', [$lastMonthStart, $lastMonthEnd])
+                ->whereBetween('date', [$lastMonthStart, $lastMonthEnd])
                 ->sum('amount'); // revenue
         }
         else {
@@ -67,7 +67,7 @@ class DashboardController extends Controller
             $lastMonthStart = now()->subMonth()->startOfMonth();
             $lastMonthEnd = now()->subMonth()->endOfMonth();
 
-            $lastMonthRevenue = Payment::whereBetween('payment_date', [$lastMonthStart, $lastMonthEnd])
+            $lastMonthRevenue = Payment::whereBetween('date', [$lastMonthStart, $lastMonthEnd])
                 ->sum('amount');
         }
 
@@ -78,7 +78,7 @@ class DashboardController extends Controller
         $sparklineQuery = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->toDateString();
-            $dailySum = Payment::whereDate('payment_date', $date);
+            $dailySum = Payment::whereDate('date', $date);
             if ($isViewer) {
                 $dailySum->whereIn('client_id', $clientIds ?? []);
             }
@@ -98,7 +98,7 @@ class DashboardController extends Controller
             $months[] = $month->format('M Y');
 
             // Monthly Income
-            $incQuery = Payment::whereBetween('payment_date', [$start, $end]);
+            $incQuery = Payment::whereBetween('date', [$start, $end]);
 
             // Monthly Expense
             $expVendor = \App\Models\VendorPayment::whereBetween('payment_date', [$start, $end]);
