@@ -24,7 +24,7 @@ return new class extends Migration {
             $table->decimal('budget', 15, 2)->nullable()->change();
         });
 
-        Schema::table('daily_reports', function (Blueprint $table) {
+        Schema::table('change_requests', function (Blueprint $table) {
             $table->decimal('cost_impact', 15, 2)->change();
         });
     }
@@ -47,7 +47,7 @@ return new class extends Migration {
             $table->decimal('budget', 12, 2)->nullable()->change();
         });
 
-        Schema::table('daily_reports', function (Blueprint $table) {
+        Schema::table('change_requests', function (Blueprint $table) {
             $table->decimal('cost_impact', 12, 2)->change();
         });
     }
