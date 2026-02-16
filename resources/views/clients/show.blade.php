@@ -802,6 +802,7 @@ default => 'overview',
 
         {{-- 5. Financials Tab --}}
         <div x-show="activeTab === 'payments'" x-cloak class="animate-in fade-in duration-500 space-y-8">
+            {{-- Capital Management --}}
             <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Capital Management</h3>
             <div
                 class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
@@ -838,6 +839,132 @@ default => 'overview',
                     </tbody>
                 </table>
             </div>
+
+            @if(!auth()->user()->isViewer() && !auth()->user()->isClient())
+            {{-- Vendor Ledger --}}
+            <div class="flex items-center justify-between mt-12">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display uppercase tracking-widest">
+                    Vendor Ledger</h3>
+                <button onclick="document.getElementById('vendor-payment-modal').classList.remove('hidden')"
+                    class="bg-slate-900 hover:bg-black text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition shadow-lg">
+                    Record Vendor Payment
+                </button>
+            </div>
+            <div
+                class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                        <tr>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Date</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Vendor</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Type</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                        @forelse($client->vendorPayments as $vp)
+                        <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                            <td class="px-7 py-4 text-[13px] font-medium text-slate-500">{{
+                                $vp->payment_date->format('d M, Y') }}</td>
+                            <td class="px-7 py-4">
+                                <div class="text-[14px] font-bold text-slate-900 dark:text-white">{{ $vp->vendor->name
+                                    }}
+                                </div>
+                                <div class="text-[10px] text-slate-400 uppercase font-black">{{ $vp->vendor->category }}
+                                </div>
+                            </td>
+                            <td class="px-7 py-4"><span
+                                    class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-black uppercase text-slate-500">{{
+                                    $vp->work_type }}</span></td>
+                            <td class="px-7 py-4 text-right font-bold text-rose-500 text-[14px]">₹{{
+                                number_format($vp->amount) }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="px-7 py-10 text-center text-slate-400 italic text-sm">No vendor
+                                payments recorded.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Material Procurement --}}
+            <div class="flex items-center justify-between mt-12">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display uppercase tracking-widest">
+                    Material Procurement</h3>
+                <button onclick="document.getElementById('material-inward-modal').classList.remove('hidden')"
+                    class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-brand-500/20">
+                    Record Material Inward
+                </button>
+            </div>
+            <div
+                class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                        <tr>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Prop Date</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Supplier & Item</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                Total Bill</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-center">
+                                Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                        @forelse($client->materialInwards as $mi)
+                        @php
+                        $paid = $mi->payments->sum('amount_paid');
+                        $isPaid = $paid >= $mi->total_amount;
+                        @endphp
+                        <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                            <td class="px-7 py-4 text-[13px] font-medium text-slate-500">{{
+                                $mi->inward_date->format('d M, Y') }}</td>
+                            <td class="px-7 py-4">
+                                <div class="text-[14px] font-bold text-slate-900 dark:text-white">{{ $mi->supplier_name
+                                    }}</div>
+                                <div class="text-[11px] text-slate-400 font-medium">{{ $mi->item_name }} ({{
+                                    (float)$mi->quantity }} {{ $mi->unit }})</div>
+                            </td>
+                            <td class="px-7 py-4 text-right font-bold text-slate-900 dark:text-white text-[14px]">₹{{
+                                number_format($mi->total_amount) }}</td>
+                            <td class="px-7 py-4 text-center">
+                                @if($isPaid)
+                                <span class="text-emerald-500 font-black text-[10px] uppercase tracking-widest">Paid
+                                    ✔</span>
+                                @else
+                                <button
+                                    onclick="openMaterialPaymentModal({{ $mi->id }}, '{{ $mi->supplier_name }}', {{ $mi->total_amount - $paid }})"
+                                    class="bg-slate-900 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black transition">
+                                    Pay
+                                </button>
+                                @endif
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="px-7 py-10 text-center text-slate-400 italic text-sm">No material
+                                inwards recorded.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            @endif
         </div>
 
         {{-- 7. Handover Tab --}}
@@ -1258,7 +1385,7 @@ default => 'overview',
     function openMaterialPaymentModal(id, supplier, pending) {
         document.getElementById('modal_inward_id').value = id;
         document.getElementById('modal_supplier_name').value = supplier;
-        document.getElementById('modal_pending_amount').value = pending;
+        document.getElementById('modal_pnt').value = pending;
         document.getElementById('material-payment-modal').classList.remove('hidden');
     }
 </script>
