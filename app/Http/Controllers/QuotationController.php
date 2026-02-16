@@ -75,7 +75,7 @@ class QuotationController extends Controller
                     'total_amount' => $totalAmount,
                     'status' => 'draft',
                     'version' => 1,
-                    'notes' => $validated['notes'],
+                    'notes' => $validated['notes'] ?? null,
                 ]);
 
                 // Update with sequential ID format
@@ -157,7 +157,7 @@ class QuotationController extends Controller
                         'status' => 'draft', // Reset to draft
                         'version' => $quotation->version + 1,
                         'parent_id' => $quotation->parent_id ?? $quotation->id,
-                        'notes' => $validated['notes'],
+                        'notes' => $validated['notes'] ?? null,
                     ]);
 
                     foreach ($validated['items'] as $item) {
@@ -178,7 +178,7 @@ class QuotationController extends Controller
                     // Update existing draft
                     $quotation->update([
                         'date' => $validated['date'],
-                        'valid_until' => $validated['valid_until'],
+                        'valid_until' => $validated['valid_until'] ?? null,
                         'subtotal' => $subtotal,
                         'discount_amount' => $validated['discount_amount'],
                         'gst_percentage' => $validated['gst_percentage'],
