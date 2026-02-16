@@ -729,8 +729,8 @@ default => 'overview',
                                     $inward->supplier_name }}</td>
                                 <td class="px-7 py-4 text-[13px] text-slate-500">{{ $inward->item_name }} ({{
                                     $inward->quantity }} {{ $inward->unit }})</td>
-                                <td class="px-7 py-4 text-right font-bold text-slate-800 dark:text-gray-300">₹{{
-                                    @indian_format($inward->total_amount)</td>
+                                <td class="px-7 py-4 text-right font-bold text-slate-800 dark:text-gray-300">
+                                    ₹@indian_format($inward->total_amount)</td>
                                 <td class="px-7 py-4 text-right font-bold text-emerald-600">₹@indian_format($paid)
                                 </td>
                                 <td class="px-7 py-4 text-right">
@@ -823,8 +823,8 @@ default => 'overview',
                     class="bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Total
                         Project Budget</span>
-                    <div class="text-2xl font-black text-slate-900 dark:text-white">₹{{
-                        @indian_format($client->total_budget)</div>
+                    <div class="text-2xl font-black text-slate-900 dark:text-white">
+                        ₹@indian_format($client->total_budget)</div>
                     <div class="text-[9px] font-bold text-slate-400 uppercase mt-2">Sum of approved quotations</div>
                 </div>
                 <div
@@ -832,7 +832,7 @@ default => 'overview',
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Total
                         Received</span>
                     <div class="text-2xl font-black text-emerald-600">₹@indian_format($client->total_client_received)
-                        }}</div>
+                    </div>
                     <div class="text-[9px] font-bold text-slate-400 uppercase mt-2">Internal ledger credits</div>
                 </div>
                 <div
@@ -878,8 +878,8 @@ default => 'overview',
                                 $payment->date->format('d M, Y') : '-' }}</td>
                             <td class="px-7 py-4 text-[13px] text-slate-600 dark:text-slate-400 font-bold">{{
                                 $payment->purpose }}</td>
-                            <td class="px-7 py-4 text-right font-bold text-emerald-600 text-[15px]">₹{{
-                                @indian_format($payment->amount)</td>
+                            <td class="px-7 py-4 text-right font-bold text-emerald-600 text-[15px]">
+                                ₹@indian_format($payment->amount)</td>
                         </tr>
                         @empty
                         <tr>
@@ -935,8 +935,8 @@ default => 'overview',
                             <td class="px-7 py-4"><span
                                     class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-black uppercase text-slate-500">{{
                                     $vp->work_type }}</span></td>
-                            <td class="px-7 py-4 text-right font-bold text-rose-500 text-[14px]">₹{{
-                                @indian_format($vp->amount)</td>
+                            <td class="px-7 py-4 text-right font-bold text-rose-500 text-[14px]">
+                                ₹@indian_format($vp->amount)</td>
                         </tr>
                         @empty
                         <tr>
@@ -991,8 +991,8 @@ default => 'overview',
                                 <div class="text-[11px] text-slate-400 font-medium">{{ $mi->item_name }} ({{
                                     (float)$mi->quantity }} {{ $mi->unit }})</div>
                             </td>
-                            <td class="px-7 py-4 text-right font-bold text-slate-900 dark:text-white text-[14px]">₹{{
-                                @indian_format($mi->total_amount)</td>
+                            <td class="px-7 py-4 text-right font-bold text-slate-900 dark:text-white text-[14px]">
+                                ₹@indian_format($mi->total_amount)</td>
                             <td class="px-7 py-4 text-center">
                                 @if($isPaid)
                                 <span class="text-emerald-500 font-black text-[10px] uppercase tracking-widest">Paid

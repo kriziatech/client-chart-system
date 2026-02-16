@@ -83,7 +83,7 @@
                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest w-56">Valuation Basis
                     (Net)</span>
                 <span class="text-xl font-black text-brand-600 flex-grow tracking-widest">INR {{
-                    number_format($payment->amount, 2) }}</span>
+                    @indian_format($payment->amount, 2)</span>
             </div>
 
             <div class="flex items-baseline gap-6 border-b-2 border-slate-100 pb-4">

@@ -137,7 +137,7 @@
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Value</p>
                             <p class="text-sm font-bold text-gray-900 dark:text-white mt-1">
-                                ₹{{ number_format($quotation->total_amount) }}
+                                ₹@indian_format($quotation->total_amount)
                             </p>
                         </div>
                     </div>
@@ -181,12 +181,12 @@
                                 <div class="text-right">
                                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Rate</p>
                                     <p class="text-sm text-gray-900 dark:text-white font-medium">₹{{
-                                        number_format($item->rate) }}</p>
+                                        @indian_format($item->rate)</p>
                                 </div>
                                 <div class="text-right w-24">
                                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Amount</p>
                                     <p class="text-sm text-brand-600 dark:text-brand-400 font-boldital">₹{{
-                                        number_format($item->amount) }}</p>
+                                        @indian_format($item->amount)</p>
                                 </div>
                             </div>
                         </div>
@@ -199,22 +199,22 @@
                         <div class="max-w-xs ml-auto space-y-3">
                             <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                                 <span>Subtotal</span>
-                                <span class="font-bold">₹{{ number_format($quotation->subtotal) }}</span>
+                                <span class="font-bold">₹@indian_format($quotation->subtotal)</span>
                             </div>
                             @if($quotation->discount_amount > 0)
                             <div class="flex justify-between text-sm text-emerald-600">
                                 <span>Discount</span>
-                                <span class="font-bold">-₹{{ number_format($quotation->discount_amount) }}</span>
+                                <span class="font-bold">-₹@indian_format($quotation->discount_amount)</span>
                             </div>
                             @endif
                             <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400">
                                 <span>GST ({{ $quotation->gst_percentage }}%)</span>
-                                <span class="font-bold">₹{{ number_format($quotation->tax_amount) }}</span>
+                                <span class="font-bold">₹@indian_format($quotation->tax_amount)</span>
                             </div>
                             <div class="flex justify-between pt-3 border-t border-gray-300 dark:border-gray-600">
                                 <span class="font-bold text-gray-900 dark:text-white">Total Amount</span>
                                 <span class="font-black text-xl text-brand-600 dark:text-brand-400">₹{{
-                                    number_format($quotation->total_amount) }}</span>
+                                    @indian_format($quotation->total_amount)</span>
                             </div>
                         </div>
                     </div>
