@@ -29,8 +29,8 @@
                 </div>
                 <div>
                     <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">Income</div>
-                    <div class="text-lg font-black text-slate-900 dark:text-white leading-none">₹{{
-                        @indian_format($totalRevenue/1000, 1) }}k</div>
+                    <div class="text-lg font-black text-slate-900 dark:text-white leading-none">
+                        ₹@indian_format($totalRevenue/1000, 1)k</div>
                 </div>
             </div>
 
@@ -44,8 +44,8 @@
                 </div>
                 <div>
                     <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">Expense</div>
-                    <div class="text-lg font-black text-slate-900 dark:text-white leading-none">₹{{
-                        @indian_format($totalExpenses/1000, 1) }}k</div>
+                    <div class="text-lg font-black text-slate-900 dark:text-white leading-none">
+                        ₹@indian_format($totalExpenses/1000, 1)k</div>
                 </div>
             </div>
 
@@ -60,8 +60,8 @@
                 </div>
                 <div>
                     <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">Net Profit</div>
-                    <div class="text-lg font-black text-slate-900 dark:text-white leading-none">₹{{
-                        @indian_format($netProfit/1000, 1) }}k</div>
+                    <div class="text-lg font-black text-slate-900 dark:text-white leading-none">
+                        ₹@indian_format($netProfit/1000, 1)k</div>
                 </div>
             </div>
 
@@ -172,8 +172,8 @@
                             <div class="flex justify-between w-full">
                                 <div class="text-[10px] font-black uppercase text-emerald-600 mb-0.5">{{
                                     $payment->client->first_name }}</div>
-                                <div class="text-[10px] font-black text-emerald-600">+₹{{
-                                    @indian_format($payment->amount) }}</div>
+                                <div class="text-[10px] font-black text-emerald-600">+₹@indian_format($payment->amount)
+                                </div>
                             </div>
                             <div class="text-[9px] text-slate-400 mt-1">Payment Received • {{ $payment->date->format('d
                                 M') }}</div>
@@ -201,8 +201,8 @@
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-[9px] font-black text-indigo-500 uppercase">{{ $quote->client ?
                                 $quote->client->first_name : 'New' }}</span>
-                            <span class="text-[9px] font-bold text-slate-400">₹{{
-                                @indian_format($quote->total_amount/1000, 1) }}k</span>
+                            <span class="text-[9px] font-bold text-slate-400">₹@indian_format($quote->total_amount/1000,
+                                1)k</span>
                         </div>
                         <div class="text-[10px] text-slate-600 dark:text-slate-300 font-bold truncate">#{{
                             $quote->quotation_number }}</div>
@@ -247,7 +247,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         Chart.defaults.font.family = "'Inter', sans-serif";
         Chart.defaults.color = '#94a3b8';
-        
+
         // Financial Performance Chart (Income vs Expense)
         const cts = document.getElementById('projectsChart');
         if (ctxProjects) {
@@ -315,8 +315,8 @@
                                 drawBorder: false
                             },
                             ticks: {
-                                callback: function(value) {
-                                    if (value >= 1000) return '₹' + (value/1000) + 'k';
+                                callback: function (value) {
+                                    if (value >= 1000) return '₹' + (value / 1000) + 'k';
                                     return '₹' + value;
                                 },
                                 font: { size: 10, weight: 'bold' }
