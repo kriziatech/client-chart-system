@@ -99,8 +99,8 @@
                 <div class="bg-slate-50 p-10 rounded-[2.5rem] border-2 border-slate-100">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] block mb-4">Total
                         Settled Amount</span>
-                    <div class="text-5xl font-black text-slate-900 tracking-tighter">₹{{ number_format($payment->amount,
-                        2) }}</div>
+                    <div class="text-5xl font-black text-slate-900 tracking-tighter">₹@indian_format($payment->amount,
+                        2)</div>
                     <div class="mt-8 flex items-center gap-3">
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Instrument:</span>
                         <span
