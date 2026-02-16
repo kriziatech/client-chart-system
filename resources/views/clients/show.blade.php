@@ -1056,308 +1056,159 @@ default => 'overview',
     @endif
 </div>
 
-@endsection <div class="flex justify-end gap-3 pt-4">
-    <button type="button" onclick="document.getElementById('add-handover-item-modal').classList.add('hidden')"
-        class="px-6 py-2 text-slate-400 font-bold hover:text-slate-600 transition uppercase text-[10px] tracking-widest">Cancel</button>
-    <button type="submit"
-        class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition active:scale-95">Add
-        to Checklist</button>
-</div>
-</form>
-</div>
-</div>
-@endif
-</div>
 
-@endsection <button onclick="document.getElementById('add-scope-modal').classList.add('hidden')"
-    class="text-slate-400 hover:text-slate-600 transition">&times;</button>
-</div>
-<form action="{{ route('scope.store', $client) }}" method="POST" class="p-8 space-y-6">
-    @csrf
-    <div class="space-y-4">
-        <div>
-            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Area
-                / Category</label>
-            <input type="text" name="area_name" required placeholder="e.g. Living Room, Master Toilet"
-                class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all">
-        </div>
-        <div>
-            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Scope
-                Details</label>
-            <textarea name="description" rows="4" required placeholder="Describe the specific work to be done..."
-                class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all"></textarea>
-        </div>
-    </div>
-    <div class="flex justify-end gap-3 pt-4">
-        <button type="button" @click="document.getElementById('add-scope-modal').classList.add('hidden')"
-            class="px-6 py-2 text-slate-400 font-bold hover:text-slate-600 transition uppercase text-[10px] tracking-widest">Cancel</button>
-        <button type="submit"
-            class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition active:scale-95">Save
-            Unit</button>
-    </div>
-</form>
-</div>
-</div>
-@endif
-
-{{-- Add Handover Item Modal --}}
+{{-- MODALS FOR FINANCIAL CONTROL ROOM --}}
 @if(!auth()->user()->isViewer() && !auth()->user()->isClient())
-<div id="add-handover-item-modal"
+
+{{-- 1. Add Material Inward Modal --}}
+<div id="material-inward-modal"
     class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
     <div
-        class="bg-white dark:bg-dark-surface rounded-[40px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
+        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
         <div
-            class="px-8 py-6 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
-            <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display">Add Handover Requirement
-            </h3>
-            <button onclick="document.getElementById('add-handover-item-modal').classList.add('hidden')"
+            class="px-8 py-5 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display">Record Material Inward</h3>
+            <button onclick="document.getElementById('material-inward-modal').classList.add('hidden')"
                 class="text-slate-400 hover:text-slate-600 transition">&times;</button>
         </div>
-        <form action="{{ route('handover.item.store', $client->handover ?? 0) }}" method="POST" class="p-8 space-y-6">
+        <form action="{{ route('finance.material-inward.store', $client) }}" method="POST" class="p-8 space-y-5">
+            @csrf
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
+                    <input type="date" name="inward_date" required
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Supplier</label>
+                    <input type="text" name="supplier_name" required placeholder="Vendor Name"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Item
+                    Details</label>
+                <input type="text" name="item_name" required placeholder="E.g. Cement, Plywood 18mm"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Quantity</label>
+                    <input type="number" step="0.01" name="quantity" required
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Unit</label>
+                    <select name="unit"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                        <option value="pcs">Pcs</option>
+                        <option value="kg">Kg</option>
+                        <option value="mtr">Mtr</option>
+                        <option value="sqft">SqFt</option>
+                        <option value="bags">Bags</option>
+                        <option value="ltr">Ltr</option>
+                    </select>
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Rate</label>
+                    <input type="number" step="0.01" name="rate" required
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                </div>
+            </div>
+            <button type="submit"
+                class="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
+                Save Record
+            </button>
+        </form>
+    </div>
+</div>
+
+{{-- 2. Add Vendor Payment Modal --}}
+<div id="vendor-payment-modal"
+    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div
+        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
+        <div
+            class="px-8 py-5 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display">Record Vendor Payment</h3>
+            <button onclick="document.getElementById('vendor-payment-modal').classList.add('hidden')"
+                class="text-slate-400 hover:text-slate-600 transition">&times;</button>
+        </div>
+        <form action="{{ route('finance.vendor.store', $client) }}" method="POST" class="p-8 space-y-5">
             @csrf
             <div>
-                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Requirement
-                    Name</label>
-                <input type="text" name="item_name" required placeholder="e.g. Balcony Waterproofing Certificate"
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-sm focus:ring-brand-500 transition-all">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Vendor</label>
+                <select name="vendor_id" required
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                    @foreach(App\Models\Vendor::all() as $v)
+                    <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->category }})</option>
+                    @endforeach
+                </select>
             </div>
-            <div class="flex justify-end gap-3 pt-4">
-                <button type="button"
-                    onclick="document.getElementById('add-handover-item-modal').classList.add('hidden')"
-                    class="px-6 py-2 text-slate-400 font-bold hover:text-slate-600 transition uppercase text-[10px] tracking-widest">Cancel</button>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
+                    <input type="date" name="payment_date" required
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Amount</label>
+                    <input type="number" step="0.01" name="amount" required
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Work Type /
+                    Description</label>
+                <input type="text" name="work_type" required placeholder="E.g. Kitchen electrical labor advance"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+            </div>
+            <button type="submit"
+                class="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
+                Record Payment
+            </button>
+        </form>
+    </div>
+</div>
+
+{{-- 3. Profit Lock Confirm Modal --}}
+@if(auth()->user()->isAdmin())
+<div id="profit-lock-modal"
+    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div
+        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 dark:border-dark-border text-center p-8">
+        <div class="mb-4">
+            <div
+                class="w-16 h-16 bg-brand-100 dark:bg-brand-500/20 rounded-full flex items-center justify-center mx-auto text-brand-600 dark:text-brand-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Toggle Profit Lock?</h3>
+        <p class="text-sm text-slate-500 mb-6">Locking will prevent adding new vendor payments or material costs without
+            admin override.</p>
+        <form action="{{ route('finance.profit.lock', $client) }}" method="POST">
+            @csrf
+            <div class="flex gap-3">
+                <button type="button" onclick="document.getElementById('profit-lock-modal').classList.add('hidden')"
+                    class="flex-1 px-6 py-3 bg-slate-100 dark:bg-dark-bg text-slate-600 dark:text-slate-400 rounded-xl font-bold uppercase tracking-widest text-xs transition hover:bg-slate-200">Cancel</button>
                 <button type="submit"
-                    class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition active:scale-95">Add
-                    to Checklist</button>
+                    class="flex-1 px-6 py-3 bg-brand-600 text-white rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg shadow-brand-500/20 transition hover:bg-brand-700">Confirm</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
+@endif
 
-                {{-- MODALS FOR FINANCIAL CONTROL ROOM --}}
-                @if(!auth()->user()->isViewer() && !auth()->user()->isClient())
-
-                {{-- 1. Add Material Inward Modal --}}
-                <div id="material-inward-modal"
-                    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div
-                        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
-                        <div
-                            class="px-8 py-5 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display">Record Material
-                                Inward</h3>
-                            <button onclick="document.getElementById('material-inward-modal').classList.add('hidden')"
-                                class="text-slate-400 hover:text-slate-600 transition">&times;</button>
-                        </div>
-                        <form action="{{ route('finance.material-inward.store', $client) }}" method="POST"
-                            class="p-8 space-y-5">
-                            @csrf
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
-                                    <input type="date" name="inward_date" required
-                                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Supplier</label>
-                                    <input type="text" name="supplier_name" required placeholder="Vendor Name"
-                                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                                </div>
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Item
-                                    Details</label>
-                                <input type="text" name="item_name" required placeholder="E.g. Cement, Plywood 18mm"
-                                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                            </div>
-                            <div class="grid grid-cols-3 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Quantity</label>
-                                    <input type="number" step="0.01" name="quantity" required
-                                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Unit</label>
-                                    <select name="unit"
-                                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                                        <option value="pcs">Pcs</option>
-                                        <option value="kg">Kg</option>
-                                        <option value="mtr">Mtr</option>
-                                        <option value="sqft">SqFt</option>
-                                        <option value="bags">Bags</option>
-                                        <option value="ltr">Ltr</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Rate</label>
-                                    <input type="number" step="0.01" name="rate" required
-                                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                                </div>
-                            </div>
-                            <button type="submit"
-                                class="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
-                                Save Record
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                {{-- 2. Add Vendor Payment Modal --}}
-                <div id="vendor-payment-modal"
-                    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div
-                        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
-                        <div
-                            class="px-8 py-5 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
-                            <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display">Record Vendor
-                                Payment</h3>
-                            <button onclick="document.getElementById('vendor-payment-modal').classList.add('hidden')"
-                                class="text-slate-400 hover:text-slate-600 transition">&times;</button>
-                        </div>
-                        <form action="{{ route('finance.vendor.store', $client) }}" method="POST" class="p-8 space-y-5">
-                            @csrf
-                            <div>
-                                <label
-                                    class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Vendor</label>
-                                <select name="vendor_id" required
-                                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                                    @foreach(App\Models\Vendor::all() as $v)
-                                    <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->category }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
-                                    <input type="date" name="payment_date" required
-                                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Amount</label>
-                                    <input type="number" step="0.01" name="amount" required
-                                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                                </div>
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Work
-                                    Type / Description</label>
-                                <input type="text" name="work_type" required
-                                    placeholder="E.g. Kitchen electrical labor advance"
-                                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                            </div>
-                            <button type="submit"
-                                class="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
-                                Record Payment
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                {{-- 3. Profit Lock Confirm Modal --}}
-                @if(auth()->user()->isAdmin())
-                <div id="profit-lock-modal"
-                    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div
-                        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 dark:border-dark-border text-center p-8">
-                        <div class="mb-4">
-                            <div
-                                class="w-16 h-16 bg-brand-100 dark:bg-brand-500/20 rounded-full flex items-center justify-center mx-auto text-brand-600 dark:text-brand-400">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Toggle Profit Lock?</h3>
-                        <p class="text-sm text-slate-500 mb-6">Locking will prevent adding new vendor payments or
-                            material costs without admin override.</p>
-                        <form action="{{ route('finance.profit.lock', $client) }}" method="POST">
-                            @csrf
-                            <div class="flex gap-3">
-                                <button type="button" </select>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
-                                    <input type="date" name="payment_date" required
-                                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Amount</label>
-                                    <input type="number" step="0.01" name="amount" required
-                                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                                </div>
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Work
-                                    Type / Description</label>
-                                <input type="text" name="work_type" required
-                                    placeholder="E.g. Kitchen electrical labor advance"
-                                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                            </div>
-                            <button type="submit"
-                                class="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
-                                Record Payment
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                {{-- 3. Profit Lock Confirm Modal --}}
-                @if(auth()->user()->isAdmin())
-                <div id="profit-lock-modal"
-                    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div
-                        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 dark:border-dark-border text-center p-8">
-                        <div class="mb-4">
-                            <div
-                                class="w-16 h-16 bg-brand-100 dark:bg-brand-500/20 rounded-full flex items-center justify-center mx-auto text-brand-600 dark:text-brand-400">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Toggle Profit Lock?</h3>
-                        <p class="text-sm text-slate-500 mb-6">Locking will prevent adding new vendor payments or
-                            material costs without admin override.</p>
-                        <form action="{{ route('finance.profit.lock', $client) }}" method="POST">
-                            @csrf
-                            <div class="flex gap-3">
-                                <button type="button" d-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold
-                                    uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
-                                    Record Payment
-                                </button>
-                        </form>
-                    </div>
-                </div>
-
-                {{-- 3. Profit Lock Confirm Modal --}}
-                @if(auth()->user()->isAdmin())
-                <div id="profit-lock-modal"
-                    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div
-                        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-sm w-full overflow-hidden border border-slate-100 dark:border-dark-border text-center p-8">
-                        <div class="mb-4">
-                            <div
-                                class="w-16 h-16 bg-brand-100 dark:bg-brand-500/20 rounded-full flex items-center justify-center mx-auto text-brand-600 dark:text-brand-400">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Toggle Profit Lock?</h3>
-                        <p class="text-sm text-slate-500 mb-6">Locking will prevent adding new vendor payments or
-                            material costs without admin override.</p>
-                        <form action="{{ route('finance.profit.lock', $client) }}" method="POST">
-                            @csrf
-                            <div class="flex gap-3">
-                                <button type="button"
+</div>
+@endsection
