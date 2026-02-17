@@ -266,4 +266,25 @@ class QuotationController extends Controller
                 ->with('success', 'Project created successfully from quotation!');
         });
     }
+
+    public function destroy(Request $request, Quotation $quotation)
+    {
+        $validated = $request->validate([
+            'remark' => 'required|string|min:5',
+            'confirmation' => 'required|string|in:DELETE',
+        ], [
+            'confirmation.in' => 'Please type "DELETE" to confirm deletion.',
+            'remark.required' => 'A deletion remark is mandatory.',
+            'remark.min' => 'The remark must be at least 5 characters.',
+        ]);
+
+        $quotation->update([
+            'deletion_remark' => $validated['remark']
+        ]);
+
+        $quotation->delete();
+
+        return redirect()->route('quotations.index')
+            ->with('success', 'Quotation deleted successfully.');
+    }
 }

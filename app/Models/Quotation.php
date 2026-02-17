@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Quotation extends Model
 {
-    use HasFactory, \App\Traits\Auditable;
+    use HasFactory, SoftDeletes, \App\Traits\Auditable;
 
     protected $fillable = [
         'client_id',
@@ -26,7 +28,8 @@ class Quotation extends Model
         'notes',
         'signature_path',
         'signed_at',
-        'signature_data'
+        'signature_data',
+        'deletion_remark'
     ];
 
     protected $casts = [

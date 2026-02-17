@@ -122,13 +122,102 @@
                     </a>
                     <a href="{{ route('quotations.edit', $quotation->id) }}"
                         class="flex-1 px-3 py-2 text-xs font-bold text-center text-white bg-brand-600 rounded-lg hover:bg-brand-700 transition-all">
-                        Revise/Edit
+                        Revise
                     </a>
+                    <button type="button"
+                        @click="$dispatch('open-delete-modal', { id: {{ $quotation->id }}, number: '{{ $quotation->quotation_number }}' })"
+                        class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all" title="Delete">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                            </path>
+                        </svg>
+                    </button>
                 </div>
             </div>
             @endforeach
         </div>
         @endif
     </main>
+
+    <!-- Global Delete Modal -->
+    <div x-data="{ 
+            isOpen: false, 
+            quotationId: null, 
+            quotationNumber: '', 
+            remark: '', 
+            confirmation: '',
+            get isValid() { return this.remark.length >= 5 && this.confirmation === 'DELETE' }
+        }"
+        @open-delete-modal.window="isOpen = true; quotationId = $event.detail.id; quotationNumber = $event.detail.number; remark = ''; confirmation = ''"
+        x-show="isOpen" class="fixed inset-0 z-[100] overflow-y-auto" style="display: none;">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div x-show="isOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"></div>
+
+            <div x-show="isOpen" x-transition:enter="ease-out duration-300"
+                x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-8 overflow-hidden border border-gray-100 dark:border-gray-700">
+
+                <div class="flex items-center gap-4 mb-6">
+                    <div
+                        class="w-12 h-12 bg-rose-100 dark:bg-rose-900/30 text-rose-600 rounded-xl flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">Delete
+                            Quotation</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">This action cannot be undone.</p>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800 rounded-xl p-4 mb-6">
+                    <p class="text-sm text-rose-800 dark:text-rose-300 leading-relaxed font-medium">
+                        You are about to delete <span class="font-bold uppercase" x-text="quotationNumber"></span>.
+                        Please provide a mandatory remark and type the confirmation word to proceed.
+                    </p>
+                </div>
+
+                <form :action="`/quotations/${quotationId}`" method="POST" class="space-y-5">
+                    @csrf
+                    @method('DELETE')
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">Reason for
+                            Deletion *</label>
+                        <textarea name="remark" x-model="remark" rows="3" required
+                            class="block w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all outline-none"
+                            placeholder="Please explain why this quotation is being deleted..."></textarea>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">Type <span
+                                class="text-rose-600">DELETE</span> to confirm *</label>
+                        <input type="text" name="confirmation" x-model="confirmation" required
+                            class="block w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all outline-none"
+                            placeholder="TYPE DELETE HERE">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-4">
+                        <button type="button" @click="isOpen = false"
+                            class="px-6 py-3 text-sm font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit" :disabled="!isValid"
+                            class="px-6 py-3 text-sm font-bold text-white bg-rose-600 rounded-xl hover:bg-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-rose-500/20">
+                            Confirm Delete
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
