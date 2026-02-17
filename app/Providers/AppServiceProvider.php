@@ -19,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if ($this->app->environment('production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         \Illuminate\Support\Facades\Event::subscribe(\App\Listeners\AuditLogSubscriber::class);
 
         \Illuminate\Support\Facades\Blade::directive('indian_format', function ($expression) {
