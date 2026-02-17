@@ -469,7 +469,7 @@
         <!-- Footer -->
         <footer
             class="p-8 text-[16px] text-slate-400 dark:text-ui-muted font-medium uppercase tracking-[0.2em] flex justify-between items-center no-print">
-            <div>© {{ date('Y') }} Interior Touch</div>
+            <div>© {{ date('Y') }} Developed By Krizia Technologies @ 2026</div>
             <div class="flex items-center gap-4">
                 <a href="#" class="hover:text-brand-500 transition-colors">Privacy</a>
                 <a href="#" class="hover:text-brand-500 transition-colors">API Docs</a>

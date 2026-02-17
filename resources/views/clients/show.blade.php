@@ -1,6 +1,58 @@
 @extends('layouts.app')
 
 @section('content')
+
+{{-- 0. Add New Vendor Modal --}}
+<div id="add-vendor-modal"
+    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[110] flex items-center justify-center p-4 transition-all duration-300">
+    <div
+        class="bg-white dark:bg-dark-surface rounded-[40px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100/50 dark:border-dark-border transform transition-all">
+        <div
+            class="px-10 py-7 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/30 backdrop-blur-sm">
+            <div>
+                <h3 class="text-xl font-black text-slate-900 dark:text-white font-display uppercase tracking-widest">Add
+                    New Vendor</h3>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter mt-1">Register a new service
+                    provider</p>
+            </div>
+            <button onclick="document.getElementById('add-vendor-modal').classList.add('hidden')"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-dark-bg text-slate-500 hover:bg-slate-200 dark:hover:bg-dark-border transition-all">&times;</button>
+        </div>
+        <form action="{{ route('finance.vendor.create') }}" method="POST" class="p-10 space-y-6">
+            @csrf
+            <div class="space-y-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Vendor
+                    Name</label>
+                <input type="text" name="name" required placeholder="Full Name / Company Name"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none">
+            </div>
+            <div class="space-y-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Category /
+                    Trade</label>
+                <input type="text" name="category" required placeholder="e.g. Electrical, Plumbing, Civil"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none">
+            </div>
+            <div class="grid grid-cols-2 gap-5">
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone
+                        Number</label>
+                    <input type="text" name="phone" placeholder="+91 ..."
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Email
+                        Address</label>
+                    <input type="email" name="email" placeholder="vendor@example.com"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none">
+                </div>
+            </div>
+            <button type="submit"
+                class="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-2xl py-4 font-black uppercase tracking-[0.2em] shadow-xl shadow-brand-500/25 transition-all active:scale-[0.98] mt-4">
+                Create Vendor
+            </button>
+        </form>
+    </div>
+</div>
 <style>
     @media print {
         .no-print {
@@ -1244,6 +1296,7 @@ default => 'overview',
 {{-- MODALS FOR FINANCIAL CONTROL ROOM --}}
 @if(!auth()->user()->isViewer() && !auth()->user()->isClient())
 
+
 {{-- 1. Add Material Inward Modal --}}
 <div id="material-inward-modal"
     class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
@@ -1314,54 +1367,65 @@ default => 'overview',
 
 {{-- 2. Add Vendor Payment Modal --}}
 <div id="vendor-payment-modal"
-    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 transition-all duration-300">
     <div
-        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
+        class="bg-white dark:bg-dark-surface rounded-[40px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100/50 dark:border-dark-border transform transition-all">
         <div
-            class="px-8 py-5 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display">Record Vendor Payment</h3>
-            <button onclick="document.getElementById('vendor-payment-modal').classList.add('hidden')"
-                class="text-slate-400 hover:text-slate-600 transition">&times;</button>
-        </div>
-        <form action="{{ route('finance.vendor.store', $client) }}" method="POST" class="p-8 space-y-5">
-            @csrf
-            <div class="flex justify-between items-center mb-1">
-                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Select
-                    Vendor</label>
-                <button type="button" onclick="document.getElementById('add-vendor-modal').classList.remove('hidden')"
-                    class="text-[9px] font-bold text-brand-600 hover:text-brand-700 uppercase tracking-wider">+ Add New
-                    Vendor</button>
+            class="px-10 py-7 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/30 backdrop-blur-sm">
+            <div>
+                <h3 class="text-xl font-black text-slate-900 dark:text-white font-display uppercase tracking-widest">
+                    Vendor Payment</h3>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter mt-1">Record a new outflow to
+                    vendor</p>
             </div>
-            <select name="vendor_id" required
-                class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-                @foreach(App\Models\Vendor::all() as $v)
-                <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->category }})</option>
-                @endforeach
-            </select>
-    </div>
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
-            <input type="date" name="payment_date" required
-                class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+            <button onclick="document.getElementById('vendor-payment-modal').classList.add('hidden')"
+                class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-dark-bg text-slate-500 hover:bg-slate-200 dark:hover:bg-dark-border transition-all">&times;</button>
         </div>
-        <div>
-            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Amount</label>
-            <input type="number" step="0.01" name="amount" required
-                class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-        </div>
+        <form action="{{ route('finance.vendor.store', $client) }}" method="POST" class="p-10 space-y-6">
+            @csrf
+            <div class="space-y-3">
+                <div class="flex justify-between items-center px-1">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400">Select
+                        Vendor</label>
+                    <button type="button"
+                        onclick="document.getElementById('add-vendor-modal').classList.remove('hidden')"
+                        class="text-[9px] font-black text-brand-600 hover:text-brand-700 bg-brand-50 px-3 py-1 rounded-full uppercase tracking-widest transition-all hover:scale-105">+
+                        Add New
+                        Vendor</button>
+                </div>
+                <select name="vendor_id" required
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none appearance-none cursor-pointer">
+                    @foreach(App\Models\Vendor::all() as $v)
+                    <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->category }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-5">
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Payment
+                        Date</label>
+                    <input type="date" name="payment_date" required value="{{ date('Y-m-d') }}"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Amount
+                        (₹)</label>
+                    <input type="number" step="0.01" name="amount" required placeholder="0.00"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none">
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Work Type /
+                    Description</label>
+                <input type="text" name="work_type" required placeholder="E.g. Kitchen electrical labor advance"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none">
+            </div>
+            <button type="submit"
+                class="w-full bg-slate-900 hover:bg-black text-white rounded-2xl py-4 font-black uppercase tracking-[0.2em] shadow-xl shadow-slate-900/20 transition-all active:scale-[0.98] mt-4">
+                Record Payment
+            </button>
+        </form>
     </div>
-    <div>
-        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Work Type /
-            Description</label>
-        <input type="text" name="work_type" required placeholder="E.g. Kitchen electrical labor advance"
-            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
-    </div>
-    <button type="submit"
-        class="w-full bg-brand-500 hover:bg-brand-600 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-brand-500/20 transition">
-        Record Payment
-    </button>
-    </form>
 </div>
 </div>
 
@@ -1497,8 +1561,7 @@ default => 'overview',
         document.getElementById('modal_inward_id').value = id;
         document.getElementById('modal_supplier_name').value = supplier;
         document.getElementById('modal_pending_amount').value = pending;
-        document.getElementById('material-payment-modal').classList.remove('hidden');
-    }
+        document.getElementById('material-payment-modal').classList.remove('h  }
 </script>
 
 @endsection

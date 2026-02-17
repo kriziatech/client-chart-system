@@ -25,6 +25,7 @@ services:
     networks:
       - itpm-network
     volumes:
+      - .:/var/www/html
       - storage_data:/var/www/html/storage
       - public_uploads:/var/www/html/public/uploads
 

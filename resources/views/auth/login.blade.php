@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Interior Touch</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700\&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -221,7 +221,7 @@
 
         <!-- Footer -->
         <div class="p-6 text-center">
-            <p class="text-xs text-slate-400 font-medium tracking-wide">Developed by Interior Touch</p>
+            <p class="text-xs text-slate-400 font-medium tracking-wide">Developed By Krizia Technologies @ 2026</p>
         </div>
     </div>
 
@@ -287,8 +287,35 @@
         .animate-fade-in-down {
             animation: fadeInDown 0.8s ease-out forwards;
         }
-    </style>
 
+        .animate-shake {
+            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+    </style>
 </body>
 
 </html>

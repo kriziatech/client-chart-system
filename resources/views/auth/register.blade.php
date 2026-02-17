@@ -85,7 +85,7 @@
             </div>
         </div>
 
-        <p class="text-center text-xs text-slate-400 mt-6">© {{ date('Y') }} Interior Touch</p>
+        <p class="text-center text-xs text-slate-400 mt-6">© {{ date('Y') }} Developed By Krizia Technologies @ 2026</p>
     </div>
 </body>
 

@@ -247,7 +247,7 @@
     <!-- Verification Footer -->
     <div
         class="mt-24 pt-8 border-t border-slate-100 flex justify-between items-center text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">
-        <p>© 2026 Interior Touch Structural Intel Node. All Rights Reserved.</p>
+        <p>© 2026 Developed By Krizia Technologies @ 2026 Interior Touch Structural Intel Node. All Rights Reserved.</p>
         <p>Verification Checksum: {{ hash('sha256', $client->id . now()) }}</p>
     </div>
 </body>
