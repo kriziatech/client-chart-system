@@ -50,7 +50,26 @@ class PresentationSlideSeeder extends Seeder
             [
                 'title' => 'Deep <span class="success">Financial Analysis</span>',
                 'subtitle' => null,
-                'content' => '<div class="grid-2"><div class="card fragment fade-right"><h3 class="success" style="font-size: 0.8em !important;">P&L Tracking</h3><p style="font-size: 0.4em; color: #CBD5E1;">Real-time Profit & Loss analysis per project. Track material vs labor costs with unmatched precision.</p></div><div class="card fragment fade-left"><h3 class="highlight" style="font-size: 0.8em !important;">Vendor Audit</h3><p style="font-size: 0.4em; color: #CBD5E1;">Mode-of-payment verification (UPI/Chq/Cash) with mandatory receipt-image archives.</p></div></div><div class="card fragment grow" style="border-left: 5px solid #10B981; margin-top: 20px;"><h3 style="font-size: 0.85em !important;">Liquidity Safety Lock</h3><p style="font-size: 0.45em; color: #fff;">Integrated "Finance Lock" mechanism prevents budget tampering after professional approval.</p></div>',
+                'content' => '<div class="grid-3">
+                    <div class="card fragment fade-up">
+                        <div class="card-accent"><span></span><span></span><span></span></div>
+                        <svg class="icon-2d" viewBox="0 0 24 24"><path d="M3 3v18h18M7 17l4-4 4 4 5-5"/></svg>
+                        <h3 class="success" style="font-size: 0.7em !important;">P&L Tracking</h3>
+                        <p style="font-size: 0.35em; color: #CBD5E1;">Real-time Profit & Loss analysis per project. Track material vs labor costs with precision.</p>
+                    </div>
+                    <div class="card fragment fade-up" style="animation-delay: 0.2s;">
+                        <div class="card-accent"><span></span><span></span><span></span></div>
+                        <svg class="icon-2d" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <h3 class="highlight" style="font-size: 0.7em !important;">Vendor Audit</h3>
+                        <p style="font-size: 0.35em; color: #CBD5E1;">Mode-of-payment verification (UPI/Chq/Cash) with mandatory receipt archives.</p>
+                    </div>
+                    <div class="card fragment fade-up" style="animation-delay: 0.4s;">
+                        <div class="card-accent"><span></span><span></span><span></span></div>
+                        <svg class="icon-2d" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <h3 style="color: #10B981; font-size: 0.7em !important;">Safety Lock</h3>
+                        <p style="font-size: 0.35em; color: #CBD5E1;">Integrated "Finance Lock" mechanism prevents budget tampering after approval.</p>
+                    </div>
+                </div>',
                 'layout_type' => 'standard',
                 'bg_color' => '#0F172A',
                 'order' => 5,

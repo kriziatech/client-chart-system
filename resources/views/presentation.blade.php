@@ -240,7 +240,41 @@
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .card-accent {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .card-accent span {
+            width: 4px;
+            height: 4px;
+            background: var(--brand);
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        .icon-2d {
+            width: 40px;
+            height: 40px;
+            stroke: var(--brand);
+            stroke-width: 1.5;
+            fill: none;
+            margin-bottom: 15px;
+            opacity: 0.8;
         }
 
         .profile-container {
@@ -474,7 +508,7 @@
         });
 
         window.addEventListener('mouseleave', () => {
-            glow.style.opacity = '0';
+            glowle. = '0';
         });
     </script>
 </body>
