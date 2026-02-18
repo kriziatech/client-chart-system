@@ -57,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/clients/{client}/gallery', [\App\Http\Controllers\ProjectGalleryController::class , 'store'])->name('gallery.store');
             Route::get('/presentation', [\App\Http\Controllers\PresentationController::class , 'index'])->name('presentation');
             Route::get('/presentation/manage', [\App\Http\Controllers\PresentationController::class , 'manage'])->name('presentation.manage');
+            Route::post('/presentation/slides/reorder', [\App\Http\Controllers\PresentationController::class , 'reorder'])->name('presentation.slides.reorder');
             Route::post('/presentation/slides', [\App\Http\Controllers\PresentationController::class , 'store'])->name('presentation.slides.store');
             Route::patch('/presentation/slides/{slide}', [\App\Http\Controllers\PresentationController::class , 'update'])->name('presentation.slides.update');
             Route::delete('/presentation/slides/{slide}', [\App\Http\Controllers\PresentationController::class , 'destroy'])->name('presentation.slides.destroy');
