@@ -4,135 +4,220 @@
 <div class="min-h-screen bg-[#F8FAFC] dark:bg-dark-bg py-12 px-4 overflow-hidden">
     <div class="max-w-[1600px] mx-auto">
         {{-- Header --}}
-        <div class="flex items-center justify-between mb-12">
+        <div class="flex items-center justify-between mb-8">
             <div>
-                <h1 class="text-4xl font-black text-slate-900 dark:text-white font-display tracking-tight">Visual
+                <h1 class="text-4xl font-black text-slate-900 dark:text-white font-display tracking-tight">Project
                     Timeline</h1>
-                <p class="text-slate-500 font-medium mt-1">Cross-project labor planning and deadline monitoring</p>
+                <p class="text-slate-500 font-medium mt-1">Gantt chart for multi-project schedule and resource
+                    management
+                </p>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-500"></span><span
-                        class="text-[10px] font-black uppercase text-slate-400">Scheduled</span></div>
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span
-                        class="text-[10px] font-black uppercase text-slate-400">Completed</span></div>
-                <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-500"></span><span
-                        class="text-[10px] font-black uppercase text-slate-400">Overdue</span></div>
+            <div class="flex items-center gap-3">
+                <div
+                    class="flex p-1 bg-slate-100 dark:bg-white/5 rounded-xl border border-slate-200 dark:border-dark-border shadow-sm">
+                    <button onclick="changeView('Day')"
+                        class="view-btn px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all hover:bg-white dark:hover:bg-brand-600/20 text-slate-500 dark:text-slate-400"
+                        id="btn-day">Day</button>
+                    <button onclick="changeView('Week')"
+                        class="view-btn px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all bg-white dark:bg-brand-600 shadow-sm text-slate-900 dark:text-white"
+                        id="btn-week">Week</button>
+                    <button onclick="changeView('Month')"
+                        class="view-btn px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all hover:bg-white dark:hover:bg-brand-600/20 text-slate-500 dark:text-slate-400"
+                        id="btn-month">Month</button>
+                </div>
+
+                <div class="flex items-center gap-4 ml-4">
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-500"></span><span
+                            class="text-[10px] font-black uppercase text-slate-400">Scheduled</span></div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span
+                            class="text-[10px] font-black uppercase text-slate-400">Completed</span></div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-500"></span><span
+                            class="text-[10px] font-black uppercase text-slate-400">Overdue</span></div>
+                </div>
             </div>
         </div>
 
-        {{-- Timeline Container --}}
+        {{-- Gantt Chart Container --}}
         <div
             class="bg-white dark:bg-slate-900/40 rounded-[40px] border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
-            <div class="overflow-x-auto">
-                <div class="min-w-[1200px] p-8">
-                    {{-- Calendar Header (Months) --}}
-                    <div class="grid grid-cols-12 border-b border-slate-100 dark:border-dark-border mb-8 pb-4">
-                        @for($i = 0; $i < 12; $i++) <div class="text-center">
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{
-                                now()->startOfYear()->addMonths($i)->format('M Y') }}</span>
-                    </div>
-                    @endfor
-                </div>
-
-                {{-- Projects Row --}}
-                <div class="space-y-12">
-                    @foreach($clients as $client)
-                    <div class="relative">
-                        <div class="flex items-center gap-4 mb-4">
-                            <span
-                                class="px-3 py-1 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 text-[10px] font-black uppercase tracking-widest rounded-lg">P-{{
-                                $client->id }}</span>
-                            <h3 class="text-sm font-black text-slate-900 dark:text-white">{{ $client->first_name }} {{
-                                $client->last_name }}</h3>
-                        </div>
-
-                        {{-- Project Duration Bar --}}
-                        <div class="relative h-12 bg-slate-50 dark:bg-white/5 rounded-2xl overflow-hidden group">
-                            @php
-                            $yearStart = now()->startOfYear();
-                            $totalDays = 365;
-
-                            $start = $client->start_date ?: $client->created_at;
-                            $end = $client->delivery_date ?: $start->copy()->addMonths(3);
-
-                            $left = (($start->diffInDays($yearStart, false) * -1) / $totalDays) * 100;
-                            $width = ($start->diffInDays($end) / $totalDays) * 100;
-                            @endphp
-                            <div class="absolute h-full bg-slate-200 dark:bg-slate-700/50 rounded-2xl border border-slate-300 dark:border-slate-600"
-                                style="left: {{ $left }}%; width: {{ $width }}%">
-                                <div class="flex items-center justify-between px-4 h-full">
-                                    <span
-                                        class="text-[8px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Project
-                                        Span</span>
-                                    <span class="text-[8px] font-black uppercase tracking-widest text-slate-400">{{
-                                        $start->format('M d') }} - {{ $end->format('M d') }}</span>
-                                </div>
-                            </div>
-
-                            {{-- Tasks Inside Project --}}
-                            @foreach($client->tasks as $task)
-                            @php
-                            $taskStart = $task->start_date ?: ($task->created_at ?: $start);
-                            $taskEnd = $task->deadline ?: $taskStart->copy()->addDays(7);
-
-                            $tLeft = (($taskStart->diffInDays($yearStart, false) * -1) / $totalDays) * 100;
-                            $tWidth = ($taskStart->diffInDays($taskEnd) / $totalDays) * 100;
-
-                            $color = $task->status == 'Completed' ? 'bg-emerald-500' : ($taskEnd->isPast() ?
-                            'bg-rose-500' : 'bg-brand-500');
-                            @endphp
-                            <div class="absolute top-3 bottom-3 rounded-lg shadow-sm {{ $color }} cursor-pointer hover:scale-y-110 transition-all z-20 group/task"
-                                style="left: {{ $tLeft }}%; width: {{ max($tWidth, 0.5) }}%" title="{{ $task->title }}">
-                                {{-- Tooltip --}}
-                                <div
-                                    class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/task:block w-48 bg-slate-900 text-white p-3 rounded-xl text-xs z-50">
-                                    <div class="font-black mb-1 uppercase text-[8px] tracking-widest opacity-60">Task
-                                        Details</div>
-                                    <div class="font-bold mb-2">{{ $task->title }}</div>
-                                    <div class="flex justify-between text-[8px] font-black uppercase">
-                                        <span>Status</span>
-                                        <span
-                                            class="{{ $color == 'bg-rose-500' ? 'text-rose-400' : 'text-emerald-400' }}">{{
-                                            $task->status }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-
-                {{-- Grid Marks (Yearly) --}}
-                <div class="absolute inset-0 pointer-events-none flex py-8">
-                    @for($i = 0; $i < 13; $i++) <div
-                        class="flex-1 border-r border-slate-100 dark:border-white/5 last:border-0">
-                </div>
-                @endfor
-            </div>
+            <div id="gantt-target" class="w-full"></div>
         </div>
     </div>
 </div>
-</div>
-</div>
+
+{{-- Frappe Gantt Resources --}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/frappe-gantt/0.6.1/frappe-gantt.min.js"></script>
 
 <style>
-    /* Custom Scrollbar for Timeline */
-    .overflow-x-auto::-webkit-scrollbar {
+    /* Premium Styling Overrides for Frappe Gantt */
+    .gantt .grid-header {
+        fill: transparent !important;
+    }
+
+    .gantt .grid-row {
+        fill: transparent !important;
+    }
+
+    .gantt .grid-row:nth-child(even) {
+        fill: rgba(0, 0, 0, 0.01) !important;
+    }
+
+    .dark .gantt .grid-row:nth-child(even) {
+        fill: rgba(255, 255, 255, 0.02) !important;
+    }
+
+    .gantt .bar-wrapper .bar {
+        fill: #6366f1 !important;
+        rx: 8px;
+        ry: 8px;
+    }
+
+    .gantt .bar-wrapper .bar.bar-completed {
+        fill: #10b981 !important;
+    }
+
+    .gantt .bar-wrapper .bar.bar-overdue {
+        fill: #ef4444 !important;
+    }
+
+    .gantt .bar-wrapper .bar.bar-project {
+        fill: #f1f5f9 !important;
+        stroke: #e2e8f0 !important;
+        stroke-width: 1px;
+    }
+
+    .dark .gantt .bar-wrapper .bar.bar-project {
+        fill: rgba(255, 255, 255, 0.05) !important;
+        stroke: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .gantt .bar-label {
+        font-size: 10px !important;
+        font-weight: 800 !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        fill: #475569 !important;
+    }
+
+    .dark .gantt .bar-label {
+        fill: #cbd5e1 !important;
+    }
+
+    .gantt .bar-label.big {
+        fill: #fff !important;
+    }
+
+    .gantt .handle-group {
+        display: none !important;
+    }
+
+    /* Disable resize handles for cleaner view */
+
+    .gantt .lower-text {
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        fill: #94a3b8 !important;
+        text-transform: uppercase;
+    }
+
+    .gantt .upper-text {
+        font-size: 11px !important;
+        font-weight: 900 !important;
+        fill: #64748b !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .gantt .arrow {
+        stroke: #e2e8f0 !important;
+        stroke-width: 1.5px;
+        opacity: 0.5;
+    }
+
+    .dark .gantt .arrow {
+        stroke: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .gantt .grid-line {
+        stroke: #f1f5f9 !important;
+    }
+
+    .dark .gantt .grid-line {
+        stroke: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .gantt .today-highlight {
+        fill: rgba(99, 102, 241, 0.05) !important;
+    }
+
+    /* Transitions */
+    .bar-wrapper {
+        transition: filter 0.3s ease;
+    }
+
+    .bar-wrapper:hover {
+        filter: brightness(1.1);
+    }
+
+    /* Custom Scrollbar */
+    #gantt-target {
+        overflow-x: auto;
+    }
+
+    #gantt-target::-webkit-scrollbar {
         height: 6px;
     }
 
-    .overflow-x-auto::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .overflow-x-auto::-webkit-scrollbar-thumb {
+    #gantt-target::-webkit-scrollbar-thumb {
         background: #e2e8f0;
         border-radius: 10px;
     }
 
-    .dark .overflow-x-auto::-webkit-scrollbar-thumb {
+    .dark #gantt-target::-webkit-scrollbar-thumb {
         background: #334155;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function  () {
+        const tasks = [
+            @foreach($clients as $client)             @php
+                    $pStart = ($clien t- >start_date ?: $clien t- >created_at )- >format('Y-m-d');         $pEnd = ($clien t- >delivery_date ?: ($clien t- >start_date ? $clien t- >start_dat e- >copy( )- >addMonths(3) : $clien t- >created_a t- >copy( )- >addMonths(3)) )- >format('Y-m-d');         @endphp         {             id: 'Project_{{ $client->id }}',                 name: {!! json_encode($client->first_name . " " . $client->last_name) !!},
+                    start: '                                        end:                                                                                         custom_class                                    @f oreach($client->                                      $t Start = ($task->star t_ date ?: ($task->creat ed _at ?: $clie nt ->created_at))->f                          $tEnd = ($task->de ad line ?: ($task->st ar t_date ? $ ta sk->st ar t_date->copy()->addD ay s(7) : $cl ie nt->cr ea ted_at->copy () ->addDays(7)))->f                        $isOverdue =  \Carbon\Carb on ::parse($tEnd)->i sP ast() && $task->status                         $sta tu sClass = $task->status == 'Completed' ? 'bar-completed' : ($isOverdue ? 'bar-overdue' :                                                       id: 'Task_{{                                name: {!! js                    !!},
+                        start: '{{ $tStart }}',
+                                           }}',
+                           progress: {{ $task->stat us              }},
+                        dependencies:                 }}',
+                        custom        las                  },             @endforeach
+            @endforeach
+        ];
+
+        window.gantt = new Gantt("#gantt-target", tasks, {
+            view_mode: 'Week',
+            date_format: 'YYYY-MM-DD',
+            bar_height: 35,
+            padding: 18,
+            on_click: function (task) {
+                console.log(task);
+            },
+             on_date_change: function (task, start, end) {
+                console.log(task, start, end);
+            }
+        });
+    });
+
+    function changeView(mode) {
+        window.ange_view_mode(mode);
+
+        // Update Buttons
+        document.querySelectorAll('.view-btn').forEach(btn => {
+            btn.classList.remove('bg-white', 'dark:bg-brand-600', 'shadow-sm', 'text-slate-900', 'dark:text-white');
+            btn.classList.add('text-slate-500', 'dark:text-sla;
+        });
+
+        const activeBtn = document.getElementById('btn-' + mode.toLowerCase());
+        activeBtn.classList.add('bg-white', 'dark:bg-brand-600', 'shadow-sm', 'text-slate-900', 'dark:text-white');
+        activeBtn.classList.remove('text-slate-500', 'dark:text-slate-}
+</script>
 @endsection
