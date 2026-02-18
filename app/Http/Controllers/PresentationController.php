@@ -21,18 +21,41 @@ class PresentationController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required',
-            'layout_type' => 'required',
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'content' => 'nullable|string',
+            'layout_type' => 'required|string|in:standard,center,grid,profile',
+            'bg_color' => 'nullable|string|max:20',
+            'order' => 'required|integer',
+            'is_active' => 'boolean'
         ]);
 
-        PresentationSlide::create($request->all());
+        if (!isset($validated['is_active'])) {
+            $validated['is_active'] = true;
+        }
+
+        PresentationSlide::create($validated);
         return back()->with('success', 'Slide added successfully.');
     }
 
     public function update(Request $request, PresentationSlide $slide)
     {
-        $slide->update($request->all());
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'subtitle' => 'nullable|string|max:255',
+            'content' => 'nullable|string',
+            'layout_type' => 'required|string|in:standard,center,grid,profile',
+            'bg_color' => 'nullable|string|max:20',
+            'order' => 'required|integer',
+            'is_active' => 'boolean'
+        ]);
+
+        if (!isset($validated['is_active'])) {
+            $validated['is_active'] = false;
+        }
+
+        $slide->update($validated);
         return back()->with('success', 'Slide updated successfully.');
     }
 
