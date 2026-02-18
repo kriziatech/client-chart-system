@@ -55,11 +55,14 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/clients/{client}', [ClientController::class , 'update'])->name('clients.update');
             Route::patch('/clients/{client}/work-summary', [ClientController::class , 'updateWorkSummary'])->name('clients.updateWorkSummary');
             Route::post('/clients/{client}/gallery', [\App\Http\Controllers\ProjectGalleryController::class , 'store'])->name('gallery.store');
-        }
-        );
+            Route::get('/presentation', function () {
+                    return view('presentation'); }
+                )->name('presentation');
+            }
+            );
 
-        // Delete — admin only
-        Route::middleware('role:admin')->group(function () {
+            // Delete — admin only
+            Route::middleware('role:admin')->group(function () {
             Route::delete('/clients/{client}', [ClientController::class , 'destroy'])->name('clients.destroy');
             Route::delete('/gallery/{gallery}', [\App\Http\Controllers\ProjectGalleryController::class , 'destroy'])->name('gallery.destroy');
         }
