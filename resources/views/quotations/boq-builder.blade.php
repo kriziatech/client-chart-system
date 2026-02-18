@@ -179,7 +179,7 @@
                                         </div>
 
                                         <!-- Quantity -->
-                                        <div class="md:col-span-1">
+                                        <div class="md:col-span-2">
                                             <label
                                                 class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Qty</label>
                                             <input type="number" step="0.01" :name="`items[${index}][quantity]`"
