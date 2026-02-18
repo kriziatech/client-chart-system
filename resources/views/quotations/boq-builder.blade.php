@@ -149,16 +149,34 @@
                         </div>
 
                         <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <!-- Desktop Header -->
+                            <div
+                                class="hidden md:grid grid-cols-12 gap-2 px-6 py-3 bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-700">
+                                <div class="col-span-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                    Category</div>
+                                <div class="col-span-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                    Description</div>
+                                <div
+                                    class="col-span-2 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">
+                                    Qty</div>
+                                <div class="col-span-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                    Rate (₹)</div>
+                                <div
+                                    class="col-span-2 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
+                                    Total</div>
+                                <div class="col-span-1"></div>
+                            </div>
+
                             <template x-for="(item, index) in items" :key="index">
                                 <div
-                                    class="p-6 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all">
-                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                                    class="p-4 md:p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all border-b border-gray-100 dark:border-gray-700/50">
+                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
                                         <!-- Category -->
-                                        <div class="md:col-span-3">
+                                        <div class="md:col-span-2">
                                             <label
                                                 class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Category</label>
                                             <select :name="`items[${index}][category]`" x-model="item.category"
-                                                class="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none appearance-none">
+                                                class="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-xs font-bold text-slate-900 dark:text-white focus:border-brand-500 outline-none appearance-none">
                                                 <option value="Carpentry">Carpentry</option>
                                                 <option value="Electrical">Electrical</option>
                                                 <option value="Civil">Civil / Tiling</option>
@@ -170,12 +188,12 @@
                                         </div>
 
                                         <!-- Description -->
-                                        <div class="md:col-span-4">
+                                        <div class="md:col-span-3">
                                             <label
                                                 class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Description</label>
                                             <input type="text" :name="`items[${index}][description]`"
-                                                x-model="item.description" placeholder="What work is being done?"
-                                                class="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 dark:text-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none placeholder:text-slate-300">
+                                                x-model="item.description" placeholder="Work detail..."
+                                                class="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-xs font-medium text-slate-900 dark:text-white focus:border-brand-500 outline-none">
                                         </div>
 
                                         <!-- Quantity -->
@@ -184,7 +202,7 @@
                                                 class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Qty</label>
                                             <input type="number" step="0.01" :name="`items[${index}][quantity]`"
                                                 x-model="item.quantity" @input="calculateItemTotal(item)"
-                                                class="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2 py-3 text-sm font-black text-slate-900 dark:text-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none text-center">
+                                                class="w-full bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-xs font-black text-slate-900 dark:text-white focus:border-brand-500 outline-none text-center shadow-inner">
                                         </div>
 
                                         <!-- Rate -->
@@ -194,16 +212,16 @@
                                                 (₹)</label>
                                             <div class="relative group">
                                                 <span
-                                                    class="absolute left-4 top-3.5 text-slate-400 font-bold text-sm transition-colors group-focus-within:text-brand-500">₹</span>
+                                                    class="absolute left-2 top-2 text-slate-400 font-bold text-[10px]">₹</span>
                                                 <input type="number" step="0.01" :name="`items[${index}][rate]`"
                                                     x-model="item.rate" @input="calculateItemTotal(item)"
-                                                    class="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-4 py-3 text-sm font-black text-slate-900 dark:text-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none">
+                                                    class="w-full bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 rounded-lg pl-6 pr-2 py-2 text-xs font-black text-slate-900 dark:text-white focus:border-brand-500 outline-none shadow-inner">
                                             </div>
                                         </div>
 
                                         <!-- Amount -->
                                         <div
-                                            class="md:col-span-1 flex items-center justify-end font-bold text-gray-900 dark:text-white pt-2 pr-2">
+                                            class="md:col-span-2 flex items-center justify-end font-black text-slate-900 dark:text-brand-400 text-xs tracking-tighter">
                                             <span x-text="formatCurrency(item.amount)"></span>
                                         </div>
 
@@ -366,11 +384,3 @@ $initialDiscount = $quotation->discount_amount;
             formatCurrency(value) {
                 return new Intl.NumberFormat('en-IN', {
                     style: 'currency',
-                    currency: 'INR',
-                    maximumFractionDigits: 0
-                }).format(value);
-            }
-        }
-    }
-</script>
-@endsection
