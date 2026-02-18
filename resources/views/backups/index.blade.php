@@ -1,24 +1,70 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="px-8 py-6">
+<div class="px-8 py-6" x-data="backupManager()">
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight font-display">System
                 Backups</h1>
             <p class="text-slate-400 text-sm font-medium uppercase tracking-[2px] mt-1">Database & File Snapshots</p>
         </div>
-        <form action="{{ route('backups.create') }}" method="POST">
-            @csrf
-            <button type="submit"
-                class="bg-brand-600 text-white px-5 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition shadow-lg shadow-brand-500/20 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div>
+            <button @click="startBackup" :disabled="isLoading"
+                class="bg-brand-600 text-white px-5 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition shadow-lg shadow-brand-500/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg x-show="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                 </svg>
-                Create New Backup
+                <svg x-show="isLoading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                    </path>
+                </svg>
+                <span x-text="isLoading ? 'Running Backup...' : 'Create New Backup'"></span>
             </button>
-        </form>
+        </div>
+    </div>
+
+    <!-- Storage Info Card -->
+    <div
+        class="mb-8 bg-white dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-dark-border shadow-sm flex items-start gap-4">
+        <div class="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                </path>
+            </svg>
+        </div>
+        <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-1">Backup Storage
+                Location</h3>
+            <p
+                class="text-xs text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-dark-bg px-2 py-1 rounded inline-block border border-slate-200 dark:border-dark-border">
+                {{ $backupPath }}</p>
+            <p class="text-[11px] text-slate-400 mt-2">Backups are stored securely in this directory. You cannot change
+                this path from the browser for security reasons.</p>
+        </div>
+    </div>
+
+    <!-- Live Log Console -->
+    <div x-show="showConsole" x-collapse
+        class="mb-8 bg-slate-900 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden">
+        <div class="flex justify-between items-center px-4 py-2 bg-slate-800 border-b border-slate-700">
+            <span class="text-xs font-mono text-slate-400 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Backup Process Output
+            </span>
+            <button @click="showConsole = false" class="text-slate-500 hover:text-white"><svg class="w-4 h-4"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                    </path>
+                </svg></button>
+        </div>
+        <div class="p-4 font-mono text-xs text-emerald-400 h-64 overflow-y-auto" id="log-container">
+            <pre x-text="logContent" class="whitespace-pre-wrap font-mono"></pre>
+        </div>
     </div>
 
     @if(session('success'))
@@ -124,4 +170,71 @@
         </div>
     </div>
 </div>
+
+<script>
+    function backupManager() {
+        return {
+            isLoading: false,
+            showConsole: false,
+            logContent: 'Initializing...',
+            pollInterval: null,
+
+            async startBackup() {
+                this.isLoading = true;
+                this.showConsole = true;
+                this.logContent = "Requesting backup start...\n";
+
+                try {
+                    const response = await fetch("{{ route('backups.create') }}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.logContent += "Backup process started in background.\nStreaming logs...\n";
+                        this.startPolling();
+                    } else {
+                        this.logContent += "Error starting backup: " + data.message;
+                        this.isLoading = false;
+                    }
+                } catch (error) {
+                    this.logContent += "Fatal Error: " + error;
+                    this.isLoading = false;
+                }
+            },
+
+            startPolling() {
+                this.pollInterval = setInterval(async () => {
+                    try {
+                        const res = await fetch("{{ route('backups.stream') }}");
+                        const data = await res.json();
+                        this.logContent = data.log;
+
+                        // Auto scroll to bottom
+                        const container = document.getElementById('log-container');
+                        container.scrollTop = container.scrollHeight;
+
+                        // Check for completion keyword in log
+                        if (this.logContent.includes('Backup completed!') || this.logContent.includes('Backup failed')) {
+                            clearInterval(this.pollInterval);
+                            this.isLoading = false;
+
+                            // Reload page after delay to show new file
+                            if (this.logContent.includes('Backup completed!')) {
+                                setTimeout(() => window.location.reload(), 2000);
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Polling error', e);
+                    }
+                }, 1000); // Poll every second
+            }
+        }
+    }
+</script>
 @endsection

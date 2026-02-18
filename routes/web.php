@@ -88,6 +88,7 @@ Route::middleware(['auth'])->group(function () {
             // System Backups
             Route::get('/backups', [\App\Http\Controllers\BackupController::class , 'index'])->name('backups.index');
             Route::post('/backups', [\App\Http\Controllers\BackupController::class , 'create'])->name('backups.create');
+            Route::get('/backups/stream', [\App\Http\Controllers\BackupController::class , 'streamLog'])->name('backups.stream');
             Route::get('/backups/{file}', [\App\Http\Controllers\BackupController::class , 'download'])->name('backups.download');
             Route::delete('/backups/{file}', [\App\Http\Controllers\BackupController::class , 'destroy'])->name('backups.destroy');
         }
