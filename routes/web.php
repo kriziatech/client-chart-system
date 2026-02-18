@@ -12,17 +12,16 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/timeline', [\App\Http\Controllers\DashboardController::class, 'timeline'])->name('timeline');
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class , 'index'])->name('dashboard');
+    Route::get('/timeline', [\App\Http\Controllers\DashboardController::class , 'timeline'])->name('timeline');
     Route::get('/search', [\App\Http\Controllers\SearchController::class , 'index'])->name('search');
-});
 
-// Client Portal (Public)
-Route::get('/portal/{client:uuid}', [\App\Http\Controllers\ClientPortalController::class , 'show'])->name('portal.show');
-Route::get('/portal/{client:uuid}/print', [\App\Http\Controllers\ClientPortalController::class , 'downloadPdf'])->name('portal.print');
-Route::post('/portal/{client:uuid}/quotation/{quotation}/approve', [\App\Http\Controllers\ClientPortalController::class , 'approveQuotation'])->name('portal.quotation.approve');
+    // Client Portal (Public)
+    Route::get('/portal/{client:uuid}', [\App\Http\Controllers\ClientPortalController::class , 'show'])->name('portal.show');
+    Route::get('/portal/{client:uuid}/print', [\App\Http\Controllers\ClientPortalController::class , 'downloadPdf'])->name('portal.print');
+    Route::post('/portal/{client:uuid}/quotation/{quotation}/approve', [\App\Http\Controllers\ClientPortalController::class , 'approveQuotation'])->name('portal.quotation.approve');
 
-// All authenticated routes continued
+    // All authenticated routes continued
     // Create — admin and editor only (MUST be before {client} wildcard)
     Route::middleware('role:admin,editor')->group(function () {
             Route::get('/clients/create', [ClientController::class , 'create'])->name('clients.create');
