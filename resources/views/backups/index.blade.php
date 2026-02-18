@@ -26,6 +26,20 @@
                     </label>
                 </form>
 
+                <!-- Cleanup Button -->
+                <form action="{{ route('backups.cleanup') }}" method="POST"
+                    onsubmit="return confirm('This will keep the latest 7 backups and delete all older ones to save space. Proceed?')">
+                    @csrf
+                    <button type="submit"
+                        class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-4 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition flex items-center gap-2 border border-rose-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Cleanup Old backups
+                    </button>
+                </form>
+
                 <button @click="startBackup" :disabled="isLoading"
                     class="bg-brand-600 text-white px-5 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-700 transition shadow-lg shadow-brand-500/20 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg x-show="!isLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,7 +61,7 @@
     </div>
 
     <!-- Storage Info Card -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div
             class="bg-white dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-dark-border shadow-sm flex items-start gap-4">
             <div class="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-indigo-500">
@@ -65,6 +79,23 @@
                     class="text-xs text-slate-500 dark:text-slate-400 font-mono bg-slate-100 dark:bg-dark-bg px-2 py-1 rounded inline-block border border-slate-200 dark:border-dark-border">
                     {{ $backupPath }}</p>
                 <p class="text-[11px] text-slate-400 mt-2">Backups are stored securely in this directory.</p>
+            </div>
+        </div>
+
+        <div
+            class="bg-white dark:bg-dark-surface p-6 rounded-2xl border border-slate-200 dark:border-dark-border shadow-sm flex items-start gap-4">
+            <div class="p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl text-emerald-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-1">Backup
+                    Statistics</h3>
+                <p class="text-2xl font-black text-slate-900 dark:text-white">{{ count($backups) }}</p>
+                <p class="text-[11px] text-slate-400 mt-1 uppercase tracking-widest font-bold">Total Snapshots ({{
+                    $totalSize }} used)</p>
             </div>
         </div>
 

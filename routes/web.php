@@ -90,6 +90,7 @@ Route::middleware(['auth'])->group(function () {
                     Route::get('/stream', [\App\Http\Controllers\BackupController::class , 'streamLog'])->name('stream');
                     Route::get('/download/{file_name}', [\App\Http\Controllers\BackupController::class , 'download'])->name('download');
                     Route::delete('/{file_name}', [\App\Http\Controllers\BackupController::class , 'destroy'])->name('destroy');
+                    Route::post('/cleanup', [\App\Http\Controllers\BackupController::class , 'cleanup'])->name('cleanup');
                     Route::post('/restore/{file_name}', [\App\Http\Controllers\BackupController::class , 'restore'])->name('restore');
                 }
                 );

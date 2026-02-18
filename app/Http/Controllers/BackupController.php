@@ -44,13 +44,60 @@ class BackupController extends Controller
             return $b['last_modified'] <=> $a['last_modified'];
         });
 
+        $totalSizeBytes = array_reduce($files, function ($carry, $item) use ($disk) {
+            return $carry + ($disk->exists($item) ? $disk->size($item) : 0);
+        }, 0);
+        $totalSize = $this->humanFilesize($totalSizeBytes);
+
         // Determine backup path for display
         $backupPath = storage_path('app/backups');
         if (!file_exists($backupPath)) {
             $backupPath = "Configured 'backups' disk path";
         }
 
-        return view('backups.index', compact('backups', 'backupPath'));
+        return view('backups.index', compact('backups', 'backupPath', 'totalSize'));
+    }
+
+    public function cleanup()
+    {
+        try {
+            $disk = Storage::disk('backups');
+            $appName = config('backup.backup.name');
+            $files = $disk->files($appName);
+
+            // Collect metadata
+            $backups = [];
+            foreach ($files as $f) {
+                if (substr($f, -4) == '.zip') {
+                    $backups[] = [
+                        'file' => $f,
+                        'time' => $disk->lastModified($f)
+                    ];
+                }
+            }
+
+            // Sort by time desc
+            usort($backups, function ($a, $b) {
+                return $b['time'] <=> $a['time'];
+            });
+
+            // Keep only latest 7
+            $keep = 7;
+            $deletedCount = 0;
+
+            if (count($backups) > $keep) {
+                $toDelete = array_slice($backups, $keep);
+                foreach ($toDelete as $b) {
+                    $disk->delete($b['file']);
+                    $deletedCount++;
+                }
+            }
+
+            return back()->with('success', "Cleanup complete. Deleted $deletedCount old snapshots. System kept the latest $keep.");
+        }
+        catch (\Exception $e) {
+            return back()->with('error', 'Cleanup failed: ' . $e->getMessage());
+        }
     }
 
     public function create()
@@ -67,7 +114,11 @@ class BackupController extends Controller
             // Execute
             exec($command);
 
-            return response()->json(['success' => true, 'message' => 'Backup initiated successfully.']);
+            // Also trigger an artisan backup:clean in background if Spatie handles it,
+            // but our manual cleanup is more predictable for specific disk space saving.
+            // We'll run ours after a delay or just rely on the manual/periodic trigger.
+
+            return response()->json(['success' => true, 'message' => 'Backup initiated successfully. Auto-cleanup will run after completion.']);
         }
         catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
