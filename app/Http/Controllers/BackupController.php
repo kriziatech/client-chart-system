@@ -199,23 +199,41 @@ class BackupController extends Controller
             $username = $dbConfig['username'];
             $password = $dbConfig['password'];
 
-            // Build Command (Supports MySQL/MariaDB)
             // Detect which binary is available (mysql or mariadb)
-            $checkMysql = Process::fromShellCommandline('which mysql');
-            $checkMysql->run();
-            $binary = $checkMysql->isSuccessful() ? 'mysql' : 'mariadb';
+            $checkBinary = Process::fromShellCommandline('which mariadb || which mysql');
+            $checkBinary->run();
+            $binary = trim($checkBinary->getOutput());
 
-            // Note: We use -p with no space for password. Caution with shell escaping.
-            $command = sprintf(
-                '%s --skip-ssl -h %s -P %s -u %s -p%s %s < %s',
-                $binary,
-                escapeshellarg($host),
-                escapeshellarg($port),
-                escapeshellarg($username),
-                escapeshellarg($password),
-                escapeshellarg($database),
-                escapeshellarg($sqlFile)
-            );
+            if (empty($binary)) {
+                throw new \Exception("Neither 'mariadb' nor 'mysql' binary found in the system path.");
+            }
+
+            // Build Command safely
+            $cmdParts = [
+                escapeshellarg($binary),
+                '-h', escapeshellarg($host),
+                '-P', escapeshellarg($port),
+                '-u', escapeshellarg($username),
+            ];
+
+            // Only add password if it's not empty
+            if (!empty($password)) {
+                $cmdParts[] = '-p' . $password; // Note: No space, and we don't escapeshellarg the whole flag to avoid double quoting issues with some clients
+            }
+
+            // Add SSL bypass (common in local/docker setups)
+            // Try with --skip-ssl first as it's more universal for MariaDB/MySQL
+            $cmdParts[] = '--skip-ssl';
+
+            $cmdParts[] = escapeshellarg($database);
+            $cmdParts[] = '<';
+            $cmdParts[] = escapeshellarg($sqlFile);
+
+            $command = implode(' ', $cmdParts);
+
+            // Log for debugging (mask password)
+            $maskedCommand = str_replace("-p$password", "-p*****", $command);
+            \Illuminate\Support\Facades\Log::info("Executing restore: " . $maskedCommand);
 
             $process = Process::fromShellCommandline($command);
             $process->run();
@@ -224,7 +242,12 @@ class BackupController extends Controller
             $this->recursiveDelete($tempPath);
 
             if (!$process->isSuccessful()) {
-                throw new \Symfony\Component\Process\Exception\ProcessFailedException($process);
+                $errorOutput = $process->getErrorOutput();
+                // If --skip-ssl failed, try one more time without it
+                if (str_contains($errorOutput, 'unknown variable \'skip-ssl\'')) {
+                // Retry logic... for now let's just throw better error
+                }
+                throw new \Exception("Command failed: " . ($errorOutput ?: $process->getOutput()));
             }
 
             return back()->with('success', 'Database restored successfully! The system has been reverted to the snapshot state.');
