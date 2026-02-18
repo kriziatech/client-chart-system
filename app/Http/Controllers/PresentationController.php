@@ -26,9 +26,10 @@ class PresentationController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'content' => 'nullable|string',
-            'layout_type' => 'required|string|in:standard,center,grid,profile',
+            'layout_type' => 'required|string|in:standard,center,grid,profile,chart',
             'bg_color' => 'nullable|string|max:20',
             'order' => 'required|integer',
+            'chart_data' => 'nullable|array',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active', true);
@@ -43,9 +44,10 @@ class PresentationController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'nullable|string|max:255',
             'content' => 'nullable|string',
-            'layout_type' => 'required|string|in:standard,center,grid,profile',
+            'layout_type' => 'required|string|in:standard,center,grid,profile,chart',
             'bg_color' => 'nullable|string|max:20',
             'order' => 'required|integer',
+            'chart_data' => 'nullable|array',
         ]);
 
         $validated['is_active'] = $request->boolean('is_active');

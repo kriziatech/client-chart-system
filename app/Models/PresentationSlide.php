@@ -16,6 +16,12 @@ class PresentationSlide extends Model
         'layout_type',
         'bg_color',
         'order',
-        'is_active'
+        'is_active',
+        'chart_data'
+    ];
+
+    protected $casts = [
+        'chart_data' => 'array',
+        'is_active' => 'boolean'
     ];
 }
