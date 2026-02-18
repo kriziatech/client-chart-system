@@ -22,7 +22,39 @@
         modal.classList.remove('hidden');
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    window.suggestWithAI = function(type) {
+        const  titleInput = document.getElementById(type + '-title');
+        const topic = titleInput.value || 'interior design'; // Use the current title as topic, or a default
+
+        // Show loading state
+        const btn = event.currentTarget;
+        const originalText  = btn.innerHTML;
+        btn.innerHTML = '<span class="animate-spin">🌀</span> Generating...';
+        btn.disabled = true;
+
+        fetch('{{ route("presentation.slides.suggest") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ topic: topic })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.title) {
+                document.getElementById(type + '-title').value = data.title;
+                document.getElementById(type + '-subtitle').value = data.subtitle || '';
+                document.getElementById(type + '-content').value = data.content || '';
+            }
+        })
+        .finally(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', fu
         const el = document.getElementById('slides-list');
         if (el) {
             Sortable.create(el, {
@@ -139,33 +171,46 @@
         </div>
         <form action="{{ route('presentation.slides.store') }}" method="POST" class="p-8 space-y-6">
             @csrf
-            <div class="grid grid-cols-2 gap-6">
-                <div class="space-y-2">
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
                     <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Slide
                         Title</label>
-                    <input type="text" name="title" required
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white"
-                        placeholder="e.g. Visual Timeline">
+                    <button type="button" onclick="suggestWithAI('add')"
+                        class="text-[10px] font-bold text-brand-500 hover:text-brand-600 flex items-center gap-1 uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-lg">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        AI Suggest
+                    </button>
                 </div>
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Layout
-                        Type</label>
-                    <select name="layout_type"
+                <input type="text" name="title" id="add-title" required
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Subtitle</label>
+                    <input type="text" name="subtitle" id="add-subtitle"
                         class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
-                        <option value="standard">Standard Card</option>
-                        <option value="center">Centered Large</option>
-                        <option value="grid">2-Column Grid</option>
-                        <option value="profile">Profile Layout</option>
+                </div>
+                <div class="space-y-4">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Layout</label>
+                    <select name="layout_type" id="add-layout"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+                        <option value="standard">Standard (Split)</option>
+                        <option value="center">Center Focused</option>
+                        <option value="grid">Data Grid</option>
+                        <option value="profile">Profile/Portfolio</option>
                     </select>
                 </div>
             </div>
 
-            <div class="space-y-2">
-                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Content (HTML
-                    Supported)</label>
-                <textarea name="content" rows="6"
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white"
-                    placeholder="Slide body content..."></textarea>
+            <div class="space-y-4">
+                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Slide Content
+                    (HTML/Markdown)</label>
+                <textarea name="content" id="add-content" rows="4"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white"></textarea>
             </div>
 
             <div class="grid grid-cols-2 gap-6">
@@ -221,9 +266,19 @@
             @csrf
             @method('PATCH')
             <div class="grid grid-cols-2 gap-6">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Slide
-                        Title</label>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Slide
+                            Title</label>
+                        <button type="button" onclick="suggestWithAI('edit')"
+                            class="text-[10px] font-bold text-brand-500 hover:text-brand-600 flex items-center gap-1 uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-lg">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            AI Suggest
+                        </button>
+                    </div>
                     <input type="text" name="title" id="edit-title" required
                         class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
                 </div>
