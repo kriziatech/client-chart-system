@@ -156,7 +156,7 @@
         </div>
         <form id="edit-slide-form" method="POST" class="p-8 space-y-6">
             @csrf
-            @method('PUT')
+            @method('PATCH')
             <div class="grid grid-cols-2 gap-6">
                 <div class="space-y-2">
                     <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Slide
@@ -223,21 +223,18 @@
 </div>
 
 <script>
-    function editSlide(slide) {
-        const modal = document.getElementById('edit-slide-modal');
-        const form = document.getElementById('edit-slide-form');
+        function editSlide(slide                const modal = document.getElementById('edit-slide-m        ');
+        const form = document.getElementById('edit-slf        );
 
-        // Set action URL
-        form.action = `/presentation/slides/${slide.id}`;
+        // Set        ion URL reliably
+        form.action = window.loca.        in + '/presentation        des/' + slide.id;
 
         // Populate fields
-        document.getElementById('edit-title').value = slide.title;
-        document.getElementById('edit-subtitle').value = slide.subtitle || '';
-        document.getElementById('edit-content').value = slide.content || '';
-        document.getElementById('edit-layout').value = slide.layout_type;
-        document.getElementById('edit-order').value = slide.order;
-        document.getElementById('edit-bg').value = slide.bg_color || '#0F172A';
-        document.getElementById('edit-active').checked = slide.is_active;
+        docum        getElementById('edit-title').value = slide.title;
+        document.getE        ntById('edit-subtitle').value = slide.subtitle || '';
+        documen        tElementById('edit-content').value = slide.content || '';
+                ment.getElementById('edit-layout').value = slide.layout_typ               document.getElementById('edit-order').value = slide.order;
+              cument.getElementById('edit-bg').value = slide.bg_color || '#0F172            document.getElementById('edit-a    ctid = slide.is_active;
 
         modal.classList.remove('hidden');
     }

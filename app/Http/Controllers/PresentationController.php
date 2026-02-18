@@ -28,12 +28,9 @@ class PresentationController extends Controller
             'layout_type' => 'required|string|in:standard,center,grid,profile',
             'bg_color' => 'nullable|string|max:20',
             'order' => 'required|integer',
-            'is_active' => 'boolean'
         ]);
 
-        if (!isset($validated['is_active'])) {
-            $validated['is_active'] = true;
-        }
+        $validated['is_active'] = $request->boolean('is_active', true);
 
         PresentationSlide::create($validated);
         return back()->with('success', 'Slide added successfully.');
@@ -48,12 +45,9 @@ class PresentationController extends Controller
             'layout_type' => 'required|string|in:standard,center,grid,profile',
             'bg_color' => 'nullable|string|max:20',
             'order' => 'required|integer',
-            'is_active' => 'boolean'
         ]);
 
-        if (!isset($validated['is_active'])) {
-            $validated['is_active'] = false;
-        }
+        $validated['is_active'] = $request->boolean('is_active');
 
         $slide->update($validated);
         return back()->with('success', 'Slide updated successfully.');
