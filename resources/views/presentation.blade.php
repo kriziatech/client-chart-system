@@ -379,7 +379,7 @@
             center: true,
             controls: true,
             progress: true,
-      Wheel: true,
+            Wheel: true,
             transition: 'slide',
             backgroundTransition: 'fade',
         });
