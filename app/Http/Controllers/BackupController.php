@@ -14,10 +14,15 @@ class BackupController extends Controller
         $disk = Storage::disk('backups');
         $appName = config('backup.backup.name');
 
-        // Ensure directory exists
-        if (!$disk->exists($appName)) {
-            $disk->makeDirectory($appName);
-            chmod(storage_path('app/backups/' . $appName), 0777);
+        // Ensure destination and temp directories exist with full permissions
+        $backupsRoot = storage_path('app/backups');
+        $tempRoot = storage_path('app/backup-temp');
+
+        foreach ([$backupsRoot, $tempRoot, $backupsRoot . '/' . $appName] as $path) {
+            if (!file_exists($path)) {
+                mkdir($path, 0777, true);
+            }
+            @chmod($path, 0777);
         }
 
         $files = $disk->files($appName);
