@@ -216,38 +216,40 @@ class BackupController extends Controller
                 '-u', escapeshellarg($username),
             ];
 
-            // Only add password if it's not empty
             if (!empty($password)) {
-                $cmdParts[] = '-p' . $password; // Note: No space, and we don't escapeshellarg the whole flag to avoid double quoting issues with some clients
+                $cmdParts[] = '-p' . escapeshellarg($password); // Added escapeshellarg for safety
             }
 
-            // Add SSL bypass (common in local/docker setups)
-            // Try with --skip-ssl first as it's more universal for MariaDB/MySQL
-            $cmdParts[] = '--skip-ssl';
+            // Database and file
+            $finalParts = [
+                escapeshellarg($database),
+                '<',
+                escapeshellarg($sqlFile)
+            ];
 
-            $cmdParts[] = escapeshellarg($database);
-            $cmdParts[] = '<';
-            $cmdParts[] = escapeshellarg($sqlFile);
+            // Try first with SSL bypass
+            $fullCmd = implode(' ', array_merge($cmdParts, ['--skip-ssl'], $finalParts));
 
-            $command = implode(' ', $cmdParts);
+            \Illuminate\Support\Facades\Log::info("Attempting restore with: " . str_replace($password, '*****', $fullCmd));
 
-            // Log for debugging (mask password)
-            $maskedCommand = str_replace("-p$password", "-p*****", $command);
-            \Illuminate\Support\Facades\Log::info("Executing restore: " . $maskedCommand);
-
-            $process = Process::fromShellCommandline($command);
+            $process = Process::fromShellCommandline($fullCmd);
             $process->run();
+
+            if (!$process->isSuccessful() && str_contains($process->getErrorOutput(), 'unknown variable')) {
+                // Retry without --skip-ssl
+                $fullCmd = implode(' ', array_merge($cmdParts, $finalParts));
+                \Illuminate\Support\Facades\Log::info("Retrying restore without --skip-ssl: " . str_replace($password, '*****', $fullCmd));
+                $process = Process::fromShellCommandline($fullCmd);
+                $process->run();
+            }
 
             // Clean up
             $this->recursiveDelete($tempPath);
 
             if (!$process->isSuccessful()) {
-                $errorOutput = $process->getErrorOutput();
-                // If --skip-ssl failed, try one more time without it
-                if (str_contains($errorOutput, 'unknown variable \'skip-ssl\'')) {
-                // Retry logic... for now let's just throw better error
-                }
-                throw new \Exception("Command failed: " . ($errorOutput ?: $process->getOutput()));
+                $error = $process->getErrorOutput() ?: $process->getOutput();
+                \Illuminate\Support\Facades\Log::error("Restore failed: " . $error);
+                throw new \Exception("Restore failed: " . $error);
             }
 
             return back()->with('success', 'Database restored successfully! The system has been reverted to the snapshot state.');
