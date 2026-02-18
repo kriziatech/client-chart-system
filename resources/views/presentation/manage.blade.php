@@ -23,12 +23,12 @@
     }
 
     window.suggestWithAI = function(type) {
-        const  titleInput = document.getElementById(type + '-title');
+        const   titleInput = document.getElementById(type + '-title');
         const topic = titleInput.value || 'interior design'; // Use the current title as topic, or a default
 
         // Show loading state
         const btn = event.currentTarget;
-        const originalText  = btn.innerHTML;
+        const originalTex t  = btn.innerHTML;
         btn.innerHTML = '<span class="animate-spin">🌀</span> Generating...';
         btn.disabled = true;
 
@@ -54,7 +54,7 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', fu
+    document.addEventListener('DOMContentLoaded',  {
         const el = document.getElementById('slides-list');
         if (el) {
             Sortable.create(el, {
