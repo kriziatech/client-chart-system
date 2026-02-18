@@ -79,7 +79,41 @@ class BackupController extends Controller
         $logFile = storage_path('logs/backup-process.log');
         if (file_exists($logFile)) {
             $content = file_get_contents($logFile);
-            return response()->json(['log' => $content]);
+
+            // Clean up Spatie backup output to be human readable
+            $lines = explode("\n", $content);
+            $formattedLines = [];
+
+            foreach ($lines as $line) {
+                // Strip ANSI escape codes
+                $line = preg_replace('/\x1b\[[0-9;]*m/', '', $line);
+
+                if (empty(trim($line)))
+                    continue;
+
+                // Friendly translations
+                $replacements = [
+                    'Starting backup...' => '🚀 Starting system snapshot...',
+                    'Dumping database' => '🗄️ Capturing database state...',
+                    'Determining files' => '🔍 Scanning system files...',
+                    'Zipping files' => '📦 Creating secure archive...',
+                    'Copying zip' => '💾 Storing backup safely...',
+                    'Backup completed!' => '✅ Success: System state preserved!',
+                    'Backup failed' => '❌ Error: Backup process interrupted',
+                    'Cleanup' => '🧹 Removing expired snapshots...',
+                ];
+
+                foreach ($replacements as $search => $replace) {
+                    if (str_contains($line, $search)) {
+                        $line = $replace;
+                        break;
+                    }
+                }
+
+                $formattedLines[] = $line;
+            }
+
+            return response()->json(['log' => implode("\n", $formattedLines)]);
         }
         return response()->json(['log' => 'Waiting for logs...']);
     }
@@ -96,6 +130,120 @@ class BackupController extends Controller
         else {
             return back()->with('error', 'Backup file doesn\'t exist.');
         }
+    }
+
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'backup_file' => 'required|file|mimes:zip|max:51200' // Max 50MB
+        ]);
+
+        $file = $request->file('backup_file');
+        $appName = config('backup.backup.name');
+
+        $path = Storage::disk('backups')->putFileAs($appName, $file, $file->getClientOriginalName());
+
+        if ($path) {
+            return back()->with('success', 'Backup uploaded successfully.');
+        }
+
+        return back()->with('error', 'Failed to upload backup.');
+    }
+
+    public function restore($file_name)
+    {
+        $appName = config('backup.backup.name');
+        $filePath = Storage::disk('backups')->path($appName . '/' . $file_name);
+
+        if (!file_exists($filePath)) {
+            return back()->with('error', 'Backup file not found.');
+        }
+
+        try {
+            $tempPath = storage_path('app/restore-temp-' . time());
+            if (!mkdir($tempPath, 0777, true)) {
+                throw new \Exception("Failed to create temp directory.");
+            }
+
+            // Extract ZIP
+            $zip = new \ZipArchive;
+            if ($zip->open($filePath) === TRUE) {
+                $zip->extractTo($tempPath);
+                $zip->close();
+            }
+            else {
+                throw new \Exception("Failed to open ZIP file.");
+            }
+
+            // Find SQL dump
+            $sqlFile = null;
+            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($tempPath));
+            foreach ($files as $file) {
+                if ($file->isFile() && $file->getExtension() === 'sql') {
+                    $sqlFile = $file->getRealPath();
+                    break;
+                }
+            }
+
+            if (!$sqlFile) {
+                throw new \Exception("No SQL dump found in the backup ZIP.");
+            }
+
+            // Database credentials from config
+            $connection = config('database.default');
+            $dbConfig = config("database.connections.{$connection}");
+
+            $host = $dbConfig['host'];
+            $port = $dbConfig['port'];
+            $database = $dbConfig['database'];
+            $username = $dbConfig['username'];
+            $password = $dbConfig['password'];
+
+            // Build Command (Supports MySQL/MariaDB)
+            // Note: We use -p with no space for password. Caution with shell escaping.
+            $command = sprintf(
+                'mysql -h %s -P %s -u %s -p%s %s < %s',
+                escapeshellarg($host),
+                escapeshellarg($port),
+                escapeshellarg($username),
+                escapeshellarg($password),
+                escapeshellarg($database),
+                escapeshellarg($sqlFile)
+            );
+
+            $process = Process::fromShellCommandline($command);
+            $process->run();
+
+            // Clean up
+            $this->recursiveDelete($tempPath);
+
+            if (!$process->isSuccessful()) {
+                throw new \Symfony\Component\Process\Exception\ProcessFailedException($process);
+            }
+
+            return back()->with('success', 'Database restored successfully! The system has been reverted to the snapshot state.');
+        }
+        catch (\Exception $e) {
+            if (isset($tempPath) && file_exists($tempPath)) {
+                $this->recursiveDelete($tempPath);
+            }
+            return back()->with('error', 'Restore failed: ' . $e->getMessage());
+        }
+    }
+
+    private function recursiveDelete($dir)
+    {
+        if (!file_exists($dir))
+            return true;
+        if (!is_dir($dir))
+            return unlink($dir);
+        foreach (scandir($dir) as $item) {
+            if ($item == '.' || $item == '..')
+                continue;
+            if (!$this->recursiveDelete($dir . DIRECTORY_SEPARATOR . $item))
+                return false;
+        }
+        return rmdir($dir);
     }
 
     public function destroy($file_name)

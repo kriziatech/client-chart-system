@@ -256,8 +256,8 @@ class QuotationController extends Controller
             // Auto-generate project number
             $client->update(['file_number' => 'P-' . str_pad($client->id, 4, '0', STR_PAD_LEFT)]);
 
-            // Link quotation to the new project
-            $quotation->update(['client_id' => $client->id]);
+            // Link all quotations of this lead to the new project
+            Quotation::where('lead_id', $lead->id)->update(['client_id' => $client->id]);
 
             // Mark lead as Won
             $lead->update(['status' => 'Won']);

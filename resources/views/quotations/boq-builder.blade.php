@@ -155,8 +155,10 @@
                                     <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
                                         <!-- Category -->
                                         <div class="md:col-span-3">
+                                            <label
+                                                class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Category</label>
                                             <select :name="`items[${index}][category]`" x-model="item.category"
-                                                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                                class="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 dark:text-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none appearance-none">
                                                 <option value="Carpentry">Carpentry</option>
                                                 <option value="Electrical">Electrical</option>
                                                 <option value="Civil">Civil / Tiling</option>
@@ -169,25 +171,33 @@
 
                                         <!-- Description -->
                                         <div class="md:col-span-4">
+                                            <label
+                                                class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Description</label>
                                             <input type="text" :name="`items[${index}][description]`"
-                                                x-model="item.description" placeholder="Description of work..."
-                                                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                                x-model="item.description" placeholder="What work is being done?"
+                                                class="w-full bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 dark:text-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none placeholder:text-slate-300">
                                         </div>
 
                                         <!-- Quantity -->
                                         <div class="md:col-span-1">
+                                            <label
+                                                class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Qty</label>
                                             <input type="number" step="0.01" :name="`items[${index}][quantity]`"
                                                 x-model="item.quantity" @input="calculateItemTotal(item)"
-                                                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-2 text-sm text-gray-900 dark:text-white outline-none text-center">
+                                                class="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-2 py-3 text-sm font-black text-slate-900 dark:text-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none text-center">
                                         </div>
 
                                         <!-- Rate -->
                                         <div class="md:col-span-2">
-                                            <div class="relative">
-                                                <span class="absolute left-3 top-2 text-gray-400">₹</span>
+                                            <label
+                                                class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Rate
+                                                (₹)</label>
+                                            <div class="relative group">
+                                                <span
+                                                    class="absolute left-4 top-3.5 text-slate-400 font-bold text-sm transition-colors group-focus-within:text-brand-500">₹</span>
                                                 <input type="number" step="0.01" :name="`items[${index}][rate]`"
                                                     x-model="item.rate" @input="calculateItemTotal(item)"
-                                                    class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg pl-7 pr-3 py-2 text-sm text-gray-900 dark:text-white outline-none">
+                                                    class="w-full bg-slate-50 dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-4 py-3 text-sm font-black text-slate-900 dark:text-white focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all outline-none">
                                             </div>
                                         </div>
 
@@ -318,49 +328,49 @@ $initialDiscount = $quotation->discount_amount;
             taxAmount: 0,
             totalAmount: 0,
 
-                init() {
-        if (this.items.length === 0) {
-            this.addItem();
+            init() {
+                if (this.items.length === 0) {
+                    this.addItem();
+                }
+                this.calculateFinalTotal();
+            },
+
+            addItem() {
+                this.items.push({
+                    category: 'Carpentry',
+                    description: '',
+                    quantity: 1,
+                    rate: 0,
+                    amount: 0
+                });
+            },
+
+            removeItem(index) {
+                this.items.splice(index, 1);
+                this.calculateFinalTotal();
+            },
+
+            calculateItemTotal(item) {
+                item.amount = (parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0);
+                this.calculateFinalTotal();
+            },
+
+            calculateFinalTotal() {
+                this.subtotal = this.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+
+                let afterDiscount = this.subtotal - (parseFloat(this.discount_amount) || 0);
+                this.taxAmount = afterDiscount * (parseFloat(this.gst_percentage) / 100);
+                this.totalAmount = afterDiscount + this.taxAmount;
+            },
+
+            formatCurrency(value) {
+                return new Intl.NumberFormat('en-IN', {
+                    style: 'currency',
+                    currency: 'INR',
+                    maximumFractionDigits: 0
+                }).format(value);
+            }
         }
-        this.calculateFinalTotal();
-    },
-
-    addItem() {
-        this.items.push({
-            category: 'Carpentry',
-            description: '',
-            quantity: 1,
-            rate: 0,
-            amount: 0
-        });
-    },
-
-    removeItem(index) {
-        this.items.splice(index, 1);
-        this.calculateFinalTotal();
-    },
-
-    calculateItemTotal(item) {
-        item.amount = (parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0);
-        this.calculateFinalTotal();
-    },
-
-    calculateFinalTotal() {
-        this.subtotal = this.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-
-        let afterDiscount = this.subtotal - (parseFloat(this.discount_amount) || 0);
-        this.taxAmount = afterDiscount * (parseFloat(this.gst_percentage) / 100);
-        this.totalAmount = afterDiscount + this.taxAmount;
-    },
-
-    formatCurrency(value) {
-        return new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0
-        }).format(value);
     }
-    }
-}
 </script>
 @endsection

@@ -1363,8 +1363,7 @@ default => 'overview',
                 <button onclick="document.getElementById('add-handover-item-modal').classList.add('hidden')"
                     class="text-slate-400 hover:text-slate-600 transition">&times;</button>
             </div>
-            <form action="{{ route('handover.item.store', $client->handover ?? 0) }}" method="POST"
-                class="p-8 space-y-6">
+            <form action="{{ route('handover.item.store', $client) }}" method="POST" class="p-8 space-y-6">
                 @csrf
                 <div>
                     <label

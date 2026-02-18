@@ -68,23 +68,33 @@ trait Auditable
 
         // Build a human-readable description
         $modelName = class_basename($model);
-        $identifier = $model->name ?? $model->title ?? "#{$model->id}";
+        $identifier = $model->name ?? $model->title ?? $model->first_name ?? $model->quotation_number ?? "#{$model->id}";
 
-        $descriptions = [
-            'created' => "{$modelName} \"{$identifier}\" was created",
-            'updated' => "{$modelName} \"{$identifier}\" was updated",
-            'deleted' => "{$modelName} \"{$identifier}\" was deleted",
+        $friendlyAction = [
+            'created' => 'generated a new',
+            'updated' => 'modified the',
+            'deleted' => 'permanently removed',
         ];
+
+        $detail = "";
+        if ($action === 'updated' && !empty($newValues)) {
+            $changedFields = array_keys($newValues);
+            $fieldList = implode(', ', array_map(fn($f) => str_replace('_', ' ', $f), $changedFields));
+            $detail = " (Changes in: {$fieldList})";
+        }
+
+        $actionLabel = $friendlyAction[$action] ?? $action;
+        $description = "{$actionLabel} {$modelName} \"{$identifier}\"{$detail}";
 
         AuditLog::create([
             'user_id' => $user?->id,
             'user_name' => $user?->name ?? 'System',
-            'user_role' => $user?->role?->name ?? 'System',
+            'user_role' => $user?->role?->name ?? 'Personnel',
             'action' => ucfirst($action),
             'module' => $modelName,
             'model_type' => get_class($model),
             'model_id' => $model->id,
-            'description' => $descriptions[$action] ?? "{$action} {$modelName}",
+            'description' => $description,
             'old_values' => $oldValues,
             'new_values' => $newValues,
             'status' => 'success',

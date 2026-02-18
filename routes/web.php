@@ -83,16 +83,21 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/attendances', [AttendanceController::class , 'index'])->name('attendances.index');
 
             // System Backups
-            Route::get('/backups', [\App\Http\Controllers\BackupController::class , 'index'])->name('backups.index');
-            Route::post('/backups', [\App\Http\Controllers\BackupController::class , 'create'])->name('backups.create');
-            Route::get('/backups/stream', [\App\Http\Controllers\BackupController::class , 'streamLog'])->name('backups.stream');
-            Route::get('/backups/{file}', [\App\Http\Controllers\BackupController::class , 'download'])->name('backups.download');
-            Route::delete('/backups/{file}', [\App\Http\Controllers\BackupController::class , 'destroy'])->name('backups.destroy');
-        }
-        );
+            Route::prefix('backups')->name('backups.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\BackupController::class , 'index'])->name('index');
+                    Route::post('/create', [\App\Http\Controllers\BackupController::class , 'create'])->name('create');
+                    Route::post('/upload', [\App\Http\Controllers\BackupController::class , 'upload'])->name('upload');
+                    Route::get('/stream', [\App\Http\Controllers\BackupController::class , 'streamLog'])->name('stream');
+                    Route::get('/download/{file_name}', [\App\Http\Controllers\BackupController::class , 'download'])->name('download');
+                    Route::delete('/{file_name}', [\App\Http\Controllers\BackupController::class , 'destroy'])->name('destroy');
+                    Route::post('/restore/{file_name}', [\App\Http\Controllers\BackupController::class , 'restore'])->name('restore');
+                }
+                );
+            }
+            );
 
-        // Attendance Actions (All Authenticated Users except sales)
-        Route::middleware('role:admin,editor,viewer,client')->group(function () {
+            // Attendance Actions (All Authenticated Users except sales)
+            Route::middleware('role:admin,editor,viewer,client')->group(function () {
             Route::get('/attendance/status', [AttendanceController::class , 'status'])->name('attendance.status');
             Route::post('/attendance/check-in', [AttendanceController::class , 'checkIn'])->name('attendance.check-in');
             Route::post('/attendance/check-out', [AttendanceController::class , 'checkOut'])->name('attendance.check-out');
@@ -195,7 +200,7 @@ Route::middleware(['auth'])->group(function () {
 
         // --- Handover & Feedback --- (Restricted from sales)
         Route::middleware('role:admin,editor,viewer,client')->group(function () {
-            Route::post('/handovers/{handover}/items', [\App\Http\Controllers\HandoverController::class , 'storeChecklistItem'])->name('handover.item.store');
+            Route::post('/clients/{client}/handover/items', [\App\Http\Controllers\HandoverController::class , 'storeChecklistItem'])->name('handover.item.store');
             Route::patch('/handover-items/{item}', [\App\Http\Controllers\HandoverController::class , 'updateChecklistStatus'])->name('handover.item.update');
             Route::post('/clients/{client}/handover/complete', [\App\Http\Controllers\HandoverController::class , 'completeHandover'])->name('handover.complete');
             Route::post('/clients/{client}/feedback', [\App\Http\Controllers\HandoverController::class , 'storeFeedback'])->name('feedback.store');

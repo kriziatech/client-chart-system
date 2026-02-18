@@ -13,12 +13,17 @@ class HandoverController extends Controller
     /**
      * Store Handover Checklist Item
      */
-    public function storeChecklistItem(Request $request, Handover $handover)
+    public function storeChecklistItem(Request $request, Client $client)
     {
-        if (auth()->user()->isViewer() && $handover->client->user_id !== auth()->id()) {
+        if (auth()->user()->isViewer() && $client->user_id !== auth()->id()) {
             abort(403);
         }
         $request->validate(['item_name' => 'required|string']);
+
+        $handover = $client->handover ?? Handover::create([
+            'client_id' => $client->id,
+            'status' => 'pending'
+        ]);
 
         HandoverChecklistItem::create([
             'handover_id' => $handover->id,
