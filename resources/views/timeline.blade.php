@@ -9,8 +9,7 @@
                 <h1 class="text-4xl font-black text-slate-900 dark:text-white font-display tracking-tight">Project
                     Timeline</h1>
                 <p class="text-slate-500 font-medium mt-1">Gantt chart for multi-project schedule and resource
-                    management
-                </p>
+                    management</p>
             </div>
             <div class="flex items-center gap-3">
                 <div
@@ -112,8 +111,6 @@
         display: none !important;
     }
 
-    /* Disable resize handles for cleaner view */
-
     .gantt .lower-text {
         font-size: 10px !important;
         font-weight: 700 !important;
@@ -151,7 +148,6 @@
         fill: rgba(99, 102, 241, 0.05) !important;
     }
 
-    /* Transitions */
     .bar-wrapper {
         transition: filter 0.3s ease;
     }
@@ -160,7 +156,6 @@
         filter: brightness(1.1);
     }
 
-    /* Custom Scrollbar */
     #gantt-target {
         overflow-x: auto;
     }
@@ -184,54 +179,68 @@
         const tasks = [
             @foreach($clients as $client)
             @php
-                    $pStartStr = ($cli en t->start_date ?: $cli en t->created_ at )->format('Y-m-d'           $pEndObj = ($ cl ient->delivery_date ?: ($ cl ient->start_date ? $ cl ient->star t_ date-> co py()->addMonths(3) : $ cl ient->crea te d_at-> co py()->addMonth s( 3)));
-                   r = $pEn        m-             @endphp
-                {
-                      roject_{{ $client->id }}',
-                    name: {!! json_encode($client->first_name . " " . $client                                          st                            }}',
-                                         $pEndStr }}',
-                      0,             custom_clas s:  'bar-project'
-                      t->tasks as $tas k) 
-                     @ php
-                          $tStart Ob j = ($task->start        _at ?: $client -> created_at));
-                           $t StartStr =  $ tStart Ob j->format('Y-m-d');
-                              $tEndObj =  ( $task->deadline ?        task->start_date->copy()->add Days(7) : $c li ent->created_at-> co py()->addDays(7)));
-           ndStr = $tEndObj->fo rm at('Y-m-d');
-                        $isOverdue = $tEndObj->isPast() && $task->status !=                        ss            pleted' ? 'bar-completed' :                 ue' : 'bar-ongoing');
-                                            {
-                        id: 'Task_{{ $task->id }                                name: { !! json _e ncode($task->title) !!},
-                        $tStartStr }}',
-                        end                                    progress: {{ $t        let        ,
-                    dependencies: 'Project_{{ $client->id }}',
-                        custom_class: '{{ $statusClass }}'
-                    },
-                @endforeach
-            @endforeach
+                    $pStartStr = ($client -> start_date ?: $client -> created_at) -> format('Y-m-d');
+        $pEndObj = ($client -> delivery_date ?: ($client -> start_date ? $client -> start_date -> copy() -> addMonths(3) : $client -> created_at -> copy() -> addMonths(3)));
+        $pEndStr = $pEndObj -> format('Y-m-d');
+        @endphp
+        {
+            id: 'Project_{{ $client->id }}',
+                name: { !!json_encode($client -> first_name. " ".$client -> last_name)!! },
+            start: '{{ $pStartStr }}',
+                end: '{{ $pEndStr }}',
+                    progress: 0,
+                        custom_class: 'bar-project'
+        },
+        @foreach($client -> tasks as $task)
+        @php
+        $tStartObj = ($task -> start_date ?: ($task -> created_at ?: $client -> created_at));
+        $tStartStr = $tStartObj -> format('Y-m-d');
+        $tEndObj = ($task -> deadline ?: ($task -> start_date ? $task -> start_date -> copy() -> addDays(7) : $client -> created_at -> copy() -> addDays(7)));
+        $tEndStr = $tEndObj -> format('Y-m-d');
+        $isOverdue = $tEndObj -> isPast() && $task -> status != 'Completed';
+        $statusClass = $task -> status == 'Completed' ? 'bar-completed' : ($isOverdue ? 'bar-overdue' : 'bar-ongoing');
+        @endphp
+        {
+            id: 'Task_{{ $task->id }}',
+                name: { !!json_encode($task -> title)!! },
+            start: '{{ $tStartStr }}',
+                end: '{{ $tEndStr }}',
+                    progress: { { $task -> status == 'Completed' ? 100 : 0 } },
+            dependencies: 'Project_{{ $client->id }}',
+                custom_class: '{{ $statusClass }}'
+        },
+        @endforeach
+        @endforeach
         ];
 
-        window.gantt = new Gantt("#gantt-target", tasks, {
-            view_mode: 'Week',
-            date_format: 'YYYY-MM-DD',
-             bar_height: 35,
-            padding: 18,
-            on_click: function (task) {
-                console.log(task);
-            }
-        });
+        if (tasks.length > 0) {
+            window.gantt = new Gantt("#gantt-target", tasks, {
+                view_mode: 'Week',
+                date_format: 'YYYY-MM-DD',
+                bar_height: 35,
+                padding: 18,
+                on_click: function (task) {
+                    console.log(task);
+                }
+            });
+        } else {
+            document.getElementById('gantt-target').innerHTML = '<div class="p-20 text-center text-slate-400 font-bold uppercase tracking-widest">No projects or tasks found to display.</div>';
+        }
     });
 
-    function changeView(mode)   if(window.gantt) {
+    function changeView(mode) {
+        if (window.gantt) {
             window.gantt.change_view_mode(mode);
-            
+
             // Update Buttons
             document.querySelectorAll('.view-btn').forEach(btn => {
-                btn.classList.remove('bg-white', 'dark:bg-brand-600', 'shadow-sm', 'text-slate-900', 'dark:tex);
+                btn.classList.remove('bg-white', 'dark:bg-brand-600', 'shadow-sm', 'text-slate-900', 'dark:text-white');
                 btn.classList.add('text-slate-500', 'dark:text-slate-400');
             });
-            
+
             const activeBtn = document.getElementById('btn-' + mode.toLowerCase());
-            if(activeBtn) {
-                activeBtn.classList.add('bg-white', 'dark:bg- 'shadow-sm', 'text-slate-900', 'dark:text-white');
+            if (activeBtn) {
+                activeBtn.classList.add('bg-white', 'dark:bg-brand-600', 'shadow-sm', 'text-slate-900', 'dark:text-white');
                 activeBtn.classList.remove('text-slate-500', 'dark:text-slate-400');
             }
         }

@@ -20,7 +20,11 @@ class AttendanceController extends Controller
             ->first();
 
         if (!$attendance) {
-            return response()->json(['status' => 'not_checked_in']);
+            $projects = \App\Models\Client::select('id', 'first_name', 'last_name')->orderBy('first_name')->get();
+            return response()->json([
+                'status' => 'not_checked_in',
+                'projects' => $projects
+            ]);
         }
 
         if ($attendance->check_in_time && !$attendance->check_out_time) {

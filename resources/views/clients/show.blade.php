@@ -551,6 +551,46 @@ default => 'overview',
                 </div>
             </div>
 
+            {{-- Summary of Work --}}
+            <div
+                class="bg-white dark:bg-slate-900/40 p-7 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display uppercase tracking-widest">
+                        Summary of Work</h3>
+                    @if(auth()->user()->isAdmin() || auth()->user()->isEditor())
+                    <button @click="$refs.workSummaryForm.classList.toggle('hidden')"
+                        class="text-[10px] font-black text-brand-500 hover:text-brand-600 uppercase tracking-widest transition-all">
+                        Update Summary
+                    </button>
+                    @endif
+                </div>
+
+                <div class="prose dark:prose-invert max-w-none">
+                    <p
+                        class="text-[15px] font-medium text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line bg-slate-50/50 dark:bg-dark-bg/30 p-6 rounded-2xl border border-slate-100 dark:border-dark-border/50">
+                        {{ $client->work_description ?: 'No project summary provided yet.' }}
+                    </p>
+                </div>
+
+                @if(auth()->user()->isAdmin() || auth()->user()->isEditor())
+                <form x-ref="workSummaryForm" action="{{ route('clients.updateWorkSummary', $client) }}" method="POST"
+                    class="hidden mt-6 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    @csrf
+                    @method('PATCH')
+                    <textarea name="work_description" rows="5"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white"
+                        placeholder="Enter detailed summary of project work...">{{ $client->work_description }}</textarea>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" @click="$refs.workSummaryForm.classList.add('hidden')"
+                            class="px-5 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition">Cancel</button>
+                        <button type="submit"
+                            class="bg-brand-500 hover:bg-brand-600 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition-all">Save
+                            Summary</button>
+                    </div>
+                </form>
+                @endif
+            </div>
+
             {{-- Scope Mandate --}}
             <div
                 class="bg-white dark:bg-slate-900/40 p-7 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium">
