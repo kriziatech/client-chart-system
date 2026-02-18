@@ -369,20 +369,18 @@ $initialDiscount = $quotation->discount_amount;
             },
 
             calculateItemTotal(item) {
-                item.amount = (parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0);
+                 item.amount = (parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0);
                 this.calculateFinalTotal();
             },
-
             calculateFinalTotal() {
                 this.subtotal = this.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-
                 let afterDiscount = this.subtotal - (parseFloat(this.discount_amount) || 0);
                 this.taxAmount = afterDiscount * (parseFloat(this.gst_percentage) / 100);
                 this.totalAmount = afterDiscount + this.taxAmount;
             },
 
-            formatCurrency(value) {
-                return new Intl.NumberFormat('en-US', {
+           formatCurrency(value) {
+                return new Intl.NumberFormat('en-IN', {
                     style: 'currency',
                     currency: 'INR',
                     maximumFractionDigits: 0
