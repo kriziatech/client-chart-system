@@ -366,7 +366,11 @@
             controls: true,
             progress: true,
             mouseWheel: true,
-            transitionlid         backgroundTransition: 'fade',
+            transition: 'convex',
+            backgroundTransition: 'zoom',
+            autoAnimate: true,
+            autoAnimateEasing: 'ease-out',
+            autoAnimateDuration: 0.8,
         });
     </script>
 </body>
