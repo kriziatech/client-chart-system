@@ -28,6 +28,63 @@
             background: radial-gradient(circle at center, #1E293B 0%, #0F172A 100%);
         }
 
+        /* Premium Animations */
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        @keyframes pulse-soft {
+            0% {
+                box-shadow: 0 0 0 0 rgba(79, 112, 250, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 15px rgba(79, 112, 250, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(79, 112, 250, 0);
+            }
+        }
+
+        @keyframes slide-up {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .animate-pulse {
+            animation: pulse-soft 3s infinite;
+        }
+
+        .animate-up {
+            animation: slide-up 0.8s ease-out forwards;
+        }
+
+        .reveal .slides section {
+            padding: 15px;
+        }
+
         .reveal h1,
         .reveal h2,
         .reveal h3 {
@@ -85,6 +142,13 @@
             padding: 20px;
             margin: 8px 0;
             text-align: left;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
         }
 
         .grid-2 {
@@ -113,6 +177,7 @@
             color: white;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
             border: 3px solid rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
         }
 
         .tag {
@@ -301,8 +366,7 @@
             controls: true,
             progress: true,
             mouseWheel: true,
-            transition: 'slide',
-            backgroundTransition: 'fade',
+            transitionlid         backgroundTransition: 'fade',
         });
     </script>
 </body>
