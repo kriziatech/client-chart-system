@@ -55,14 +55,16 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/clients/{client}', [ClientController::class , 'update'])->name('clients.update');
             Route::patch('/clients/{client}/work-summary', [ClientController::class , 'updateWorkSummary'])->name('clients.updateWorkSummary');
             Route::post('/clients/{client}/gallery', [\App\Http\Controllers\ProjectGalleryController::class , 'store'])->name('gallery.store');
-            Route::get('/presentation', function () {
-                    return view('presentation'); }
-                )->name('presentation');
-            }
-            );
+            Route::get('/presentation', [\App\Http\Controllers\PresentationController::class , 'index'])->name('presentation');
+            Route::get('/presentation/manage', [\App\Http\Controllers\PresentationController::class , 'manage'])->name('presentation.manage');
+            Route::post('/presentation/slides', [\App\Http\Controllers\PresentationController::class , 'store'])->name('presentation.slides.store');
+            Route::patch('/presentation/slides/{slide}', [\App\Http\Controllers\PresentationController::class , 'update'])->name('presentation.slides.update');
+            Route::delete('/presentation/slides/{slide}', [\App\Http\Controllers\PresentationController::class , 'destroy'])->name('presentation.slides.destroy');
+        }
+        );
 
-            // Delete — admin only
-            Route::middleware('role:admin')->group(function () {
+        // Delete — admin only
+        Route::middleware('role:admin')->group(function () {
             Route::delete('/clients/{client}', [ClientController::class , 'destroy'])->name('clients.destroy');
             Route::delete('/gallery/{gallery}', [\App\Http\Controllers\ProjectGalleryController::class , 'destroy'])->name('gallery.destroy');
         }
