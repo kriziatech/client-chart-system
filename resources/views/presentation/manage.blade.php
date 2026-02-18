@@ -2,6 +2,7 @@
 
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     window.editSlide = function (slide) {
         const modal = document.getElementById('edit-slide-modal');
@@ -36,7 +37,7 @@
 
         // Show loading state
         const btn = event.currentTarget;
-        const originalT e xt = btn.innerHTML;
+        const originalText = btn.innerHTML;
         btn.innerHTML = '<span class="animate-spin">🌀</span> Generating...';
         btn.disabled = true;
 
@@ -63,6 +64,16 @@
             });
     }
 
+    window.toggleChartSection = function (type) {
+        const layout = document.getElementById(type + '-layout').value;
+        const section = document.getElementById(type + '-chart-section');
+        if (layout === 'chart') {
+            section.classList.remove('hidden');
+        } else {
+            section.classList.add('hidden');
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         // Live Preview Logic
         const types = ['add', 'edit'];
@@ -76,8 +87,15 @@
             });
             // Layout select listener
             const layoutSelect = document.getElementById(type + '-layout');
-            if (layoutSelect) layoutSelect.addEventListener('change', () => updatePreview(type));
+            if (layoutSelect) {
+                layoutSelect.addEventListener('change', () => {
+                    window.toggleChartSection(type);
+                    updatePreview(type);
+                });
+            }
         });
+
+        const previewCharts = {};
 
         function updatePreview(type) {
             const title = document.getElementById(type + '-title').value;
@@ -98,13 +116,57 @@
 
             // Simple layout preview adjustments
             const innerDiv = previewContainer.querySelector('div');
-            if (innerDiv) {
-                if (layout === 'center') {
-                    innerDiv.classList.add('items-center', 'text-center');
-                } else {
-                    innerDiv.classList.remove('items-center', 'text-center');
+            const previewSection = document.getElementById(type + '-preview-content');
+
+            if (layout === 'chart') {
+                previewSection.innerHTML = `<canvas id="${type}-preview-chart-canvas" style="max-height: 250px;"></canvas>`;
+                renderPreviewChart(type);
+            } else {
+                previewSection.innerHTML = content || 'Content will appear here as you type.';
+                if (innerDiv) {
+                    if (layout === 'center') {
+                        innerDiv.classList.add('items-center', 'text-center');
+                    } else {
+                        innerDiv.classList.remove('items-center', 'text-center');
+                    }
                 }
             }
+        }
+
+        function renderPreviewChart(type) {
+            const canvas = document.getElementById(type + '-preview-chart-canvas');
+            if (!canvas) return;
+
+            const chartDataRaw = document.getElementById(type + '-chart_data').value;
+            let chartData;
+
+            try {
+                chartData = JSON.parse(chartDataRaw);
+            } catch (e) {
+                return; // Invalid JSON
+            }
+
+            if (previewCharts[type]) {
+                previewCharts[type].destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+
+            // Handle both full and simple formats
+            const config = {
+                type: chartData.type || 'bar',
+                data: chartData.data || {
+                    labels: chartData.labels || [],
+                    datasets: chartData.datasets || []
+                },
+                options: chartData.options || {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#fff', font: { size: 10 } } } }
+                }
+            };
+
+            previewCharts[type] = new Chart(ctx, config);
         }
 
         // Global exposing for manual calls (like after AI suggest)

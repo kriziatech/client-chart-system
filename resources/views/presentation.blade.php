@@ -12,6 +12,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@400;600;700&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root {
@@ -382,6 +383,19 @@
                         {!! $slide->content !!}
                     </div>
                 </div>
+                @elseif($slide->layout_type == 'chart')
+                <div class="chart-container" style="height: 450px; position: relative;">
+                    <div style="margin-bottom: 20px;">
+                        <h2 style="margin-bottom: 5px !important;">{!! $slide->title !!}</h2>
+                        @if($slide->subtitle)<p style="font-size: 0.6em; color: #94A3B8;">{{ $slide->subtitle }}</p>
+                        @endif
+                    </div>
+                    <canvas id="chart-{{ $slide->id }}"
+                        data-chart-data="{{ json_encode($slide->chart_data) }}"></canvas>
+                    <div style="margin-top: 20px; font-size: 0.5em; opacity: 0.6;">
+                        {!! $slide->content !!}
+                    </div>
+                </div>
                 @else
                 <h2>{!! $slide->title !!}</h2>
                 @if($slide->subtitle)<p style="font-size: 0.6em; color: #94A3B8; margin-bottom: 20px;">{{
@@ -498,6 +512,55 @@
             autoAnimateEasing: 'ease-out',
             autoAnimateDuration: 0.8,
         });
+
+        const charts = {};
+
+        function initChart(slideElement) {
+            const canvas = slideElement.querySelector('canvas');
+            if (!canvas || charts[canvas.id]) return;
+
+            const ctx = canvas.getContext('2d');
+            const data = JSON.parse(canvas.dataset.chartData || '{}');
+
+            if (data.type && data.data) {
+                charts[canvas.id] = new Chart(ctx, {
+                    type: data.type,
+                    data: data.data,
+                    options: data.options || {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#fff', font: { family: 'Outfit', size: 14 } } }
+                        },
+                                                  y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94A3B8' } },
+                            x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94A3B8' } }
+                        }
+                    }
+                } else if (data.labels && data.datasets) {
+                // Fallback for simple format
+                charts[canvas.id] = new Chart(ctx, {
+                    type: data.type || 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: data.datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#fff', font: { family: 'Outfit', size: 14 } } }
+                        }
+                    }
+                });
+            }
+        }
+
+        Reveal.on('slidechanged', event => {
+            initChart(event.currentSlide);
+        });
+
+        // Init initial slide if it's a chart
+        initChart(Reveal.getCurrentSlide());
 
         // Mouse Follower Logic
         const glow = document.getElementById('mouse-glow');
