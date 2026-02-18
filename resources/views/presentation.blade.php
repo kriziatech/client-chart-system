@@ -390,8 +390,7 @@
                         @if($slide->subtitle)<p style="font-size: 0.6em; color: #94A3B8;">{{ $slide->subtitle }}</p>
                         @endif
                     </div>
-                    <canvas id="chart-{{ $slide->id }}"
-                        data-chart-data="{{ json_encode($slide->chart_data) }}"></canvas>
+                    <canvas id="chart-{{ $slide->id }}" data-chart-data='@json($slide->chart_data)'></canvas>
                     <div style="margin-top: 20px; font-size: 0.5em; opacity: 0.6;">
                         {!! $slide->content !!}
                     </div>
@@ -520,7 +519,9 @@
             if (!canvas || charts[canvas.id]) return;
 
             const ctx = canvas.getContext('2d');
-            const data = JSON.parse(canvas.dataset.chartData || '{}');
+            const dataRaw = canvas.dataset.chartData;
+            if (!dataRaw || dataRaw === 'null') return;
+            const data = JSON.parse(dataRaw);
 
             if (data.type && data.data) {
                 charts[canvas.id] = new Chart(ctx, {
@@ -532,11 +533,13 @@
                         plugins: {
                             legend: { labels: { color: '#fff', font: { family: 'Outfit', size: 14 } } }
                         },
-                                                  y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94A3B8' } },
+                        scales: {
+                            y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94A3B8' } },
                             x: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#94A3B8' } }
                         }
                     }
-                } else if (data.labels && data.datasets) {
+                });
+            } else if (data.labels && data.datasets) {
                 // Fallback for simple format
                 charts[canvas.id] = new Chart(ctx, {
                     type: data.type || 'bar',
