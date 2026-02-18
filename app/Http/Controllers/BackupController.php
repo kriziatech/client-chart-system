@@ -14,6 +14,12 @@ class BackupController extends Controller
         $disk = Storage::disk('backups');
         $appName = config('backup.backup.name');
 
+        // Ensure directory exists
+        if (!$disk->exists($appName)) {
+            $disk->makeDirectory($appName);
+            chmod(storage_path('app/backups/' . $appName), 0777);
+        }
+
         $files = $disk->files($appName);
 
         $backups = [];
