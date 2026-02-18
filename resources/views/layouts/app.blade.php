@@ -480,15 +480,15 @@
         </footer>
     </div>
 
-    <!-- Attendance Status Script -->
+    <!-- Theme & Dashboard Scripts -->
     <script>
-        Mode: IST day / night auto + manual override-- -
-            function getISTHour() {
-                const now = new Date();
-                const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-                const ist = new Date(utc + (5.5 * 3600000));
-                return ist.getHours();
-            }
+        // Mode: IST day / night auto + manual override
+        function getISTHour() {
+            const now = new Date();
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const ist = new Date(utc + (5.5 * 3600000));
+            return ist.getHours();
+        }
 
         function isNightInIST() {
             const h = getISTHour();

@@ -239,7 +239,8 @@
                                 <div class="flex items-center gap-1.5 mt-1">
                                     <span
                                         class="w-1.5 h-1.5 rounded-full {{ $client->risk_analysis['level'] == 'Low' ? 'bg-emerald-500' : ($client->risk_analysis['level'] == 'Medium' ? 'bg-amber-500' : 'bg-rose-500') }}"></span>
-                                    <span class="text-[9px] font-bold uppercase opacity-60">{{
+                                    <span
+                                        class="text-[9px] font-bold uppercase opacity-60 dark:text-slate-400 font-mono">{{
                                         $client->risk_analysis['level'] }} Risk</span>
                                 </div>
                             </div>
@@ -248,7 +249,7 @@
                     @endforeach
                 </div>
                 <a href="{{ route('clients.index') }}"
-                    class="mt-4 text-[10px] font-black text-center text-brand-500 uppercase tracking-widest hover:underline">View
+                    class="mt-4 text-[10px] font-black text-center text-brand-500 dark:text-brand-400 uppercase tracking-widest hover:underline">View
                     All Projects →</a>
             </div>
         </div>
