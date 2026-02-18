@@ -11,20 +11,18 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-Route::get('/dashboard', function () {
-    return (new \App\Http\Controllers\DashboardController)->index();
-})->middleware(['auth'])->name('dashboard');
-
-Route::get('/search', [\App\Http\Controllers\SearchController::class , 'index'])->middleware(['auth'])->name('search');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/timeline', [\App\Http\Controllers\DashboardController::class, 'timeline'])->name('timeline');
+    Route::get('/search', [\App\Http\Controllers\SearchController::class , 'index'])->name('search');
+});
 
 // Client Portal (Public)
 Route::get('/portal/{client:uuid}', [\App\Http\Controllers\ClientPortalController::class , 'show'])->name('portal.show');
 Route::get('/portal/{client:uuid}/print', [\App\Http\Controllers\ClientPortalController::class , 'downloadPdf'])->name('portal.print');
 Route::post('/portal/{client:uuid}/quotation/{quotation}/approve', [\App\Http\Controllers\ClientPortalController::class , 'approveQuotation'])->name('portal.quotation.approve');
 
-// All client routes require authentication
-Route::middleware(['auth'])->group(function () {
-
+// All authenticated routes continued
     // Create — admin and editor only (MUST be before {client} wildcard)
     Route::middleware('role:admin,editor')->group(function () {
             Route::get('/clients/create', [ClientController::class , 'create'])->name('clients.create');
@@ -186,6 +184,7 @@ Route::middleware(['auth'])->group(function () {
         );
 
         // --- Daily Reports (DPR) ---
+        Route::resource('work-orders', \App\Http\Controllers\WorkOrderController::class);
         Route::get('/clients/{client}/reports', [\App\Http\Controllers\DailyReportController::class , 'index'])->name('reports.index');
         Route::post('/clients/{client}/reports', [\App\Http\Controllers\DailyReportController::class , 'store'])->name('reports.store');
         Route::put('/reports/{report}', [\App\Http\Controllers\DailyReportController::class , 'update'])->name('reports.update');

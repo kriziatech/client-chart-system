@@ -174,6 +174,11 @@ class Client extends Model
     {
         return $this->hasMany(Expense::class);
     }
+
+    public function workOrders()
+    {
+        return $this->hasMany(WorkOrder::class);
+    }
     /**
      * Handover & Feedback
      */

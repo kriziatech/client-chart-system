@@ -170,4 +170,12 @@ class DashboardController extends Controller
             'recentPayments' => Payment::with('client')->latest()->take(3)->get()
         ]);
     }
+    public function timeline()
+    {
+        $clients = Client::with(['tasks' => function ($q) {
+            $q->orderBy('start_date');
+        }])->where('status', '!=', 'Completed')->get();
+
+        return view('timeline', compact('clients'));
+    }
 }

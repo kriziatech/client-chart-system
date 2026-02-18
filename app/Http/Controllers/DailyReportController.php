@@ -64,10 +64,24 @@ class DailyReportController extends Controller
                 }
             }
 
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $image) {
+            if ($request->hasFile('images_before')) {
+                foreach ($request->file('images_before') as $image) {
                     $path = $image->store('daily_reports', 'public');
-                    $report->images()->create(['image_path' => $path]);
+                    $report->images()->create(['image_path' => $path, 'label' => 'before']);
+                }
+            }
+
+            if ($request->hasFile('images_after')) {
+                foreach ($request->file('images_after') as $image) {
+                    $path = $image->store('daily_reports', 'public');
+                    $report->images()->create(['image_path' => $path, 'label' => 'after']);
+                }
+            }
+
+            if ($request->hasFile('images_progress')) {
+                foreach ($request->file('images_progress') as $image) {
+                    $path = $image->store('daily_reports', 'public');
+                    $report->images()->create(['image_path' => $path, 'label' => 'progress']);
                 }
             }
 

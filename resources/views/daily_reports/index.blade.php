@@ -65,11 +65,27 @@
                 </div>
                 @endif
 
-                <div>
-                    <label class="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Evidence
-                        (Images)</label>
-                    <input type="file" name="images[]" multiple accept="image/*"
-                        class="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-black text-rose-500 uppercase tracking-widest mb-2">Before
+                            Work (Critical)</label>
+                        <input type="file" name="images_before[]" multiple accept="image/*"
+                            class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">After
+                            Work (Completion)</label>
+                        <input type="file" name="images_after[]" multiple accept="image/*"
+                            class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-black text-brand-500 uppercase tracking-widest mb-2">Progress
+                            / Others</label>
+                        <input type="file" name="images_progress[]" multiple accept="image/*"
+                            class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                    </div>
                 </div>
 
                 <div class="pt-4">
@@ -134,14 +150,27 @@
                     @endif
 
                     @if($report->images->count() > 0)
-                    <div class="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4">
-                        @foreach($report->images as $image)
-                        <div
-                            class="aspect-square rounded-2xl overflow-hidden shadow-lg border border-slate-100 dark:border-dark-border">
-                            <img src="{{ Storage::url($image->image_path) }}" alt="Progress Image"
-                                class="w-full h-full object-cover">
+                    <div class="mt-8">
+                        <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Site
+                            Documentation</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            @foreach($report->images as $image)
+                            <div
+                                class="group/img relative aspect-square rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-dark-border">
+                                <img src="{{ Storage::url($image->image_path) }}" alt="Progress Image"
+                                    class="w-full h-full object-cover">
+                                @if($image->label)
+                                <div class="absolute top-2 left-2">
+                                    <span
+                                        class="px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-lg 
+                                        {{ $image->label == 'before' ? 'bg-rose-500 text-white' : ($image->label == 'after' ? 'bg-emerald-500 text-white' : 'bg-brand-500 text-white') }}">
+                                        {{ $image->label }}
+                                    </span>
+                                </div>
+                                @endif
+                            </div>
+                            @endforeach
                         </div>
-                        @endforeach
                     </div>
                     @endif
                 </div>
