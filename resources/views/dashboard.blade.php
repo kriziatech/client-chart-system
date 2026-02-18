@@ -376,7 +376,8 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         Chart.defaults.font.family = "'Inter', sans-serif";
-        Chart.defaults.color = '{{ Auth::user()->isDarkMode() ? "#94a3b8" : "#64748b" }}';
+        const isDark = document.documentElement.classList.contains('dark');
+        Chart.defaults.color = isDark ? "#94a3b8" : "#64748b";
 
         const ctx = document.getElementById('mainDashboardChart').getContext('2d');
 
