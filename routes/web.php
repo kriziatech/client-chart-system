@@ -77,6 +77,7 @@ Route::middleware(['auth'])->group(function () {
         // Audit Logs — admin only
         Route::middleware('role:admin')->group(function () {
             Route::get('/audit-logs', [AuditLogController::class , 'index'])->name('audit-logs.index');
+            Route::post('/audit-logs/cleanup', [AuditLogController::class , 'cleanup'])->name('audit-logs.cleanup');
             Route::get('/audit-logs/latest', [AuditLogController::class , 'latest'])->name('audit-logs.latest');
 
             // Attendance Logs - Admin View

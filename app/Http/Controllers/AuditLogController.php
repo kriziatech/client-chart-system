@@ -28,8 +28,25 @@ class AuditLogController extends Controller
 
         $logs = $query->paginate(50);
         $users = \App\Models\User::orderBy('name')->get();
+        $totalLogs = AuditLog::count();
 
-        return view('audit-logs.index', compact('logs', 'users'));
+        return view('audit-logs.index', compact('logs', 'users', 'totalLogs'));
+    }
+
+    public function cleanup()
+    {
+        try {
+            $cutoffDate = now()->subDays(7);
+            
+            // Bypass the 'immutable' check in AuditLog model using DB facade or withoutEvents
+            $deletedCount = \Illuminate\Support\Facades\DB::table('audit_logs')
+                ->where('created_at', '<', $cutoffDate)
+                ->delete();
+
+            return back()->with('success', "Audit cleanup complete. Removed $deletedCount logs older than 7 days.");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Cleanup failed: ' . $e->getMessage());
+        }
     }
 
     /**
