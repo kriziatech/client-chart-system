@@ -53,6 +53,20 @@ class PresentationController extends Controller
         return back()->with('success', 'Slide updated successfully.');
     }
 
+    public function reorder(Request $request)
+    {
+        $request->validate([
+            'order' => 'required|array',
+            'order.*' => 'required|integer|exists:presentation_slides,id'
+        ]);
+
+        foreach ($request->order as $index => $id) {
+            PresentationSlide::where('id', $id)->update(['order' => $index + 1]);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
     public function destroy(PresentationSlide $slide)
     {
         $slide->delete();

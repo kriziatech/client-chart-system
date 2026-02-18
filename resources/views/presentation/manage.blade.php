@@ -1,4 +1,7 @@
+@extends('layouts.app')
+
 @section('content')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
     window.editSlide = function (slide) {
         const modal = document.getElementById('edit-slide-modal');
@@ -18,6 +21,32 @@
 
         modal.classList.remove('hidden');
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const el = document.getElementById('slides-list');
+        if (el) {
+            Sortable.create(el, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'bg-brand-50',
+                onEnd: function () {
+                    const order = Array.from(el.querySelectorAll('[data-id]')).map(item => item.dataset.id);
+                    fetch('{{ route("presentation.slides.reorder") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ order: order })
+                    }).then(response => {
+                        if (response.ok) {
+                            // Optional: Show a subtle toast
+                        }
+                    });
+                }
+            });
+        }
+    });
 </script>
 <div class="min-h-screen bg-[#F8FAFC] dark:bg-dark-bg py-12 px-4">
     <div class="max-w-6xl mx-auto">
@@ -33,19 +62,35 @@
         </div>
 
         {{-- Slides List --}}
-        <div class="space-y-4">
+        <div id="slides-list" class="space-y-4">
             @foreach($slides as $slide)
-            <div
-                class="bg-white dark:bg-slate-900/40 p-6 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium flex items-center justify-between group">
+            <div data-id="{{ $slide->id }}"
+                class="group bg-white dark:bg-dark-surface p-6 rounded-3xl border border-slate-200 dark:border-dark-border hover:border-brand-500 dark:hover:border-brand-500 transition-all flex items-center justify-between shadow-sm hover:shadow-xl hover:shadow-brand-500/10 active:scale-[0.99]">
                 <div class="flex items-center gap-6">
                     <div
-                        class="w-12 h-12 bg-slate-100 dark:bg-white/5 rounded-xl flex items-center justify-center text-lg font-bold text-brand-500">
-                        {{ $slide->order }}
+                        class="drag-handle cursor-grab active:cursor-grabbing text-slate-300 hover:text-brand-500 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16">
+                            </path>
+                        </svg>
+                    </div>
+                    <div
+                        class="w-12 h-12 bg-slate-100 dark:bg-dark-bg rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-500 transition-colors">
+                        <span class="text-xs font-black">#{{ $slide->order }}</span>
                     </div>
                     <div>
-                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ $slide->title }}</h3>
-                        <p class="text-xs text-slate-400 font-medium uppercase tracking-widest">{{ $slide->layout_type
-                            }}</p>
+                        <h3
+                            class="font-bold text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors">
+                            {{ $slide->title }}</h3>
+                        <div class="flex items-center gap-3 mt-1">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">{{
+                                $slide->layout_type }}</span>
+                            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                            <span
+                                class="text-[10px] font-bold {{ $slide->is_active ? 'text-emerald-500' : 'text-slate-400' }} uppercase tracking-widest">
+                                {{ $slide->is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div class="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all">
@@ -58,7 +103,7 @@
                         </svg>
                     </button>
                     <form action="{{ route('presentation.slides.destroy', $slide) }}" method="POST"
-                        onsubmit="return confirm('Are you sure?')">
+                        onsubmit="return confirm('Are you sure you want to delete this slide?')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="p-3 text-rose-500 hover:bg-rose-50 rounded-xl transition">
