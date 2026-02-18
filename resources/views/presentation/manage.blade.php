@@ -223,21 +223,23 @@
 </div>
 
 <script>
-    window.editSlide = function(        e) {
-    const modal = document.getElementById('edit-slide-        l');
-    const form = document.getElementById('edit-slidem            
-    // Set ac         URL reliably
-    form.action = window.location.or         presentation/slides         slide.id;
-    
-    // Populate fields
-    document.getElem        yId('edit-title').value = slide.title;
-    document.getElementById('edi        btitle').value = slide.subtitle || '';
-    document.getElementById('e        content').value = slide.content || '';
-    document.getElementById        it-layout').value = slide.layout_type;
-    document.getElem        yId('edit-order').value = slide.order;
-    document.getElementById('edit        ).value = slide.bg_color || '#0F172A';
-    document.getElementByIdi        tive').checked = !!slide.is_active    ;
- al.classList.remove('hidden');
-}
+    window.editSlide = function (slide) {
+        const modal = document.getElementById('edit-slide-modal');
+        const form = document.getElementById('edit-slide-form');
+
+        // Set action URL reliably
+        form.action = window.location.origin + '/presentation/slides/' + slide.id;
+
+        // Populate fields
+        document.getElementById('edit-title').value = slide.title;
+        document.getElementById('edit-subtitle').value = slide.subtitle || '';
+        document.getElementById('edit-content').value = slide.content || '';
+        document.getElementById('edit-layout').value = slide.layout_type;
+        document.getElementById('edit-order').value = slide.order;
+        document.getElementById('edit-bg').value = slide.bg_color || '#0F172A';
+        document.getElementById('edit-active').checked = !!slide.is_active;
+
+        modal.classList.remove('hidden');
+    }
 </script>
 @endsection
