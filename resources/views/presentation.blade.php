@@ -508,7 +508,7 @@
         });
 
         window.addEventListener('mouseleave', () => {
-            glowle. = '0';
+            glow.style.opacity = '0';
         });
     </script>
 </body>
