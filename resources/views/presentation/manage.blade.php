@@ -31,7 +31,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-all">
-                    <button @click="editSlide({{ json_encode($slide) }})"
+                    <button onclick="editSlide({{ json_encode($slide) }})"
                         class="p-3 text-brand-500 hover:bg-brand-50 rounded-xl transition">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -223,20 +223,21 @@
 </div>
 
 <script>
-        function editSlide(slide                const modal = document.getElementById('edit-slide-m        ');
-        const form = document.getElementById('edit-slf        );
-
-        // Set        ion URL reliably
-        form.action = window.loca.        in + '/presentation        des/' + slide.id;
-
-        // Populate fields
-        docum        getElementById('edit-title').value = slide.title;
-        document.getE        ntById('edit-subtitle').value = slide.subtitle || '';
-        documen        tElementById('edit-content').value = slide.content || '';
-                ment.getElementById('edit-layout').value = slide.layout_typ               document.getElementById('edit-order').value = slide.order;
-              cument.getElementById('edit-bg').value = slide.bg_color || '#0F172            document.getElementById('edit-a    ctid = slide.is_active;
-
-        modal.classList.remove('hidden');
-    }
+    window.editSlide = function(        e) {
+    const modal = document.getElementById('edit-slide-        l');
+    const form = document.getElementById('edit-slidem            
+    // Set ac         URL reliably
+    form.action = window.location.or         presentation/slides         slide.id;
+    
+    // Populate fields
+    document.getElem        yId('edit-title').value = slide.title;
+    document.getElementById('edi        btitle').value = slide.subtitle || '';
+    document.getElementById('e        content').value = slide.content || '';
+    document.getElementById        it-layout').value = slide.layout_type;
+    document.getElem        yId('edit-order').value = slide.order;
+    document.getElementById('edit        ).value = slide.bg_color || '#0F172A';
+    document.getElementByIdi        tive').checked = !!slide.is_active    ;
+ al.classList.remove('hidden');
+}
 </script>
 @endsection
