@@ -20,15 +20,16 @@
         document.getElementById('edit-active').checked = !!slide.is_active;
 
         modal.classList.remove('hidden');
+        if (window.forceUpdatePreview) window.forceUpdatePreview('edit');
     }
 
-    window.suggestWithAI = function(type) {
-        const    titleInput = document.getElementById(type + '-title');
+    window.suggestWithAI = function (type) {
+        const titleInput = document.getElementById(type + '-title');
         const topic = titleInput.value || 'interior design'; // Use the current title as topic, or a default
 
         // Show loading state
         const btn = event.currentTarget;
-        const originalTe xt = btn.innerHTML;
+        const originalT e xt = btn.innerHTML;
         btn.innerHTML = '<span class="animate-spin">🌀</span> Generating...';
         btn.disabled = true;
 
@@ -40,44 +41,91 @@
             },
             body: JSON.stringify({ topic: topic })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.title) {
-                document.getElementById(type + '-title').value = data.title;
-                document.getElementById(type + '-subtitle').value = data.subtitle || '';
-                document.getElementById(type + '-content').value = data.content || '';
-            }
-        })
-        .finally(() => {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.title) {
+                    document.getElementById(type + '-title').value = data.title;
+                    document.getElementById(type + '-subtitle').value = data.subtitle || '';
+                    document.getElementById(type + '-content').value = data.content || '';
+                    if (window.forceUpdatePreview) window.forceUpdatePreview(type);
+                }
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
     }
 
-    document.addEventListener('DOMContentLoaded',  {
-        const el = document.getElementById('slides-list');
-        if (el) {
-            Sortable.create(el, {
-                animation: 150,
-                handle: '.drag-handle',
-                ghostClass: 'bg-brand-50',
-                onEnd: function () {
-                    const order = Array.from(el.querySelectorAll('[data-id]')).map(item => item.dataset.id);
-                    fetch('{{ route("presentation.slides.reorder") }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ order: order })
-                    }).then(response => {
-                        if (response.ok) {
-                            // Optional: Show a subtle toast
-                        }
-                    });
+    document.addEventListener('DOMContentLoaded'() {
+        // Live Preview Logic
+        const types = ['add', 'edit'];
+        types.forEach(type => {
+            const fields = ['title', 'subtitle', 'content', 'bg'];
+            fields.forEach(field => {
+                const input = document.getElementById(type + '-' + (field === 'bg' ? 'bg' : field));
+                if (input) {
+                    input.addEventListener('input', () => updatePreview(type));
                 }
             });
+            // Layout select listener
+            const layoutSelect = document.getElementById(type + '-layout');
+            if (layoutSelect) layoutSelect.addEventListener('change', () => updatePreview(type));
+        });
+
+        function updatePreview(type) {
+        const title = document.getElementById(type + '-title').value;
+        const subtitle = document.getElementById(type + '-subtitle').value;
+        const content = document.getElementById(type + '-content').value;
+        const bg = document.getElementById(type + '-bg').value || '#0F172A';
+        const layout = document.getElementById(type + '-layout').value;
+
+        const previewTitle = document.getElementById(type + '-preview-title');
+        const previewSubtitle = document.getElementById(type + '-preview-subtitle');
+        const previewContent = document.getElementById(type + '-preview-content');
+        const previewContainer = document.getElementById(type + '-preview-container');
+
+        previewTitle.innerText = title || 'Slide Title';
+        previewSubtitle.innerText = subtitle || 'Subtitle Goes Here';
+        previewContent.innerHTML = content || 'Content will appear here as you type.';
+        previewContainer.style.backgroundColor = bg;
+
+        // Simple layout preview adjustments
+        const innerDiv = previewContainer.querySelector('div');
+        if(innerDiv) {
+            if (layout === 'center') {
+                innerDiv.classList.add('items-center', 'text-center');
+            } else {
+                innerDiv.classList.remove('items-center', 'text-center');
+            }
         }
+    }
+
+        // Global exposing for manual calls (like after AI suggest)
+        window.forceUpdatePreview = updatePreview;
+
+    const el = document.getElementById('slides-list');
+    if (el) {
+        Sortable.create(el, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'bg-brand-50',
+            onEnd: function () {
+                const order = Array.from(el.querySelectorAll('[data-id]')).map(item => item.dataset.id);
+                fetch('{{ route("presentation.slides.reorder") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ order: order })
+                }).then(response => {
+                    if (response.ok) {
+                        // Optional: Show a subtle toast
+                    }
+                });
+            }
+        });
+    }
     });
 </script>
 <div class="min-h-screen bg-[#F8FAFC] dark:bg-dark-bg py-12 px-4">
@@ -87,7 +135,8 @@
                 <h1 class="text-3xl font-black text-slate-900 dark:text-white font-display">Manage Slides</h1>
                 <p class="text-slate-500 font-medium">Add, Edit or Delete presentation slides dynamically</p>
             </div>
-            <button @click="document.getElementById('add-slide-modal').classList.remove('hidden')"
+            <button
+                @click="document.getElementById('add-slide-modal').classList.remove('hidden'); window.forceUpdatePreview('add');"
                 class="bg-brand-500 hover:bg-brand-600 text-white px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest shadow-lg shadow-brand-500/20 transition-all">
                 Add New Slide
             </button>
@@ -157,120 +206,28 @@
 <div id="add-slide-modal"
     class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div
-        class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden border border-white/10">
-        <div class="p-8 border-b border-slate-100 dark:border-dark-border flex items-center justify-between">
-            <h2 class="text-2xl font-black text-slate-900 dark:text-white font-display uppercase tracking-tight">Add New
-                Slide</h2>
-            <button @click="document.getElementById('add-slide-modal').classList.add('hidden')"
-                class="text-slate-400 hover:text-slate-600 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                    </path>
-                </svg>
-            </button>
-        </div>
-        <form action="{{ route('presentation.slides.store') }}" method="POST" class="p-8 space-y-6">
-            @csrf
-            <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Slide
-                        Title</label>
-                    <button type="button" onclick="suggestWithAI('add')"
-                        class="text-[10px] font-bold text-brand-500 hover:text-brand-600 flex items-center gap-1 uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-lg">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                        </svg>
-                        AI Suggest
-                    </button>
-                </div>
-                <input type="text" name="title" id="add-title" required
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+        class="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-[40px] shadow-2xl overflow-hidden border border-white/10 flex">
+        {{-- Left: Form --}}
+        <div class="w-1/2 border-r border-slate-100 dark:border-dark-border">
+            <div class="p-8 border-b border-slate-100 dark:border-dark-border flex items-center justify-between">
+                <h2 class="text-2xl font-black text-slate-900 dark:text-white font-display uppercase tracking-tight">Add
+                    New
+                    Slide</h2>
+                <button @click="document.getElementById('add-slide-modal').classList.add('hidden')"
+                    class="text-slate-400 hover:text-slate-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
             </div>
-
-            <div class="grid grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Subtitle</label>
-                    <input type="text" name="subtitle" id="add-subtitle"
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
-                </div>
-                <div class="space-y-4">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Layout</label>
-                    <select name="layout_type" id="add-layout"
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
-                        <option value="standard">Standard (Split)</option>
-                        <option value="center">Center Focused</option>
-                        <option value="grid">Data Grid</option>
-                        <option value="profile">Profile/Portfolio</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="space-y-4">
-                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Slide Content
-                    (HTML/Markdown)</label>
-                <textarea name="content" id="add-content" rows="4"
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white"></textarea>
-            </div>
-
-            <div class="grid grid-cols-2 gap-6">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Display
-                        Order</label>
-                    <input type="number" name="order" value="0"
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Background
-                        Color</label>
-                    <input type="text" name="bg_color" placeholder="#0F172A" value="#0F172A"
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3 px-2">
-                <input type="checkbox" name="is_active" value="1" id="is_active_add" checked
-                    class="w-5 h-5 rounded border-slate-300 dark:border-dark-border text-brand-500 focus:ring-brand-500/20 transition-all">
-                <label for="is_active_add" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">Active
-                    Display</label>
-            </div>
-
-            <div class="pt-4 flex justify-end gap-4">
-                <button type="button" @click="document.getElementById('add-slide-modal').classList.add('hidden')"
-                    class="px-8 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition">Cancel</button>
-                <button type="submit"
-                    class="bg-brand-500 hover:bg-brand-600 text-white px-10 py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-brand-500/40 transition-all active:scale-95">Save
-                    Slide</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-{{-- Edit Slide Modal --}}
-<div id="edit-slide-modal"
-    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div
-        class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[40px] shadow-2xl overflow-hidden border border-white/10">
-        <div class="p-8 border-b border-slate-100 dark:border-dark-border flex items-center justify-between">
-            <h2 class="text-2xl font-black text-slate-900 dark:text-white font-display uppercase tracking-tight">Edit
-                Slide</h2>
-            <button onclick="document.getElementById('edit-slide-modal').classList.add('hidden')"
-                class="text-slate-400 hover:text-slate-600 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                    </path>
-                </svg>
-            </button>
-        </div>
-        <form id="edit-slide-form" method="POST" class="p-8 space-y-6">
-            @csrf
-            @method('PATCH')
-            <div class="grid grid-cols-2 gap-6">
+            <form action="{{ route('presentation.slides.store') }}" method="POST" class="p-8 space-y-6">
+                @csrf
                 <div class="space-y-4">
                     <div class="flex items-center justify-between">
                         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Slide
                             Title</label>
-                        <button type="button" onclick="suggestWithAI('edit')"
+                        <button type="button" onclick="suggestWithAI('add')"
                             class="text-[10px] font-bold text-brand-500 hover:text-brand-600 flex items-center gap-1 uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-lg">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -279,64 +236,214 @@
                             AI Suggest
                         </button>
                     </div>
-                    <input type="text" name="title" id="edit-title" required
+                    <input type="text" name="title" id="add-title" required
                         class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
                 </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <label
+                            class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Subtitle</label>
+                        <input type="text" name="subtitle" id="add-subtitle"
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+                    </div>
+                    <div class="space-y-4">
+                        <label
+                            class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Layout</label>
+                        <select name="layout_type" id="add-layout"
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+                            <option value="standard">Standard (Split)</option>
+                            <option value="center">Center Focused</option>
+                            <option value="grid">Data Grid</option>
+                            <option value="profile">Profile/Portfolio</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Slide Content
+                        (HTML/Markdown)</label>
+                    <textarea name="content" id="add-content" rows="4"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Display
+                            Order</label>
+                        <input type="number" name="order" value="0"
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Background
+                            Color</label>
+                        <input type="text" name="bg_color" id="add-bg" placeholder="#0F172A" value="#0F172A"
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 px-2">
+                    <input type="checkbox" name="is_active" value="1" id="is_active_add" checked
+                        class="w-5 h-5 rounded border-slate-300 dark:border-dark-border text-brand-500 focus:ring-brand-500/20 transition-all">
+                    <label for="is_active_add"
+                        class="text-xs font-bold text-slate-500 uppercase tracking-tighter">Active
+                        Display</label>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-4">
+                    <button type="button" onclick="document.getElementById('add-slide-modal').classList.add('hidden')"
+                        class="px-8 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition">Cancel</button>
+                    <button type="submit"
+                        class="bg-brand-500 hover:bg-brand-600 text-white px-10 py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-brand-500/40 transition-all active:scale-95">Save
+                        Slide</button>
+                </div>
+            </form>
+        </div>
+
+        {{-- Right: Preview --}}
+        <div class="w-1/2 bg-slate-50 dark:bg-dark-bg p-8 flex flex-col">
+            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Live Preview</label>
+            <div id="add-preview-container"
+                class="flex-1 rounded-3xl overflow-hidden border border-slate-200 dark:border-dark-border bg-[#0F172A] p-8 shadow-inner relative">
+                {{-- Mock Slide Content --}}
+                <div class="h-full flex flex-col justify-center">
+                    <h1 id="add-preview-title" class="text-3xl font-black text-white mb-2 leading-tight">Slide Title
+                    </h1>
+                    <h3 id="add-preview-subtitle"
+                        class="text-lg font-bold text-brand-400 mb-6 uppercase tracking-wider">Subtitle Goes Here</h3>
+                    <div id="add-preview-content"
+                        class="text-slate-300 text-sm leading-relaxed prose prose-invert max-w-none">
+                        Content will appear here as you type.
+                    </div>
+                </div>
+            </div>
+            <div
+                class="mt-6 p-4 rounded-2xl bg-brand-50/50 dark:bg-brand-500/5 text-brand-600 dark:text-brand-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                Real-time Sync Active
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Edit Slide Modal --}}
+<div id="edit-slide-modal"
+    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+        class="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-[40px] shadow-2xl overflow-hidden border border-white/10 flex">
+        <div class="w-1/2 border-r border-slate-100 dark:border-dark-border">
+            <div class="p-8 border-b border-slate-100 dark:border-dark-border flex items-center justify-between">
+                <h2 class="text-2xl font-black text-slate-900 dark:text-white font-display uppercase tracking-tight">
+                    Edit
+                    Slide</h2>
+                <button onclick="document.getElementById('edit-slide-modal').classList.add('hidden')"
+                    class="text-slate-400 hover:text-slate-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                        </path>
+                    </svg>
+                </button>
+            </div>
+            <form id="edit-slide-form" method="POST" class="p-8 space-y-6">
+                @csrf
+                @method('PATCH')
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Slide
+                                Title</label>
+                            <button type="button" onclick="suggestWithAI('edit')"
+                                class="text-[10px] font-bold text-brand-500 hover:text-brand-600 flex items-center gap-1 uppercase tracking-widest bg-brand-50 px-2 py-1 rounded-lg">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                AI Suggest
+                            </button>
+                        </div>
+                        <input type="text" name="title" id="edit-title" required
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Layout
+                            Type</label>
+                        <select name="layout_type" id="edit-layout"
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+                            <option value="standard">Standard Card</option>
+                            <option value="center">Centered Large</option>
+                            <option value="grid">2-Column Grid</option>
+                            <option value="profile">Profile Layout</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Layout
-                        Type</label>
-                    <select name="layout_type" id="edit-layout"
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Subtitle</label>
+                    <input type="text" name="subtitle" id="edit-subtitle"
                         class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
-                        <option value="standard">Standard Card</option>
-                        <option value="center">Centered Large</option>
-                        <option value="grid">2-Column Grid</option>
-                        <option value="profile">Profile Layout</option>
-                    </select>
                 </div>
-            </div>
 
-            <div class="space-y-2">
-                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Subtitle</label>
-                <input type="text" name="subtitle" id="edit-subtitle"
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
-            </div>
-
-            <div class="space-y-2">
-                <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Content (HTML
-                    Support)</label>
-                <textarea name="content" id="edit-content" rows="6"
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white"></textarea>
-            </div>
-
-            <div class="grid grid-cols-2 gap-6">
                 <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Order</label>
-                    <input type="number" name="order" id="edit-order"
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Content (HTML
+                        Support)</label>
+                    <textarea name="content" id="edit-content" rows="6"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white"></textarea>
                 </div>
-                <div class="space-y-2">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Background
-                        Color</label>
-                    <input type="text" name="bg_color" id="edit-bg"
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label
+                            class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Order</label>
+                        <input type="number" name="order" id="edit-order"
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Background
+                            Color</label>
+                        <input type="text" name="bg_color" id="edit-bg"
+                            class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-4 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 px-2">
+                    <input type="checkbox" name="is_active" value="1" id="edit-active"
+                        class="w-5 h-5 rounded border-slate-300 dark:border-dark-border text-brand-500 focus:ring-brand-500/20 transition-all">
+                    <label for="edit-active" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">Active
+                        Display</label>
+                </div>
+
+                <div class="pt-4 flex justify-end gap-4">
+                    <button type="button" onclick="document.getElementById('edit-slide-modal').classList.add('hidden')"
+                        class="px-8 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition">Cancel</button>
+                    <button type="submit"
+                        class="bg-brand-500 hover:bg-brand-600 text-white px-10 py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-brand-500/40 transition-all active:scale-95">Update
+                        Slide</button>
+                </div>
+            </form>
+        </div>
+
+        {{-- Right: Preview --}}
+        <div class="w-1/2 bg-slate-50 dark:bg-dark-bg p-8 flex flex-col">
+            <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Live Preview</label>
+            <div id="edit-preview-container"
+                class="flex-1 rounded-3xl overflow-hidden border border-slate-200 dark:border-dark-border bg-[#0F172A] p-8 shadow-inner relative">
+                <div class="h-full flex flex-col justify-center">
+                    <h1 id="edit-preview-title" class="text-3xl font-black text-white mb-2 leading-tight">Slide Title
+                    </h1>
+                    <h3 id="edit-preview-subtitle"
+                        class="text-lg font-bold text-brand-400 mb-6 uppercase tracking-wider">Subtitle Goes Here</h3>
+                    <div id="edit-preview-content"
+                        class="text-slate-300 text-sm leading-relaxed prose prose-invert max-w-none">
+                        Content will appear here as you type.
+                    </div>
                 </div>
             </div>
-
-            <div class="flex items-center gap-3 px-2">
-                <input type="checkbox" name="is_active" value="1" id="edit-active"
-                    class="w-5 h-5 rounded border-slate-300 dark:border-dark-border text-brand-500 focus:ring-brand-500/20 transition-all">
-                <label for="edit-active" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">Active
-                    Display</label>
+            <div
+                class="mt-6 p-4 rounded-2xl bg-brand-50/50 dark:bg-brand-500/5 text-brand-600 dark:text-brand-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                Real-time Sync Active
             </div>
-
-            <div class="pt-4 flex justify-end gap-4">
-                <button type="button" onclick="document.getElementById('edit-slide-modal').classList.add('hidden')"
-                    class="px-8 py-4 text-sm font-bold text-slate-400 hover:text-slate-600 transition">Cancel</button>
-                <button type="submit"
-                    class="bg-brand-500 hover:bg-brand-600 text-white px-10 py-4 rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-brand-500/40 transition-all active:scale-95">Update
-                    Slide</button>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
 
