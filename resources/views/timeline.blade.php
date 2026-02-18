@@ -180,44 +180,61 @@
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function  () {
+    document.addEventListener('DOMContentLoaded', function () {
         const tasks = [
-            @foreach($clients as $client)             @php
-                    $pStart = ($clien t- >start_date ?: $clien t- >created_at )- >format('Y-m-d');         $pEnd = ($clien t- >delivery_date ?: ($clien t- >start_date ? $clien t- >start_dat e- >copy( )- >addMonths(3) : $clien t- >created_a t- >copy( )- >addMonths(3)) )- >format('Y-m-d');         @endphp         {             id: 'Project_{{ $client->id }}',                 name: {!! json_encode($client->first_name . " " . $client->last_name) !!},
-                    start: '                                        end:                                                                                         custom_class                                    @f oreach($client->                                      $t Start = ($task->star t_ date ?: ($task->creat ed _at ?: $clie nt ->created_at))->f                          $tEnd = ($task->de ad line ?: ($task->st ar t_date ? $ ta sk->st ar t_date->copy()->addD ay s(7) : $cl ie nt->cr ea ted_at->copy () ->addDays(7)))->f                        $isOverdue =  \Carbon\Carb on ::parse($tEnd)->i sP ast() && $task->status                         $sta tu sClass = $task->status == 'Completed' ? 'bar-completed' : ($isOverdue ? 'bar-overdue' :                                                       id: 'Task_{{                                name: {!! js                    !!},
-                        start: '{{ $tStart }}',
-                                           }}',
-                           progress: {{ $task->stat us              }},
-                        dependencies:                 }}',
-                        custom        las                  },             @endforeach
+            @foreach($clients as $client)
+            @php
+                    $pStartStr = ($cli en t->start_date ?: $cli en t->created_ at )->format('Y-m-d'           $pEndObj = ($ cl ient->delivery_date ?: ($ cl ient->start_date ? $ cl ient->star t_ date-> co py()->addMonths(3) : $ cl ient->crea te d_at-> co py()->addMonth s( 3)));
+                   r = $pEn        m-             @endphp
+                {
+                      roject_{{ $client->id }}',
+                    name: {!! json_encode($client->first_name . " " . $client                                          st                            }}',
+                                         $pEndStr }}',
+                      0,             custom_clas s:  'bar-project'
+                      t->tasks as $tas k) 
+                     @ php
+                          $tStart Ob j = ($task->start        _at ?: $client -> created_at));
+                           $t StartStr =  $ tStart Ob j->format('Y-m-d');
+                              $tEndObj =  ( $task->deadline ?        task->start_date->copy()->add Days(7) : $c li ent->created_at-> co py()->addDays(7)));
+           ndStr = $tEndObj->fo rm at('Y-m-d');
+                        $isOverdue = $tEndObj->isPast() && $task->status !=                        ss            pleted' ? 'bar-completed' :                 ue' : 'bar-ongoing');
+                                            {
+                        id: 'Task_{{ $task->id }                                name: { !! json _e ncode($task->title) !!},
+                        $tStartStr }}',
+                        end                                    progress: {{ $t        let        ,
+                    dependencies: 'Project_{{ $client->id }}',
+                        custom_class: '{{ $statusClass }}'
+                    },
+                @endforeach
             @endforeach
         ];
 
         window.gantt = new Gantt("#gantt-target", tasks, {
             view_mode: 'Week',
             date_format: 'YYYY-MM-DD',
-            bar_height: 35,
+             bar_height: 35,
             padding: 18,
             on_click: function (task) {
                 console.log(task);
-            },
-             on_date_change: function (task, start, end) {
-                console.log(task, start, end);
             }
         });
     });
 
-    function changeView(mode) {
-        window.ange_view_mode(mode);
-
-        // Update Buttons
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.classList.remove('bg-white', 'dark:bg-brand-600', 'shadow-sm', 'text-slate-900', 'dark:text-white');
-            btn.classList.add('text-slate-500', 'dark:text-sla;
-        });
-
-        const activeBtn = document.getElementById('btn-' + mode.toLowerCase());
-        activeBtn.classList.add('bg-white', 'dark:bg-brand-600', 'shadow-sm', 'text-slate-900', 'dark:text-white');
-        activeBtn.classList.remove('text-slate-500', 'dark:text-slate-}
+    function changeView(mode)   if(window.gantt) {
+            window.gantt.change_view_mode(mode);
+            
+            // Update Buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'dark:bg-brand-600', 'shadow-sm', 'text-slate-900', 'dark:tex);
+                btn.classList.add('text-slate-500', 'dark:text-slate-400');
+            });
+            
+            const activeBtn = document.getElementById('btn-' + mode.toLowerCase());
+            if(activeBtn) {
+                activeBtn.classList.add('bg-white', 'dark:bg- 'shadow-sm', 'text-slate-900', 'dark:text-white');
+                activeBtn.classList.remove('text-slate-500', 'dark:text-slate-400');
+            }
+        }
+    }
 </script>
 @endsection
