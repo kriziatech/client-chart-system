@@ -200,9 +200,15 @@ class BackupController extends Controller
             $password = $dbConfig['password'];
 
             // Build Command (Supports MySQL/MariaDB)
+            // Detect which binary is available (mysql or mariadb)
+            $checkMysql = Process::fromShellCommandline('which mysql');
+            $checkMysql->run();
+            $binary = $checkMysql->isSuccessful() ? 'mysql' : 'mariadb';
+
             // Note: We use -p with no space for password. Caution with shell escaping.
             $command = sprintf(
-                'mysql -h %s -P %s -u %s -p%s %s < %s',
+                '%s -h %s -P %s -u %s -p%s %s < %s',
+                $binary,
                 escapeshellarg($host),
                 escapeshellarg($port),
                 escapeshellarg($username),
