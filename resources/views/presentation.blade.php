@@ -327,7 +327,7 @@
                     photo metadata doesn't match geofence.</p>
             </section>
 
-            <!-- Slide 8: Team & Inventory -->
+            <!-- Slide 8: Team & Efficiency -->
             <section>
                 <h2>System <span class="warning">Efficiency</span></h2>
                 <div class="card fragment">
@@ -366,6 +366,34 @@
                 </div>
             </section>
 
+            <!-- Slide 10: Contact -->
+            <section>
+                <h2 class="highlight">Get In Touch</h2>
+                <div class="card" style="text-align: center; padding: 40px;">
+                    <div style="margin-bottom: 25px;">
+                        <p
+                            style="font-size: 0.5em; color: #94A3B8; text-transform: uppercase; font-weight: 800; letter-spacing: 2px;">
+                            Contact Us</p>
+                        <h3 style="font-size: 1.4em !important; color: #fff; margin: 5px 0;">+91-8376097938</h3>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <p
+                            style="font-size: 0.5em; color: #94A3B8; text-transform: uppercase; font-weight: 800; letter-spacing: 2px;">
+                            Mail for Enquiries</p>
+                        <h3 style="font-size: 1.1em !important; color: var(--brand); margin: 5px 0;">Contact@Krizia.in
+                        </h3>
+                    </div>
+
+                    <div style="margin-top: 35px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 25px;">
+                        <p style="font-size: 0.4em; color: #64748B; margin-bottom: 12px;">Visit our website for more
+                            services</p>
+                        <a href="https://krizia.in" target="_blank"
+                            style="font-family: 'Outfit'; font-weight: 800; font-size: 1.4em; color: #fff; text-decoration: none; letter-spacing: 3px;">KRIZIA.IN</a>
+                    </div>
+                </div>
+            </section>
+
         </div>
     </div>
 
@@ -379,7 +407,7 @@
             center: true,
             controls: true,
             progress: true,
-            Wheel: true,
+            mouseWheel: true,
             transition: 'slide',
             backgroundTransition: 'fade',
         });
