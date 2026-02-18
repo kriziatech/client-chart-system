@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware('role:admin,editor')->group(function () {
             Route::get('/clients/{client}/edit', [ClientController::class , 'edit'])->name('clients.edit');
             Route::put('/clients/{client}', [ClientController::class , 'update'])->name('clients.update');
+            Route::patch('/clients/{client}/work-summary', [ClientController::class , 'updateWorkSummary'])->name('clients.updateWorkSummary');
             Route::post('/clients/{client}/gallery', [\App\Http\Controllers\ProjectGalleryController::class , 'store'])->name('gallery.store');
         }
         );

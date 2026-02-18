@@ -1488,7 +1488,8 @@ default => 'overview',
             <button onclick="document.getElementById('vendor-payment-modal').classList.add('hidden')"
                 class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 dark:bg-dark-bg text-slate-500 hover:bg-slate-200 dark:hover:bg-dark-border transition-all">&times;</button>
         </div>
-        <form action="{{ route('finance.vendor.store', $client) }}" method="POST" class="p-10 space-y-6">
+        <form action="{{ route('finance.vendor.store', $client) }}" method="POST" enctype="multipart/form-data"
+            class="p-10 space-y-6">
             @csrf
             <div class="space-y-3">
                 <div class="flex justify-between items-center px-1">
@@ -1501,32 +1502,62 @@ default => 'overview',
                         Vendor</button>
                 </div>
                 <select name="vendor_id" required
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none appearance-none cursor-pointer">
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none appearance-none cursor-pointer text-slate-700 dark:text-white">
                     @foreach(App\Models\Vendor::all() as $v)
                     <option value="{{ $v->id }}">{{ $v->name }} ({{ $v->category }})</option>
                     @endforeach
                 </select>
             </div>
+
             <div class="grid grid-cols-2 gap-5">
                 <div class="space-y-1">
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Payment
                         Date</label>
                     <input type="date" name="payment_date" required value="{{ date('Y-m-d') }}"
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none">
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none text-slate-700 dark:text-white">
                 </div>
                 <div class="space-y-1">
                     <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Amount
                         (₹)</label>
                     <input type="number" step="0.01" name="amount" required placeholder="0.00"
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none">
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none text-slate-700 dark:text-white">
                 </div>
             </div>
+
+            <div class="grid grid-cols-2 gap-5">
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Payment
+                        Mode</label>
+                    <select name="payment_mode" required
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 transition-all outline-none appearance-none cursor-pointer text-slate-700 dark:text-white">
+                        <option value="Cash">Cash</option>
+                        <option value="Online (UPI/IMPS)">Online (UPI/IMPS)</option>
+                        <option value="Cheque">Cheque</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Reference
+                        No.</label>
+                    <input type="text" name="reference_number" placeholder="Txn ID / Chq No."
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none text-slate-700 dark:text-white">
+                </div>
+            </div>
+
             <div class="space-y-1">
                 <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Work Type /
                     Description</label>
                 <input type="text" name="work_type" required placeholder="E.g. Kitchen electrical labor advance"
-                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none">
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none text-slate-700 dark:text-white">
             </div>
+
+            <div class="space-y-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Quotation
+                    Picture (Optional)</label>
+                <input type="file" name="quotation_image" accept="image/*"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-dashed border-2 border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3 text-xs font-bold text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-black file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 transition-all">
+            </div>
+
             <button type="submit"
                 class="w-full bg-slate-900 hover:bg-black text-white rounded-2xl py-4 font-black uppercase tracking-[0.2em] shadow-xl shadow-slate-900/20 transition-all active:scale-[0.98] mt-4">
                 Record Payment

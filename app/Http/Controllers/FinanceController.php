@@ -55,8 +55,15 @@ class FinanceController extends Controller
             'work_type' => 'required|string',
             'payment_date' => 'required|date',
             'payment_mode' => 'nullable|string',
-            'notes' => 'nullable|string'
+            'reference_number' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'quotation_image' => 'nullable|image|max:5120'
         ]);
+
+        if ($request->hasFile('quotation_image')) {
+            $path = $request->file('quotation_image')->store('quotations', 'public');
+            $validated['quotation_image_path'] = $path;
+        }
 
         $client->vendorPayments()->create($validated);
 

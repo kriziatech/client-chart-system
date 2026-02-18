@@ -238,6 +238,17 @@ class ClientController extends Controller
         return redirect()->route('clients.show', $client)->with('success', 'Client updated.');
     }
 
+    public function updateWorkSummary(Request $request, Client $client)
+    {
+        $request->validate([
+            'work_description' => 'required|string',
+        ]);
+
+        $client->update($request->only('work_description'));
+
+        return back()->with('success', 'Project work summary updated successfully.');
+    }
+
     public function destroy(Client $client)
     {
         $client->delete();

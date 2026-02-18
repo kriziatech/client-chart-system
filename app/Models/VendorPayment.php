@@ -17,6 +17,7 @@ class VendorPayment extends Model
         'payment_date',
         'payment_mode',
         'reference_number',
+        'quotation_image_path',
         'notes',
         'deletion_remark',
     ];
