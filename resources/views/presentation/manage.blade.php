@@ -1,6 +1,24 @@
-@extends('layouts.app')
-
 @section('content')
+<script>
+    window.editSlide = function (slide) {
+        const modal = document.getElementById('edit-slide-modal');
+        const form = document.getElementById('edit-slide-form');
+
+        // Set action URL reliably
+        form.action = window.location.origin + '/presentation/slides/' + slide.id;
+
+        // Populate fields
+        document.getElementById('edit-title').value = slide.title;
+        document.getElementById('edit-subtitle').value = slide.subtitle || '';
+        document.getElementById('edit-content').value = slide.content || '';
+        document.getElementById('edit-layout').value = slide.layout_type;
+        document.getElementById('edit-order').value = slide.order;
+        document.getElementById('edit-bg').value = slide.bg_color || '#0F172A';
+        document.getElementById('edit-active').checked = !!slide.is_active;
+
+        modal.classList.remove('hidden');
+    }
+</script>
 <div class="min-h-screen bg-[#F8FAFC] dark:bg-dark-bg py-12 px-4">
     <div class="max-w-6xl mx-auto">
         <div class="flex items-center justify-between mb-10">
@@ -222,24 +240,4 @@
     </div>
 </div>
 
-<script>
-    window.editSlide = function (slide) {
-        const modal = document.getElementById('edit-slide-modal');
-        const form = document.getElementById('edit-slide-form');
-
-        // Set action URL reliably
-        form.action = window.location.origin + '/presentation/slides/' + slide.id;
-
-        // Populate fields
-        document.getElementById('edit-title').value = slide.title;
-        document.getElementById('edit-subtitle').value = slide.subtitle || '';
-        document.getElementById('edit-content').value = slide.content || '';
-        document.getElementById('edit-layout').value = slide.layout_type;
-        document.getElementById('edit-order').value = slide.order;
-        document.getElementById('edit-bg').value = slide.bg_color || '#0F172A';
-        document.getElementById('edit-active').checked = !!slide.is_active;
-
-        modal.classList.remove('hidden');
-    }
-</script>
 @endsection
