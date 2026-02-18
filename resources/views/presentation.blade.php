@@ -340,22 +340,4 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
-    <script>
-        Reveal.initialize({
-            width: 1200,
-            height: 700,
-            margin: 0.1,
-            minScale: 0.2,
-            maxScale: 2.0,
-            hash: true,
-            center: true,
-            controls: true,
-        pr true,
-            mouseWheel: true,
-            transition: 'slide',
-            backgroundTransition: 'fade',
-        });
-    </script>
-</body>
-
-</html>
+    <sc
