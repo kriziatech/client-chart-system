@@ -170,6 +170,11 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/clients/{client}/material-payments', [\App\Http\Controllers\FinanceController::class , 'storeMaterialPayment'])->name('finance.material-payment.store');
             Route::post('/clients/{client}/profit-lock', [\App\Http\Controllers\FinanceController::class , 'toggleLock'])->name('finance.profit.lock');
             Route::get('/clients/{client}/ledger', [\App\Http\Controllers\FinanceController::class , 'downloadLedger'])->name('finance.ledger.download');
+
+            // Delete Routes for Financials
+            Route::delete('/vendor-payments/{payment}', [\App\Http\Controllers\FinanceController::class , 'destroyVendorPayment'])->name('finance.vendor.destroy');
+            Route::delete('/material-inwards/{inward}', [\App\Http\Controllers\FinanceController::class , 'destroyMaterialInward'])->name('finance.material-inward.destroy');
+            Route::delete('/expenses/{expense}', [\App\Http\Controllers\FinanceController::class , 'destroyExpense'])->name('finance.expense.destroy');
         }
         );
 

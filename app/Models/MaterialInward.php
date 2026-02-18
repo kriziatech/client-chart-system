@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MaterialInward extends Model
 {
-    use HasFactory;
+    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes;
 
     protected $fillable = [
         'client_id',
@@ -18,8 +18,8 @@ class MaterialInward extends Model
         'rate',
         'total_amount',
         'bill_number',
-        'bill_image_path',
         'inward_date',
+        'deletion_remark',
     ];
 
     protected $casts = [

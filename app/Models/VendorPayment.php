@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class VendorPayment extends Model
 {
-    use HasFactory;
+    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes;
 
     protected $fillable = [
         'client_id',
@@ -18,6 +18,7 @@ class VendorPayment extends Model
         'payment_mode',
         'reference_number',
         'notes',
+        'deletion_remark',
     ];
 
     protected $casts = [

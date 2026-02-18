@@ -18,7 +18,7 @@
     </div>
 
     <!-- Global Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
         <div class="bg-slate-900 dark:bg-brand-600 p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden group">
             <div
                 class="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-700">
@@ -41,6 +41,17 @@
                 ₹@indian_format($globalStats['total_expenses'])</div>
             <div class="mt-4 h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div class="bg-rose-500 h-full w-[45%]"></div>
+            </div>
+        </div>
+
+        <div
+            class="bg-white dark:bg-dark-surface p-8 rounded-[2.5rem] border border-slate-100 dark:border-dark-border shadow-premium group">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-[2px] block mb-2">Vendor
+                Payments</span>
+            <div class="text-3xl font-black text-purple-600 tracking-tight">
+                ₹@indian_format($globalStats['total_vendor_payments'])</div>
+            <div class="mt-4 h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="bg-purple-600 h-full w-[60%]"></div>
             </div>
         </div>
 
@@ -84,7 +95,8 @@
                         class="bg-slate-50/50 dark:bg-dark-bg/50 text-[10px] font-black uppercase tracking-[2px] text-slate-400 border-b border-slate-100 dark:border-dark-border">
                         <th class="py-5 px-10">Project Name</th>
                         <th class="py-5 px-8">Inflow (Revenue)</th>
-                        <th class="py-5 px-8">Outflow (Costs)</th>
+                        <th class="py-5 px-8">Daily Expenses</th>
+                        <th class="py-5 px-8">Vendor Payments</th>
                         <th class="py-5 px-8">Material Cost</th>
                         <th class="py-5 px-10 text-right">Net Maturity</th>
                     </tr>
@@ -111,6 +123,9 @@
                         <td class="py-6 px-8 text-sm font-bold text-emerald-600">₹@indian_format($data['revenue'])
                         </td>
                         <td class="py-6 px-8 text-sm font-bold text-rose-500">₹@indian_format($data['expenses'])
+                        </td>
+                        <td class="py-6 px-8 text-sm font-bold text-purple-600">
+                            ₹@indian_format($data['vendor_payments'])
                         </td>
                         <td class="py-6 px-8 text-sm font-bold text-amber-500">₹@indian_format($data['material_costs'])
                         </td>

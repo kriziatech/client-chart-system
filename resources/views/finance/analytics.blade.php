@@ -15,7 +15,7 @@
     </div>
 
     <!-- P&L Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
         <div class="bg-white dark:bg-dark-surface p-6 rounded-[2rem] border border-ui-border shadow-premium">
             <span class="text-[10px] font-black text-ui-muted uppercase tracking-[2px] block mb-2">Total Revenue</span>
             <div class="text-2xl font-black text-ui-success tracking-tight">₹@indian_format($totalRevenue)</div>
@@ -25,7 +25,13 @@
             <span class="text-[10px] font-black text-ui-muted uppercase tracking-[2px] block mb-2">Operational
                 Costs</span>
             <div class="text-2xl font-black text-ui-danger tracking-tight">₹@indian_format($totalExpenses)</div>
-            <p class="text-[10px] text-ui-muted mt-2 font-bold uppercase">Labor & Site Costs</p>
+            <p class="text-[10px] text-ui-muted mt-2 font-bold uppercase">Daily Site Expenses</p>
+        </div>
+        <div class="bg-white dark:bg-dark-surface p-6 rounded-[2rem] border border-ui-border shadow-premium">
+            <span class="text-[10px] font-black text-ui-muted uppercase tracking-[2px] block mb-2">Vendor
+                Payments</span>
+            <div class="text-2xl font-black text-purple-600 tracking-tight">₹@indian_format($vendorPayments)</div>
+            <p class="text-[10px] text-ui-muted mt-2 font-bold uppercase">Sub-contractors</p>
         </div>
         <div class="bg-white dark:bg-dark-surface p-6 rounded-[2rem] border border-ui-border shadow-premium">
             <span class="text-[10px] font-black text-ui-muted uppercase tracking-[2px] block mb-2">Material Costs</span>

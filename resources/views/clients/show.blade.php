@@ -976,6 +976,9 @@ default => 'overview',
                             <th
                                 class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
                                 Amount</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
@@ -995,10 +998,22 @@ default => 'overview',
                                     $vp->work_type }}</span></td>
                             <td class="px-7 py-4 text-right font-bold text-rose-500 text-[14px]">
                                 ₹@indian_format($vp->amount)</td>
+                            <td class="px-7 py-4 text-right">
+                                <button
+                                    @click="$dispatch('open-delete-modal', { url: '{{ route('finance.vendor.destroy', $vp) }}', name: '{{ $vp->vendor->name }} (₹{{ $vp->amount }})' })"
+                                    class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all"
+                                    title="Delete Record">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="px-7 py-10 text-center text-slate-400 italic text-sm">No vendor
+                            <td colspan="5" class="px-7 py-10 text-center text-slate-400 italic text-sm">No vendor
                                 payments recorded.</td>
                         </tr>
                         @endforelse
@@ -1030,8 +1045,8 @@ default => 'overview',
                                 class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
                                 Total Bill</th>
                             <th
-                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-center">
-                                Status</th>
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
@@ -1051,23 +1066,103 @@ default => 'overview',
                             </td>
                             <td class="px-7 py-4 text-right font-bold text-slate-900 dark:text-white text-[14px]">
                                 ₹@indian_format($mi->total_amount)</td>
-                            <td class="px-7 py-4 text-center">
-                                @if($isPaid)
-                                <span class="text-emerald-500 font-black text-[10px] uppercase tracking-widest">Paid
-                                    ✔</span>
-                                @else
-                                <button
-                                    onclick="openMaterialPaymentModal({{ $mi->id }}, '{{ $mi->supplier_name }}', {{ $mi->total_amount - $paid }})"
-                                    class="bg-slate-900 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black transition">
-                                    Pay
-                                </button>
-                                @endif
+                            <td class="px-7 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    @if($isPaid)
+                                    <span class="text-emerald-500 font-black text-[10px] uppercase tracking-widest">Paid
+                                        ✔</span>
+                                    @else
+                                    <button
+                                        onclick="openMaterialPaymentModal({{ $mi->id }}, '{{ $mi->supplier_name }}', {{ $mi->total_amount - $paid }})"
+                                        class="bg-slate-900 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-black transition">
+                                        Pay
+                                    </button>
+                                    @endif
+                                    <button
+                                        @click="$dispatch('open-delete-modal', { url: '{{ route('finance.material-inward.destroy', $mi) }}', name: '{{ $mi->supplier_name }} - {{ $mi->item_name }}' })"
+                                        class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all"
+                                        title="Delete Record">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                            </path>
+                                        </svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
                             <td colspan="4" class="px-7 py-10 text-center text-slate-400 italic text-sm">No material
                                 inwards recorded.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Daily Site Expenses --}}
+            <div class="flex items-center justify-between mt-12">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white font-display uppercase tracking-widest">
+                    Daily Site Expenses (Petty Cash)</h3>
+                <button onclick="document.getElementById('add-expense-modal').classList.remove('hidden')"
+                    class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition shadow-lg shadow-amber-500/20">
+                    Log Expense
+                </button>
+            </div>
+            <div
+                class="bg-white dark:bg-slate-900/40 rounded-3xl border border-slate-100 dark:border-dark-border shadow-premium overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50/50 dark:bg-dark-bg/50 border-b border-slate-50 dark:border-dark-border">
+                        <tr>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Date</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Category</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display">
+                                Description</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                Amount</th>
+                            <th
+                                class="px-7 py-4 text-[11px] font-bold uppercase tracking-[1.5px] text-slate-400 font-display text-right">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 dark:divide-dark-border">
+                        @forelse($client->expenses as $expense)
+                        <tr class="hover:bg-slate-50/30 dark:hover:bg-dark-bg/20 transition-all">
+                            <td class="px-7 py-4 text-[13px] font-medium text-slate-500">{{ $expense->date->format('d M,
+                                Y') }}</td>
+                            <td class="px-7 py-4">
+                                <span
+                                    class="px-3 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg text-[10px] font-black uppercase tracking-widest">{{
+                                    $expense->category }}</span>
+                            </td>
+                            <td class="px-7 py-4 text-[14px] font-bold text-slate-700 dark:text-slate-200">{{
+                                $expense->description }}</td>
+                            <td class="px-7 py-4 text-right font-bold text-slate-900 dark:text-white text-[14px]">
+                                ₹@indian_format($expense->amount)</td>
+                            <td class="px-7 py-4 text-right">
+                                <button
+                                    @click="$dispatch('open-delete-modal', { url: '{{ route('finance.expense.destroy', $expense) }}', name: '{{ $expense->category }} - ₹{{ $expense->amount }}' })"
+                                    class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all"
+                                    title="Delete Expense">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-7 py-10 text-center text-slate-400 italic text-sm">No expenses
+                                recorded.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -1554,6 +1649,130 @@ default => 'overview',
 </div>
 @endif
 
+{{-- 6. Add Expense Modal --}}
+<div id="add-expense-modal"
+    class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div
+        class="bg-white dark:bg-dark-surface rounded-[32px] shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 dark:border-dark-border">
+        <div
+            class="px-8 py-5 border-b border-slate-50 dark:border-dark-border flex justify-between items-center bg-slate-50/50">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white font-display">Record Project Expense</h3>
+            <button onclick="document.getElementById('add-expense-modal').classList.add('hidden')"
+                class="text-slate-400 hover:text-slate-600 transition">&times;</button>
+        </div>
+        <form action="{{ route('finance.expense.store', $client) }}" method="POST" class="p-8 space-y-5">
+            @csrf
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
+                    <input type="date" name="date" required value="{{ date('Y-m-d') }}"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                </div>
+                <div>
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Amount</label>
+                    <input type="number" step="0.01" name="amount" required placeholder="0.00"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                </div>
+            </div>
+            <div>
+                <label
+                    class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Category</label>
+                <select name="category" required
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                    <option value="Site Visit">Site Visit / Travel</option>
+                    <option value="Labor Cost">Labor Charges</option>
+                    <option value="Food & Beverages">Food & Refreshments</option>
+                    <option value="Miscellaneous">Miscellaneous / Petty Cash</option>
+                    <option value="Transport">Material Transport</option>
+                </select>
+            </div>
+            <div>
+                <label
+                    class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Description</label>
+                <input type="text" name="description" required placeholder="E.g. Auto fare for site visit"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+            </div>
+            <button type="submit"
+                class="w-full bg-amber-500 hover:bg-amber-600 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-amber-500/20 transition">
+                Log Expense
+            </button>
+        </form>
+    </div>
+</div>
+
+{{-- 7. Generic Delete Confirmation Modal --}}
+<div x-data="{ 
+    open: false, 
+    actionUrl: '', 
+    itemName: '', 
+    remark: '', 
+    confirmation: '',
+    get isValid() { return this.remark.length >= 5 && this.confirmation === 'DELETE'; }
+}" @open-delete-modal.window="
+    open = true; 
+    actionUrl = $event.detail.url; 
+    itemName = $event.detail.name; 
+    remark = ''; 
+    confirmation = '';
+" x-show="open" x-cloak
+    class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[150] flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-surface rounded-[40px] shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 dark:border-dark-border animate-in zoom-in-95 duration-200"
+        @click.outside="open = false">
+
+        <div
+            class="px-8 py-6 border-b border-slate-50 dark:border-dark-border bg-rose-50/50 dark:bg-rose-900/20 flex flex-col items-center text-center">
+            <div class="w-12 h-12 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mb-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                    </path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-black text-rose-600 font-display uppercase tracking-widest">Confirm Deletion</h3>
+            <p class="text-[11px] font-bold text-slate-400 uppercase mt-1">Permanently remove record</p>
+        </div>
+
+        <form :action="actionUrl" method="POST" class="p-8 space-y-6">
+            @csrf @method('DELETE')
+
+            <div
+                class="bg-slate-50 dark:bg-dark-bg p-4 rounded-2xl text-center border border-slate-100 dark:border-dark-border">
+                <span class="block text-[10px] uppercase font-black text-slate-400">Record to delete</span>
+                <span class="block text-sm font-bold text-slate-800 dark:text-white mt-1" x-text="itemName"></span>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Reason for
+                    Deletion <span class="text-rose-500">*</span></label>
+                <textarea name="remark" x-model="remark" rows="2" required placeholder="Why are you deleting this?"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-medium focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all outline-none resize-none"></textarea>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Type "DELETE"
+                    to Confirm <span class="text-rose-500">*</span></label>
+                <input type="text" name="confirmation" x-model="confirmation" required placeholder="DELETE"
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-2xl px-5 py-3.5 text-sm font-bold text-rose-600 placeholder:text-slate-300 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all outline-none">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button type="button" @click="open = false"
+                    class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-500 dark:text-slate-300 rounded-xl py-3.5 font-bold uppercase tracking-widest transition">
+                    Cancel
+                </button>
+                <button type="submit" :disabled="!isValid"
+                    :class="isValid ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/25' : 'bg-slate-200 text-slate-400 cursor-not-allowed'"
+                    class="w-full text-white rounded-xl py-3.5 font-black uppercase tracking-widest shadow-xl transition-all">
+                    Confirm Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 </div>
 
 <script>
@@ -1561,7 +1780,7 @@ default => 'overview',
         document.getElementById('modal_inward_id').value = id;
         document.getElementById('modal_supplier_name').value = supplier;
         document.getElementById('modal_pending_amount').value = pending;
-        document.getElementById('material-payment-modal').classList.remove('h  }
+        documentById('material-payment-modal').classList.remove('h  }
 </script>
 
 @endsection

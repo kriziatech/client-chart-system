@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Expense extends Model
 {
-    use HasFactory, \App\Traits\Auditable;
+    use HasFactory, \App\Traits\Auditable, \Illuminate\Database\Eloquent\SoftDeletes;
 
     protected $fillable = [
         'client_id',
@@ -20,7 +20,8 @@ class Expense extends Model
         'paid_through',
         'paid_to',
         'attachment',
-        'comments'
+        'comments',
+        'deletion_remark',
     ];
 
     public function vendor()

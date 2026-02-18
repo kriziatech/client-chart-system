@@ -7,6 +7,8 @@ use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\PaymentRequest;
 use App\Models\Vendor;
+use App\Models\VendorPayment;
+use App\Models\MaterialInward;
 use Illuminate\Http\Request;
 
 class FinanceController extends Controller
@@ -221,13 +223,17 @@ class FinanceController extends Controller
         $totalExpenses = Expense::where('client_id', $client->id)->sum('amount');
 
         // Material costs from site inventory
+
         $materialCosts = $client->projectMaterials->sum(function ($item) {
             return $item->quantity_dispatched * ($item->inventoryItem->cost_price ?? 0);
         });
 
-        $netProfit = $totalRevenue - ($totalExpenses + $materialCosts);
+        // Vendor payments
+        $vendorPayments = $client->vendorPayments->sum('amount');
 
-        return view('finance.analytics', compact('client', 'totalRevenue', 'totalExpenses', 'materialCosts', 'netProfit'));
+        $netProfit = $totalRevenue - ($totalExpenses + $materialCosts + $vendorPayments);
+
+        return view('finance.analytics', compact('client', 'totalRevenue', 'totalExpenses', 'materialCosts', 'vendorPayments', 'netProfit'));
     }
 
     /**
@@ -253,6 +259,7 @@ class FinanceController extends Controller
         $projectsData = $clients->map(function ($client) {
             $revenue = $client->payments->sum('amount');
             $expenses = $client->expenses->sum('amount');
+            $vendorPayments = $client->vendorPayments->sum('amount');
             $materialCosts = $client->projectMaterials->sum(function ($pm) {
                     return $pm->quantity_dispatched * ($pm->inventoryItem->cost_price ?? 0);
                 }
@@ -262,18 +269,81 @@ class FinanceController extends Controller
                 'client' => $client,
                 'revenue' => $revenue,
                 'expenses' => $expenses,
+                'vendor_payments' => $vendorPayments,
                 'material_costs' => $materialCosts,
-                'profit' => $revenue - ($expenses + $materialCosts)
+                'profit' => $revenue - ($expenses + $vendorPayments + $materialCosts)
                 ];
             });
 
         $globalStats = [
             'total_revenue' => $projectsData->sum('revenue'),
             'total_expenses' => $projectsData->sum('expenses'),
+            'total_vendor_payments' => $projectsData->sum('vendor_payments'),
             'total_material' => $projectsData->sum('material_costs'),
             'total_profit' => $projectsData->sum('profit'),
         ];
 
         return view('finance.index', compact('projectsData', 'globalStats'));
+    }
+
+
+    /**
+     * Delete Vendor Payment
+     */
+    public function destroyVendorPayment(Request $request, VendorPayment $payment)
+    {
+        if (auth()->user()->isViewer() && $payment->client->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'remark' => ['required', 'string', 'min:5'],
+            'confirmation' => ['required', 'string', 'in:DELETE'],
+        ]);
+
+        $payment->update(['deletion_remark' => $validated['remark']]);
+        $payment->delete();
+
+        return back()->with('success', 'Vendor payment deleted successfully.');
+    }
+
+    /**
+     * Delete Material Inward
+     */
+    public function destroyMaterialInward(Request $request, MaterialInward $inward)
+    {
+        if (auth()->user()->isViewer() && $inward->client->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'remark' => ['required', 'string', 'min:5'],
+            'confirmation' => ['required', 'string', 'in:DELETE'],
+        ]);
+
+        $inward->update(['deletion_remark' => $validated['remark']]);
+        $inward->delete();
+
+        return back()->with('success', 'Material inward record deleted successfully.');
+    }
+
+    /**
+     * Delete Expense
+     */
+    public function destroyExpense(Request $request, Expense $expense)
+    {
+        if (auth()->user()->isViewer() && $expense->client->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'remark' => ['required', 'string', 'min:5'],
+            'confirmation' => ['required', 'string', 'in:DELETE'],
+        ]);
+
+        $expense->update(['deletion_remark' => $validated['remark']]);
+        $expense->delete();
+
+        return back()->with('success', 'Expense record deleted successfully.');
     }
 }

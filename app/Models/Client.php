@@ -74,7 +74,7 @@ class Client extends Model
 
     public function getRealTimeProfitAttribute()
     {
-        return $this->total_client_received - ($this->total_vendor_paid + $this->total_material_cost);
+        return $this->total_client_received - ($this->total_vendor_paid + $this->total_material_cost + $this->expenses()->sum('amount'));
     }
 
     public function user()
