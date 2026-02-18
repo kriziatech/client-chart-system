@@ -143,8 +143,10 @@ class FinanceController extends Controller
             'material_inward_id' => 'nullable|exists:material_inwards,id',
             'amount_paid' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
-            'payment_mode' => 'nullable|string',
-            'supplier_name' => 'nullable|string' // If generic payment
+            'payment_mode' => 'required|string',
+            'paid_to' => 'required|string',
+            'reference_number' => 'nullable|string',
+            'supplier_name' => 'nullable|string'
         ]);
 
         $client->materialPayments()->create($validated);

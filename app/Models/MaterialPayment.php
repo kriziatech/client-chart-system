@@ -12,9 +12,12 @@ class MaterialPayment extends Model
     protected $fillable = [
         'client_id',
         'material_inward_id',
+        'supplier_name',
+        'paid_to',
         'amount_paid',
         'payment_date',
         'payment_mode',
+        'reference_number',
         'notes',
     ];
 

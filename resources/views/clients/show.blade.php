@@ -786,15 +786,28 @@ default => 'overview',
                                 <td class="px-7 py-4 text-right font-bold text-emerald-600">₹@indian_format($paid)
                                 </td>
                                 <td class="px-7 py-4 text-right">
-                                    @if($pending > 0.1)
-                                    <button
-                                        onclick="openMaterialPaymentModal({{ $inward->id }}, '{{ $inward->supplier_name }}', {{ $pending }})"
-                                        class="px-3 py-1 bg-slate-900 text-white text-[10px] font-bold uppercase rounded-lg hover:bg-slate-700 transition">
-                                        Pay
-                                    </button>
-                                    @else
-                                    <span class="text-[10px] font-bold text-emerald-500 uppercase">Paid ✔</span>
-                                    @endif
+                                    <div class="flex flex-col items-end gap-1.5">
+                                        @if($pending > 0.1)
+                                        <button
+                                            onclick="openMaterialPaymentModal({{ $inward->id }}, '{{ $inward->supplier_name }}', {{ $pending }})"
+                                            class="px-3 py-1 bg-slate-900 text-white text-[10px] font-bold uppercase rounded-lg hover:bg-slate-700 transition">
+                                            Pay
+                                        </button>
+                                        @else
+                                        <span class="text-[10px] font-bold text-emerald-500 uppercase">Paid ✔</span>
+                                        @endif
+
+                                        @if($inward->payments->count() > 0)
+                                        <div class="flex flex-col items-end">
+                                            @foreach($inward->payments as $p)
+                                            <div class="text-[9px] text-slate-400 font-bold whitespace-nowrap">
+                                                {{ $p->payment_mode }}: {{ $p->paid_to }}
+                                                @if($p->reference_number) (ID: {{ $p->reference_number }}) @endif
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                             @empty
@@ -1565,32 +1578,57 @@ default => 'overview',
             <button onclick="document.getElementById('material-payment-modal').classList.add('hidden')"
                 class="text-slate-400 hover:text-slate-600 transition">&times;</button>
         </div>
-        <form action="{{ route('finance.material-payment.store', $client) }}" method="POST" class="p-8 space-y-5">
+        <form action="{{ route('finance.material-payment.store', $client) }}" method="POST" class="p-8 space-y-4"
+            x-data="{ mode: 'Cash' }">
             @csrf
             <input type="hidden" name="material_inward_id" id="modal_inward_id">
-            <div>
-                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Paying
-                    To</label>
-                <input type="text" id="modal_supplier_name" readonly
-                    class="w-full bg-slate-100 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm text-slate-500 font-bold">
+            <input type="hidden" name="supplier_name" id="modal_raw_supplier_name">
+
+            <div class="space-y-1">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Paid To
+                    (Recipient)</label>
+                <input type="text" name="paid_to" id="modal_paid_to" required
+                    class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-brand-500">
             </div>
+
             <div class="grid grid-cols-2 gap-4">
-                <div>
+                <div class="space-y-1">
                     <label
-                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Date</label>
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Date</label>
                     <input type="date" name="payment_date" required value="{{ date('Y-m-d') }}"
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500 font-bold">
                 </div>
-                <div>
+                <div class="space-y-1">
                     <label
-                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Amount</label>
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Amount</label>
                     <input type="number" step="0.01" name="amount_paid" id="modal_pending_amount" required
-                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500">
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm focus:ring-brand-500 font-bold">
                 </div>
             </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label
+                        class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mode</label>
+                    <select name="payment_mode" x-model="mode" required
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-brand-500">
+                        <option value="Cash">Cash</option>
+                        <option value="Online">Online</option>
+                        <option value="Cheque">Cheque</option>
+                        <option value="UPI">UPI</option>
+                    </select>
+                </div>
+                <div class="space-y-1" x-show="mode !== 'Cash'">
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Trans. ID
+                        (Last 4)</label>
+                    <input type="text" name="reference_number" maxlength="4" placeholder="Last 4 digits"
+                        class="w-full bg-slate-50 dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-brand-500">
+                </div>
+            </div>
+
             <button type="submit"
-                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-3 font-bold uppercase tracking-widest shadow-lg shadow-emerald-500/20 transition">
-                Confirm Payment
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-4 font-black uppercase tracking-widest shadow-xl shadow-emerald-500/20 transition-all active:scale-95 mt-2">
+                Confirm & Record
             </button>
         </form>
     </div>
@@ -1777,9 +1815,11 @@ default => 'overview',
 <script>
     function openMaterialPaymentModal(id, supplier, pending) {
         document.getElementById('modal_inward_id').value = id;
-        document.getElementById('modal_supplier_name').value = supplier;
+        document.getElementById('modal_raw_supplier_name').value = supplier;
+        document.getElementById('modal_paid_to').value = supplier;
         document.getElementById('modal_pending_amount').value = pending;
-        documentById('material-payment-modal').classList.remove('h  }
+        document.getElementById('material-payment-modal').classList.remove('hidden');
+    }
 </script>
 
 @endsection
