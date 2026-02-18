@@ -179,33 +179,33 @@
         const tasks = [
             @foreach($clients as $client)
             @php
-                    $pStartStr = ($client -> start_date ?: $client -> created_at) -> format('Y-m-d');
-        $pEndObj = ($client -> delivery_date ?: ($client -> start_date ? $client -> start_date -> copy() -> addMonths(3) : $client -> created_at -> copy() -> addMonths(3)));
-        $pEndStr = $pEndObj -> format('Y-m-d');
+                    $pStartStr = ($client->start_date ?: $client->created_at)->format('Y-m-d');
+        $pEndObj = ($client->delivery_date ?: ($client->start_date ? $client->start_date->copy()->addMonths(3) : $client->created_at->copy()->addMonths(3)));
+        $pEndStr = $pEndObj->format('Y-m-d');
         @endphp
         {
             id: 'Project_{{ $client->id }}',
-                name: { !!json_encode($client -> first_name. " ".$client -> last_name)!! },
+                name: {!!json_encode($client->first_name. " ".$client->last_name)!!},
             start: '{{ $pStartStr }}',
                 end: '{{ $pEndStr }}',
                     progress: 0,
                         custom_class: 'bar-project'
         },
-        @foreach($client -> tasks as $task)
+        @foreach($client->tasks as $task)
         @php
-        $tStartObj = ($task -> start_date ?: ($task -> created_at ?: $client -> created_at));
-        $tStartStr = $tStartObj -> format('Y-m-d');
-        $tEndObj = ($task -> deadline ?: ($task -> start_date ? $task -> start_date -> copy() -> addDays(7) : $client -> created_at -> copy() -> addDays(7)));
-        $tEndStr = $tEndObj -> format('Y-m-d');
-        $isOverdue = $tEndObj -> isPast() && $task -> status != 'Completed';
-        $statusClass = $task -> status == 'Completed' ? 'bar-completed' : ($isOverdue ? 'bar-overdue' : 'bar-ongoing');
+        $tStartObj = ($task->start_date ?: ($task->created_at ?: $client->created_at));
+        $tStartStr = $tStartObj->format('Y-m-d');
+        $tEndObj = ($task->deadline ?: ($task->start_date ? $task->start_date->copy()->addDays(7) : $client->created_at->copy()->addDays(7)));
+        $tEndStr = $tEndObj->format('Y-m-d');
+        $isOverdue = $tEndObj->isPast() && $task->status != 'Completed';
+        $statusClass = $task->status == 'Completed' ? 'bar-completed' : ($isOverdue ? 'bar-overdue' : 'bar-ongoing');
         @endphp
         {
             id: 'Task_{{ $task->id }}',
-                name: { !!json_encode($task -> title)!! },
+                name: {!!json_encode($task->title)!!},
             start: '{{ $tStartStr }}',
                 end: '{{ $tEndStr }}',
-                    progress: { { $task -> status == 'Completed' ? 100 : 0 } },
+                    progress: {{ $task->status == 'Completed' ? 100 : 0 }},
             dependencies: 'Project_{{ $client->id }}',
                 custom_class: '{{ $statusClass }}'
         },
