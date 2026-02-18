@@ -207,7 +207,7 @@ class BackupController extends Controller
 
             // Note: We use -p with no space for password. Caution with shell escaping.
             $command = sprintf(
-                '%s -h %s -P %s -u %s -p%s %s < %s',
+                '%s --ssl-mode=DISABLED -h %s -P %s -u %s -p%s %s < %s',
                 $binary,
                 escapeshellarg($host),
                 escapeshellarg($port),
