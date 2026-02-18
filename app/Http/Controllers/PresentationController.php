@@ -29,12 +29,17 @@ class PresentationController extends Controller
             'layout_type' => 'required|string|in:standard,center,grid,profile,chart',
             'bg_color' => 'nullable|string|max:20',
             'order' => 'required|integer',
-            'chart_data' => 'nullable|array',
+            'chart_data' => 'nullable|string',
         ]);
 
-        $validated['is_active'] = $request->boolean('is_active', true);
+        $data = $validated;
+        $data['is_active'] = $request->boolean('is_active', true);
 
-        PresentationSlide::create($validated);
+        if ($request->filled('chart_data')) {
+            $data['chart_data'] = json_decode($request->chart_data, true);
+        }
+
+        PresentationSlide::create($data);
         return back()->with('success', 'Slide added successfully.');
     }
 
@@ -47,12 +52,17 @@ class PresentationController extends Controller
             'layout_type' => 'required|string|in:standard,center,grid,profile,chart',
             'bg_color' => 'nullable|string|max:20',
             'order' => 'required|integer',
-            'chart_data' => 'nullable|array',
+            'chart_data' => 'nullable|string',
         ]);
 
-        $validated['is_active'] = $request->boolean('is_active');
+        $data = $validated;
+        $data['is_active'] = $request->boolean('is_active');
 
-        $slide->update($validated);
+        if ($request->filled('chart_data')) {
+            $data['chart_data'] = json_decode($request->chart_data, true);
+        }
+
+        $slide->update($data);
         return back()->with('success', 'Slide updated successfully.');
     }
 
