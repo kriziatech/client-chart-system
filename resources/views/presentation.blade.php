@@ -295,7 +295,8 @@
         Reveal.initialize({
             width: 1100,
             height: 700,
-            marg         hash: true,
+            margin: 0.1,
+            hash: true,
             center: true,
             controls: true,
             progress: true,
