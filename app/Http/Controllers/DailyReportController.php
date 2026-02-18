@@ -28,7 +28,11 @@ class DailyReportController extends Controller
         $request->validate([
             'report_date' => 'required|date',
             'content' => 'required|string',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images_before' => 'required|array|min:1',
+            'images_before.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
+            'images_after' => 'required|array|min:1',
+            'images_after.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
+            'images_progress.*' => 'image|mimes:jpeg,png,jpg,gif|max:5120',
             'tasks' => 'nullable|array',
             'tasks.*' => 'exists:tasks,id',
             'expenses' => 'nullable|array',

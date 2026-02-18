@@ -66,25 +66,28 @@
                 @endif
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
+                    <div
+                        class="p-4 bg-rose-50/30 dark:bg-rose-500/5 rounded-2xl border border-rose-100 dark:border-rose-500/20">
                         <label class="block text-[10px] font-black text-rose-500 uppercase tracking-widest mb-2">Before
-                            Work (Critical)</label>
-                        <input type="file" name="images_before[]" multiple accept="image/*"
-                            class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100">
+                            Work (Mandatory)</label>
+                        <input type="file" name="images_before[]" multiple accept="image/*" required
+                            class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-rose-500 file:text-white hover:file:bg-rose-600 transition-all cursor-pointer">
                     </div>
-                    <div>
+                    <div
+                        class="p-4 bg-emerald-50/30 dark:bg-emerald-500/5 rounded-2xl border border-emerald-100 dark:border-emerald-500/20">
                         <label
                             class="block text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2">After
-                            Work (Completion)</label>
-                        <input type="file" name="images_after[]" multiple accept="image/*"
-                            class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                            Work (Mandatory)</label>
+                        <input type="file" name="images_after[]" multiple accept="image/*" required
+                            class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-emerald-500 file:text-white hover:file:bg-emerald-600 transition-all cursor-pointer">
                     </div>
-                    <div>
+                    <div
+                        class="p-4 bg-brand-50/30 dark:bg-brand-500/5 rounded-2xl border border-brand-100 dark:border-brand-500/20">
                         <label
-                            class="block text-[10px] font-black text-brand-500 uppercase tracking-widest mb-2">Progress
+                            class="block text-[10px] font-black text-brand-500 uppercase tracking-widest mb-2">In-Progress
                             / Others</label>
                         <input type="file" name="images_progress[]" multiple accept="image/*"
-                            class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100">
+                            class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-brand-500 file:text-white hover:file:bg-brand-600 transition-all cursor-pointer">
                     </div>
                 </div>
 
@@ -150,26 +153,65 @@
                     @endif
 
                     @if($report->images->count() > 0)
-                    <div class="mt-8">
-                        <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Site
-                            Documentation</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            @foreach($report->images as $image)
-                            <div
-                                class="group/img relative aspect-square rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-dark-border">
-                                <img src="{{ Storage::url($image->image_path) }}" alt="Progress Image"
-                                    class="w-full h-full object-cover">
-                                @if($image->label)
-                                <div class="absolute top-2 left-2">
-                                    <span
-                                        class="px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-lg 
-                                        {{ $image->label == 'before' ? 'bg-rose-500 text-white' : ($image->label == 'after' ? 'bg-emerald-500 text-white' : 'bg-brand-500 text-white') }}">
-                                        {{ $image->label }}
-                                    </span>
+                    <div class="mt-8 space-y-6">
+                        @php
+                        $beforeImages = $report->images->where('label', 'before');
+                        $afterImages = $report->images->where('label', 'after');
+                        $progressImages = $report->images->where('label', 'progress');
+                        @endphp
+
+                        {{-- Before vs After Comparison Card --}}
+                        @if($beforeImages->count() > 0 && $afterImages->count() > 0)
+                        <div
+                            class="bg-slate-50 dark:bg-dark-bg/50 rounded-[24px] p-6 border border-slate-100 dark:border-dark-border">
+                            <h4
+                                class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+                                Transformation Comparison
+                            </h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-3">
+                                    <span class="text-[9px] font-black text-rose-500 uppercase tracking-tighter">Initial
+                                        Condition (Before)</span>
+                                    <div
+                                        class="aspect-video rounded-2xl overflow-hidden shadow-sm border border-rose-100 bg-white">
+                                        <img src="{{ Storage::url($beforeImages->first()->image_path) }}"
+                                            class="w-full h-full object-cover">
+                                    </div>
                                 </div>
-                                @endif
+                                <div class="space-y-3">
+                                    <span class="text-[9px] font-black text-emerald-500 uppercase tracking-tighter">Work
+                                        Result (After)</span>
+                                    <div
+                                        class="aspect-video rounded-2xl overflow-hidden shadow-sm border border-emerald-100 bg-white">
+                                        <img src="{{ Storage::url($afterImages->first()->image_path) }}"
+                                            class="w-full h-full object-cover">
+                                    </div>
+                                </div>
                             </div>
-                            @endforeach
+                        </div>
+                        @endif
+
+                        {{-- Full Gallery --}}
+                        <div>
+                            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Complete
+                                Journal Photos</h4>
+                            <div class="grid grid-cols-3 md:grid-cols-6 gap-3">
+                                @foreach($report->images as $image)
+                                <div
+                                    class="group/img relative aspect-square rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-dark-border">
+                                    <img src="{{ Storage::url($image->image_path) }}" alt="Progress Image"
+                                        class="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500">
+                                    <div class="absolute top-1.5 left-1.5">
+                                        <span
+                                            class="px-1.5 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-widest shadow-lg 
+                                            {{ $image->label == 'before' ? 'bg-rose-500 text-white' : ($image->label == 'after' ? 'bg-emerald-500 text-white' : 'bg-brand-500 text-white') }}">
+                                            {{ $image->label }}
+                                        </span>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                     @endif
