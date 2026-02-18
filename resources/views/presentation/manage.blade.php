@@ -19,7 +19,14 @@
         document.getElementById('edit-bg').value = slide.bg_color || '#0F172A';
         document.getElementById('edit-active').checked = !!slide.is_active;
 
+        // Populate chart data if exists
+        const chartDataInput = document.getElementById('edit-chart_data');
+        if (chartDataInput) {
+            chartDataInput.value = slide.chart_data ? JSON.stringify(slide.chart_data, null, 2) : '';
+        }
+
         modal.classList.remove('hidden');
+        if (window.toggleChartSection) window.toggleChartSection('edit');
         if (window.forceUpdatePreview) window.forceUpdatePreview('edit');
     }
 
@@ -56,11 +63,11 @@
             });
     }
 
-    document.addEventListener('DOMContentLoaded'() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Live Preview Logic
         const types = ['add', 'edit'];
         types.forEach(type => {
-            const fields = ['title', 'subtitle', 'content', 'bg'];
+            const fields = ['title', 'subtitle', 'content', 'bg', 'chart_data'];
             fields.forEach(field => {
                 const input = document.getElementById(type + '-' + (field === 'bg' ? 'bg' : field));
                 if (input) {
@@ -73,59 +80,59 @@
         });
 
         function updatePreview(type) {
-        const title = document.getElementById(type + '-title').value;
-        const subtitle = document.getElementById(type + '-subtitle').value;
-        const content = document.getElementById(type + '-content').value;
-        const bg = document.getElementById(type + '-bg').value || '#0F172A';
-        const layout = document.getElementById(type + '-layout').value;
+            const title = document.getElementById(type + '-title').value;
+            const subtitle = document.getElementById(type + '-subtitle').value;
+            const content = document.getElementById(type + '-content').value;
+            const bg = document.getElementById(type + '-bg').value || '#0F172A';
+            const layout = document.getElementById(type + '-layout').value;
 
-        const previewTitle = document.getElementById(type + '-preview-title');
-        const previewSubtitle = document.getElementById(type + '-preview-subtitle');
-        const previewContent = document.getElementById(type + '-preview-content');
-        const previewContainer = document.getElementById(type + '-preview-container');
+            const previewTitle = document.getElementById(type + '-preview-title');
+            const previewSubtitle = document.getElementById(type + '-preview-subtitle');
+            const previewContent = document.getElementById(type + '-preview-content');
+            const previewContainer = document.getElementById(type + '-preview-container');
 
-        previewTitle.innerText = title || 'Slide Title';
-        previewSubtitle.innerText = subtitle || 'Subtitle Goes Here';
-        previewContent.innerHTML = content || 'Content will appear here as you type.';
-        previewContainer.style.backgroundColor = bg;
+            previewTitle.innerText = title || 'Slide Title';
+            previewSubtitle.innerText = subtitle || 'Subtitle Goes Here';
+            previewContent.innerHTML = content || 'Content will appear here as you type.';
+            previewContainer.style.backgroundColor = bg;
 
-        // Simple layout preview adjustments
-        const innerDiv = previewContainer.querySelector('div');
-        if(innerDiv) {
-            if (layout === 'center') {
-                innerDiv.classList.add('items-center', 'text-center');
-            } else {
-                innerDiv.classList.remove('items-center', 'text-center');
+            // Simple layout preview adjustments
+            const innerDiv = previewContainer.querySelector('div');
+            if (innerDiv) {
+                if (layout === 'center') {
+                    innerDiv.classList.add('items-center', 'text-center');
+                } else {
+                    innerDiv.classList.remove('items-center', 'text-center');
+                }
             }
         }
-    }
 
         // Global exposing for manual calls (like after AI suggest)
         window.forceUpdatePreview = updatePreview;
 
-    const el = document.getElementById('slides-list');
-    if (el) {
-        Sortable.create(el, {
-            animation: 150,
-            handle: '.drag-handle',
-            ghostClass: 'bg-brand-50',
-            onEnd: function () {
-                const order = Array.from(el.querySelectorAll('[data-id]')).map(item => item.dataset.id);
-                fetch('{{ route("presentation.slides.reorder") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ order: order })
-                }).then(response => {
-                    if (response.ok) {
-                        // Optional: Show a subtle toast
-                    }
-                });
-            }
-        });
-    }
+        const el = document.getElementById('slides-list');
+        if (el) {
+            Sortable.create(el, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'bg-brand-50',
+                onEnd: function () {
+                    const order = Array.from(el.querySelectorAll('[data-id]')).map(item => item.dataset.id);
+                    fetch('{{ route("presentation.slides.reorder") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ order: order })
+                    }).then(response => {
+                        if (response.ok) {
+                            // Optional: Show a subtle toast
+                        }
+                    });
+                }
+            });
+        }
     });
 </script>
 <div class="min-h-screen bg-[#F8FAFC] dark:bg-dark-bg py-12 px-4">
@@ -256,8 +263,20 @@
                             <option value="center">Center Focused</option>
                             <option value="grid">Data Grid</option>
                             <option value="profile">Profile/Portfolio</option>
+                            <option value="chart">Interactive Chart</option>
                         </select>
                     </div>
+                </div>
+
+                <div id="add-chart-section"
+                    class="hidden space-y-4 p-6 rounded-2xl bg-brand-50/30 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/20">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-brand-500 ml-2">Chart Data
+                        (JSON)</label>
+                    <textarea name="chart_data" id="add-chart_data" rows="3"
+                        placeholder='{"labels": ["Jan", "Feb", "Mar"], "datasets": [{"label": "Sales", "data": [10, 20, 15]}]}'
+                        class="w-full bg-white dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-3 text-xs font-mono focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white"></textarea>
+                    <p class="text-[9px] text-slate-400 italic">Enter Chart.js formatted data. Labels and datasets are
+                        required.</p>
                 </div>
 
                 <div class="space-y-4">
@@ -373,8 +392,17 @@
                             <option value="center">Centered Large</option>
                             <option value="grid">2-Column Grid</option>
                             <option value="profile">Profile Layout</option>
+                            <option value="chart">Interactive Chart</option>
                         </select>
                     </div>
+                </div>
+
+                <div id="edit-chart-section"
+                    class="hidden space-y-4 p-6 rounded-2xl bg-brand-50/30 dark:bg-brand-500/5 border border-brand-100 dark:border-brand-500/20">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-brand-500 ml-2">Chart Data
+                        (JSON)</label>
+                    <textarea name="chart_data" id="edit-chart_data" rows="3"
+                        class="w-full bg-white dark:bg-dark-bg border-slate-200 dark:border-dark-border rounded-xl px-4 py-3 text-xs font-mono focus:ring-2 focus:ring-brand-500/20 transition-all outline-none text-slate-700 dark:text-white"></textarea>
                 </div>
 
                 <div class="space-y-2">
