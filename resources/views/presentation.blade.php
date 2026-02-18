@@ -69,6 +69,88 @@
             }
         }
 
+        .reveal .slides section {
+            padding: 15px;
+        }
+
+        /* 2D Background Ornaments */
+        .bg-ornaments {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .ornament {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(79, 112, 250, 0.1), rgba(167, 139, 250, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 50%;
+            filter: blur(40px);
+            animation: float-slow infinite ease-in-out;
+        }
+
+        .ornament-1 {
+            width: 400px;
+            height: 400px;
+            top: -100px;
+            right: -100px;
+            animation-duration: 20s;
+        }
+
+        .ornament-2 {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            left: -50px;
+            animation-duration: 25s;
+            animation-delay: -5s;
+        }
+
+        .ornament-3 {
+            width: 200px;
+            height: 200px;
+            top: 40%;
+            left: 10%;
+            animation-duration: 18s;
+            animation-delay: -2s;
+            border-radius: 30%;
+        }
+
+        @keyframes float-slow {
+
+            0%,
+            100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+
+            33% {
+                transform: translate(30px, 50px) rotate(10deg);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) rotate(-5deg);
+            }
+        }
+
+        /* Mouse Follower Glow */
+        #mouse-glow {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(79, 112, 250, 0.15) 0%, rgba(79, 112, 250, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
         .animate-float {
             animation: float 6s ease-in-out infinite;
         }
@@ -134,21 +216,25 @@
             -webkit-text-fill-color: transparent;
         }
 
+        /* Glassmorphism 2.0 */
         .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 24px;
+            margin: 12px 0;
             text-align: left;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
         }
 
         .card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
         }
 
         .grid-2 {
@@ -233,6 +319,12 @@
 </head>
 
 <body>
+    <div id="mouse-glow"></div>
+    <div class="bg-ornaments">
+        <div class="ornament ornament-1"></div>
+        <div class="ornament ornament-2"></div>
+        <div class="ornament ornament-3"></div>
+    </div>
     <div class="reveal">
         <div class="slides">
 
@@ -371,6 +463,18 @@
             autoAnimate: true,
             autoAnimateEasing: 'ease-out',
             autoAnimateDuration: 0.8,
+        });
+
+        // Mouse Follower Logic
+        const glow = document.getElementById('mouse-glow');
+        window.addEventListener('mousemove', (e) => {
+            glow.style.opacity = '1';
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+        });
+
+        window.addEventListener('mouseleave', () => {
+            glow.style.opacity = '0';
         });
     </script>
 </body>
