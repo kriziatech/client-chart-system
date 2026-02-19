@@ -4,7 +4,18 @@
 <div class="max-w-4xl mx-auto">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Edit Project: {{ $client->first_name }}</h1>
-        <a href="{{ route('clients.index') }}" class="text-gray-600 hover:text-gray-800">&larr; Back to Dashboard</a>
+        <div class="flex items-center gap-4">
+            @if(Auth::user()->isAdmin())
+            <form action="{{ route('clients.destroy', $client) }}" method="POST"
+                onsubmit="return confirm('Delete this project charter permanently?');" class="inline">
+                @csrf @method('DELETE')
+                <button type="submit" class="text-rose-600 hover:text-rose-800 text-sm font-bold">Delete
+                    Project</button>
+            </form>
+            @endif
+            <a href="{{ route('clients.index') }}" class="text-gray-600 hover:text-gray-800">&larr; Back to
+                Dashboard</a>
+        </div>
     </div>
 
     <!-- Error Alert -->

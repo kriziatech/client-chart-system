@@ -178,6 +178,16 @@ default => 'overview',
                 class="bg-white dark:bg-slate-800 text-slate-700 dark:text-white border border-slate-200 dark:border-slate-700 px-5 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 transition">Edit
                 Details</a>
             @endif
+            @if(Auth::user()->isAdmin())
+            <form action="{{ route('clients.destroy', $client) }}" method="POST"
+                onsubmit="return confirm('Delete this project charter permanently?');" class="inline">
+                @csrf @method('DELETE')
+                <button type="submit"
+                    class="bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 border border-rose-100 dark:border-rose-900/50 px-5 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-rose-100 dark:hover:bg-rose-900/50 transition">
+                    Delete Project
+                </button>
+            </form>
+            @endif
             <a href="{{ route('clients.print', $client) }}" target="_blank"
                 class="bg-slate-900 hover:bg-black text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg transition">Print
                 Brief</a>
