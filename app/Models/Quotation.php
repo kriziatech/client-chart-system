@@ -9,12 +9,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Quotation extends Model
 {
-    use HasFactory, SoftDeletes, \App\Traits\Auditable;
+    use HasFactory, SoftDeletes, \App\Traits\Auditable, \App\Traits\BelongsToTenant;
 
     protected $fillable = [
+        'company_id',
         'client_id',
         'lead_id',
         'quotation_number',
+        'project_type',
         'date',
         'valid_until',
         'subtotal',

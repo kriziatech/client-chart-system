@@ -8,7 +8,7 @@ use App\Traits\Auditable;
 
 class Task extends Model
 {
-    use HasFactory, Auditable;
+    use HasFactory, Auditable, \App\Traits\BelongsToTenant;
 
     protected $guarded = [];
 

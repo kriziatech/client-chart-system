@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class DailyReport extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BelongsToTenant;
 
-    protected $fillable = ['client_id', 'report_date', 'content'];
+    protected $fillable = ['company_id', 'client_id', 'report_date', 'content'];
 
     protected $casts = [
         'report_date' => 'date',

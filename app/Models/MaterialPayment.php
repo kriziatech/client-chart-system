@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class MaterialPayment extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BelongsToTenant;
 
     protected $fillable = [
+        'company_id',
         'client_id',
         'material_inward_id',
         'supplier_name',

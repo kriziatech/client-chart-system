@@ -10,6 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (Schema::hasTable('presentation_slides')) {
+            return;
+        }
+
         Schema::create('presentation_slides', function (Blueprint $table) {
             $table->id();
             $table->string('title');

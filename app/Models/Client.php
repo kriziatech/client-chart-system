@@ -8,7 +8,7 @@ use Carbon\Carbon;
 
 class Client extends Model
 {
-    use Auditable;
+    use Auditable, \App\Traits\BelongsToTenant;
 
     protected $guarded = [];
 

@@ -8,11 +8,12 @@ use App\Models\Client;
 
 class PitchLead extends Model
 {
-    use \App\Traits\Auditable;
+    use \App\Traits\Auditable, \App\Traits\BelongsToTenant;
 
     protected $table = 'pitch_leads';
 
     protected $fillable = [
+        'company_id',
         'name',
         'email',
         'phone',

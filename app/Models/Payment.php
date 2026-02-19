@@ -7,7 +7,7 @@ use App\Traits\Auditable;
 
 class Payment extends Model
 {
-    use Auditable;
+    use Auditable, \App\Traits\BelongsToTenant;
 
     protected $guarded = [];
 

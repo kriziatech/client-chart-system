@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Expense extends Model
 {
-    use HasFactory, \App\Traits\Auditable, \Illuminate\Database\Eloquent\SoftDeletes;
+    use HasFactory, \App\Traits\Auditable, \Illuminate\Database\Eloquent\SoftDeletes, \App\Traits\BelongsToTenant;
 
     protected $fillable = [
+        'company_id',
         'client_id',
         'vendor_id',
         'description',

@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProjectFinancial extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BelongsToTenant;
 
     protected $fillable = [
+        'company_id',
         'client_id',
         'budget_locked_amount',
         'is_locked',

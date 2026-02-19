@@ -11,7 +11,7 @@ use App\Traits\Auditable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, Auditable;
+    use HasFactory, Notifiable, Auditable, \App\Traits\BelongsToTenant;
 
     /**
      * The attributes that are mass assignable.
@@ -19,6 +19,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'company_id',
         'name',
         'email',
         'password',

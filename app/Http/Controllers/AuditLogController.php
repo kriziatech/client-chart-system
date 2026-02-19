@@ -39,9 +39,15 @@ class AuditLogController extends Controller
             $cutoffDate = now()->subDays(7);
             
             // Bypass the 'immutable' check in AuditLog model using DB facade or withoutEvents
-            $deletedCount = \Illuminate\Support\Facades\DB::table('audit_logs')
-                ->where('created_at', '<', $cutoffDate)
-                ->delete();
+            // SECURE: Scope to current tenant
+            $query = \Illuminate\Support\Facades\DB::table('audit_logs')
+                ->where('created_at', '<', $cutoffDate);
+
+            if (auth()->check() && auth()->user()->company_id) {
+                $query->where('company_id', auth()->user()->company_id);
+            }
+
+            $deletedCount = $query->delete();
 
             return back()->with('success', "Audit cleanup complete. Removed $deletedCount logs older than 7 days.");
         } catch (\Exception $e) {

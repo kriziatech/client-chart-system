@@ -2,9 +2,11 @@
 
 @section('content')
 <div class="h-full bg-gray-50 dark:bg-gray-900" x-data="quotationShow()">
+    @if($quotation)
     <x-journey-header stage="Estimate & Quotation"
         nextStep="{{ $quotation->status === 'accepted' ? 'Convert this approved estimate to a live Project Workspace' : 'Get client approval and signature' }}"
         progress="30" statusColor="{{ $quotation->status === 'accepted' ? 'green' : 'blue' }}" />
+    @endif
 
     <!-- Header -->
     <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4 sticky top-0 z-30">
@@ -169,6 +171,16 @@
                         </h3>
                     </div>
 
+                    <!-- BOQ Header (Desktop) -->
+                    <div
+                        class="hidden md:grid md:grid-cols-12 gap-4 px-4 py-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        <div class="md:col-span-5">Particulars</div>
+                        <div class="md:col-span-2 text-center">Rate</div>
+                        <div class="md:col-span-1 text-center">Units</div>
+                        <div class="md:col-span-2 text-center">Area</div>
+                        <div class="md:col-span-2 text-right">Amount</div>
+                    </div>
+
                     <div class="divide-y divide-gray-100 dark:divide-gray-700">
                         @foreach($quotation->items->groupBy('category') as $category => $items)
                         <div
@@ -176,30 +188,61 @@
                             {{ $category ?: 'General' }}
                         </div>
                         @foreach($items as $item)
-                        <div class="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div class="flex-1">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $item->description }}
-                                </p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-tighter">{{
-                                    $item->type }} / {{ $item->unit ?: 'Nos' }}</p>
+                        <div
+                            class="p-4 grid grid-cols-1 md:grid-cols-12 print:grid-cols-12 gap-4 items-start md:items-center break-inside-avoid page-break-inside-avoid">
+                            <!-- S.No -->
+                            <div
+                                class="col-span-1 md:col-span-1 text-gray-500 dark:text-gray-400 font-bold border-r border-gray-100 dark:border-gray-800 hidden md:block print:block">
+                                {{ $loop->parent->iteration }}.{{ $loop->iteration }}
                             </div>
-                            <div class="flex items-center gap-8">
-                                <div class="text-right">
-                                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Quantity
-                                    </p>
-                                    <p class="text-sm text-gray-900 dark:text-white font-medium">{{ $item->quantity }}
-                                    </p>
+
+                            <!-- Particulars -->
+                            <div class="md:col-span-4 pl-2">
+                                <div
+                                    class="text-sm font-semibold text-gray-900 dark:text-white prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 dark:prose-invert">
+                                    {!! \Illuminate\Support\Str::markdown($item->description) !!}
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Rate</p>
-                                    <p class="text-sm text-gray-900 dark:text-white font-medium">
-                                        ₹@indian_format($item->rate)</p>
-                                </div>
-                                <div class="text-right w-24">
-                                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Amount</p>
-                                    <p class="text-sm text-brand-600 dark:text-brand-400 font-boldital">
-                                        ₹@indian_format($item->amount)</p>
-                                </div>
+                                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 uppercase tracking-wider">
+                                    {{ $item->category }}
+                                </p>
+                            </div>
+
+                            <!-- Rate -->
+                            <div class="col-span-2 md:col-span-2 text-right md:text-center">
+                                <p
+                                    class="md:hidden print:hidden text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                    Rate
+                                </p>
+                                <p class="text-sm text-gray-900 dark:text-white font-medium">
+                                    ₹@indian_format($item->rate)/{{ $item->unit ?? 'unit' }}</p>
+                            </div>
+
+                            <!-- No. of Units -->
+                            <div class="col-span-1 md:col-span-1 text-right md:text-center">
+                                <p
+                                    class="md:hidden print:hidden text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                    Units
+                                </p>
+                                <p class="text-sm text-gray-900 dark:text-white">{{ $item->no_of_units + 0 }}</p>
+                            </div>
+
+                            <!-- Area -->
+                            <div class="col-span-2 md:col-span-2 text-right md:text-center">
+                                <p
+                                    class="md:hidden print:hidden text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                    Area
+                                </p>
+                                <p class="text-sm text-gray-900 dark:text-white">{{ $item->area + 0 }} {{ $item->unit }}
+                                </p>
+                            </div>
+
+                            <!-- Total -->
+                            <div class="col-span-2 md:col-span-2 text-right">
+                                <p
+                                    class="md:hidden print:hidden text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                                    Amount</p>
+                                <p class="text-sm text-brand-600 dark:text-brand-400 font-bold">
+                                    ₹@indian_format($item->amount)</p>
                             </div>
                         </div>
                         @endforeach
@@ -241,6 +284,51 @@
                         $quotation->notes }}</p>
                 </div>
                 @endif
+
+                <!-- Fixed Terms & Conditions -->
+                <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Terms & Conditions</h4>
+
+                    <div class="overflow-hidden border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">1.</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">The rates mentioned
+                                        above are of per square feet.</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">2.</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">The material will be
+                                        delivered of above mentioned brand and the brand warranty will be provided under
+                                        the name of Interior Touch.</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">3.</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">All the products
+                                        mentioned above comes with a standard warranty of 5 years.</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">4.</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">There is an
+                                        additional 3-D designing fees of Rs. 20,000 which will be adjusted after the
+                                        work starts.</td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">5.</td>
+                                    <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">Minimum 50% advance
+                                        is required to initialise the work, rest 30% on completion of fifty percent work
+                                        and the remaining 20% before completion of work.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-12">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white">Thanks & Regards,</p>
+                        <p class="text-sm text-brand-600 dark:text-brand-400 font-bold mt-1">Interior Touch</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Right: Metadata & History -->
@@ -451,7 +539,7 @@
                 document.getElementById('signature_data_input').value = dataUrl;
                 document.getElementById('signature-form').submit();
             }
-        }
+        };
     }
 </script>
 @endsection

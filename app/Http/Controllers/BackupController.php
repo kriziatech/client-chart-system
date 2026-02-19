@@ -251,12 +251,36 @@ class BackupController extends Controller
             $password = $dbConfig['password'];
 
             // Detect which binary is available (mysql or mariadb)
-            $checkBinary = Process::fromShellCommandline('which mariadb || which mysql');
-            $checkBinary->run();
-            $binary = trim($checkBinary->getOutput());
+            $binary = env('DB_RESTORE_BINARY_PATH');
 
             if (empty($binary)) {
-                throw new \Exception("Neither 'mariadb' nor 'mysql' binary found in the system path.");
+                // Try to detect using 'which'
+                $checkBinary = Process::fromShellCommandline('which mariadb || which mysql');
+                $checkBinary->run();
+                $binary = trim($checkBinary->getOutput());
+            }
+
+            if (empty($binary)) {
+                // Fallback to common paths
+                $commonPaths = [
+                    '/usr/local/bin/mysql',
+                    '/usr/bin/mysql',
+                    '/opt/homebrew/bin/mysql',
+                    '/Applications/MAMP/Library/bin/mysql',
+                    '/Applications/XAMPP/xamppfiles/bin/mysql'
+                ];
+
+                foreach ($commonPaths as $path) {
+                    if (file_exists($path) && is_executable($path)) {
+                        $binary = $path;
+                        break;
+                    }
+                }
+            }
+
+            if (empty($binary)) {
+                \Illuminate\Support\Facades\Log::error("Restore failed: Could not find mysql binary. Please set DB_RESTORE_BINARY_PATH in .env");
+                throw new \Exception("Neither 'mariadb' nor 'mysql' binary found in system path or common locations. Please configure DB_RESTORE_BINARY_PATH in .env file.");
             }
 
             // Build Command safely
@@ -286,7 +310,7 @@ class BackupController extends Controller
             $process = Process::fromShellCommandline($fullCmd);
             $process->run();
 
-            if (!$process->isSuccessful() && str_contains($process->getErrorOutput(), 'unknown variable')) {
+            if (!$process->isSuccessful() && (str_contains($process->getErrorOutput(), 'unknown variable') || str_contains($process->getErrorOutput(), 'unknown option'))) {
                 // Retry without --skip-ssl
                 $fullCmd = implode(' ', array_merge($cmdParts, $finalParts));
                 \Illuminate\Support\Facades\Log::info("Retrying restore without --skip-ssl: " . str_replace($password, '*****', $fullCmd));

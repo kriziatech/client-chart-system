@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class VendorPayment extends Model
 {
-    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes;
+    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes, \App\Traits\BelongsToTenant;
 
     protected $fillable = [
+        'company_id',
         'client_id',
         'vendor_id',
         'amount',

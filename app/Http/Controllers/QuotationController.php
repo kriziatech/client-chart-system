@@ -26,7 +26,8 @@ class QuotationController extends Controller
     public function create(Request $request)
     {
         $clients = Client::all();
-        $leads = Lead::whereNotIn('status', ['Won', 'Lost'])->get();
+        // Include 'Won' leads because we might want to create a quote for a won lead to convert it
+        $leads = Lead::whereNotIn('status', ['Lost'])->get();
         $selectedClientId = $request->get('client_id');
         $selectedLeadId = $request->get('lead_id');
         return view('quotations.boq-builder', compact('clients', 'leads', 'selectedClientId', 'selectedLeadId'));
@@ -37,6 +38,7 @@ class QuotationController extends Controller
         $validated = $request->validate([
             'client_id' => 'nullable|exists:clients,id',
             'lead_id' => 'nullable|exists:leads,id',
+            'project_type' => 'required|string|in:RES,COM',
             'date' => 'required|date',
             'valid_until' => 'nullable|date',
             'gst_percentage' => 'required|numeric|min:0',
@@ -44,7 +46,10 @@ class QuotationController extends Controller
             'items' => 'required|array|min:1',
             'items.*.description' => 'required|string',
             'items.*.category' => 'required|string',
-            'items.*.quantity' => 'required|numeric|min:0',
+            'items.*.quantity' => 'nullable|numeric|min:0', // Can be calculated from area * units
+            'items.*.area' => 'nullable|numeric|min:0',
+            'items.*.no_of_units' => 'nullable|numeric|min:0',
+            'items.*.unit' => 'nullable|string',
             'items.*.rate' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
@@ -55,7 +60,10 @@ class QuotationController extends Controller
 
         return DB::transaction(function () use ($validated) {
             $subtotal = collect($validated['items'])->sum(function ($item) {
-                    return $item['quantity'] * $item['rate'];
+                    $area = $item['area'] ?? 0;
+                    $units = $item['no_of_units'] ?? 1;
+                    $quantity = ($area > 0) ? ($area * $units) : ($item['quantity'] ?? 0);
+                    return $quantity * $item['rate'];
                 }
                 );
 
@@ -78,19 +86,48 @@ class QuotationController extends Controller
                     'notes' => $validated['notes'] ?? null,
                 ]);
 
-                // Update with sequential ID format
+                // Generate Custom Quotation Number
+                // Format: COMPANY_CODE/CLIENT_CODE/PROJECT_TYPE/DATE/RUNNING_NO
+                $companyCode = 'ITPM'; // Hardcoded for now
+    
+                $clientCode = 'UNKNOWN';
+                if (!empty($validated['client_id'])) {
+                    $client = Client::find($validated['client_id']);
+                    $clientCode = $client ? $client->file_number : 'ERR';
+                }
+                elseif (!empty($validated['lead_id'])) {
+                    $clientCode = 'L-' . $validated['lead_id'];
+                }
+
+                $projectType = $validated['project_type'] ?? 'GEN'; // Default to GEN if missing
+                $dateStr = date('Ymd');
+
+                // Running Number (Reset daily)
+                $todayCount = Quotation::whereDate('created_at', today())->count();
+                $runningNo = str_pad($todayCount + 1, 4, '0', STR_PAD_LEFT);
+
+                $customQuotationNumber = sprintf('%s/%s/%s/%s/%s', $companyCode, $clientCode, $projectType, $dateStr, $runningNo);
+
+                // Update with custom format
                 $quotation->update([
-                    'quotation_number' => 'Q-' . str_pad($quotation->id, 4, '0', STR_PAD_LEFT)
+                    'quotation_number' => $customQuotationNumber
                 ]);
 
                 foreach ($validated['items'] as $item) {
+                    $area = $item['area'] ?? 0;
+                    $units = $item['no_of_units'] ?? 1;
+                    $quantity = ($area > 0) ? ($area * $units) : ($item['quantity'] ?? 0);
+
                     $quotation->items()->create([
                         'description' => $item['description'],
                         'category' => $item['category'],
                         'type' => 'work', // default
-                        'quantity' => $item['quantity'],
+                        'unit' => $item['unit'] ?? null,
+                        'area' => $area,
+                        'no_of_units' => $units,
+                        'quantity' => $quantity,
                         'rate' => $item['rate'],
-                        'amount' => $item['quantity'] * $item['rate'],
+                        'amount' => $quantity * $item['rate'],
                     ]);
                 }
 
@@ -108,7 +145,8 @@ class QuotationController extends Controller
     public function edit(Quotation $quotation)
     {
         $clients = Client::all();
-        $leads = Lead::whereNotIn('status', ['Won', 'Lost'])->get();
+        // Include 'Won' leads
+        $leads = Lead::whereNotIn('status', ['Lost'])->get();
         $quotation->load('items');
         return view('quotations.boq-builder', compact('quotation', 'clients', 'leads'));
     }
@@ -116,6 +154,8 @@ class QuotationController extends Controller
     public function update(Request $request, Quotation $quotation)
     {
         $validated = $request->validate([
+            'client_id' => 'nullable|exists:clients,id',
+            'lead_id' => 'nullable|exists:leads,id',
             'date' => 'required|date',
             'valid_until' => 'nullable|date',
             'gst_percentage' => 'required|numeric|min:0',
@@ -123,7 +163,10 @@ class QuotationController extends Controller
             'items' => 'required|array|min:1',
             'items.*.description' => 'required|string',
             'items.*.category' => 'required|string',
-            'items.*.quantity' => 'required|numeric|min:0',
+            'items.*.quantity' => 'nullable|numeric|min:0',
+            'items.*.area' => 'nullable|numeric|min:0',
+            'items.*.no_of_units' => 'nullable|numeric|min:0',
+            'items.*.unit' => 'nullable|string',
             'items.*.rate' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
             'create_version' => 'nullable|boolean'
@@ -135,7 +178,10 @@ class QuotationController extends Controller
             $shouldCreateVersion = $request->has('create_version') || $quotation->status !== 'draft';
 
             $subtotal = collect($validated['items'])->sum(function ($item) {
-                    return $item['quantity'] * $item['rate'];
+                    $area = $item['area'] ?? 0;
+                    $units = $item['no_of_units'] ?? 1;
+                    $quantity = ($area > 0) ? ($area * $units) : ($item['quantity'] ?? 0);
+                    return $quantity * $item['rate'];
                 }
                 );
 
@@ -143,40 +189,80 @@ class QuotationController extends Controller
                 $totalAmount = $subtotal - $validated['discount_amount'] + $taxAmount;
 
                 if ($shouldCreateVersion) {
-                    // Create new version
-                    $newQuotation = Quotation::create([
-                        'client_id' => $quotation->client_id,
-                        'quotation_number' => $quotation->quotation_number, // Same number, different ID/version
-                        'date' => $validated['date'],
-                        'valid_until' => $validated['valid_until'] ?? null,
-                        'subtotal' => $subtotal,
-                        'discount_amount' => $validated['discount_amount'],
-                        'gst_percentage' => $validated['gst_percentage'],
-                        'tax_amount' => $taxAmount,
-                        'total_amount' => $totalAmount,
-                        'status' => 'draft', // Reset to draft
-                        'version' => $quotation->version + 1,
-                        'parent_id' => $quotation->parent_id ?? $quotation->id,
-                        'notes' => $validated['notes'] ?? null,
-                    ]);
+                    $nextVersion = $quotation->version + 1;
 
+                    // Check if next version already exists to prevent duplicate error
+                    $existingNextVersion = Quotation::where('quotation_number', $quotation->quotation_number)
+                        ->where('version', $nextVersion)
+                        ->first();
+
+                    if ($existingNextVersion) {
+                        // Update the existing draft version instead of creating a duplicate
+                        $newQuotation = $existingNextVersion;
+                        $newQuotation->update([
+                            'client_id' => $validated['client_id'] ?? $quotation->client_id,
+                            'lead_id' => $validated['lead_id'] ?? $quotation->lead_id,
+                            'date' => $validated['date'],
+                            'valid_until' => $validated['valid_until'] ?? null,
+                            'subtotal' => $subtotal,
+                            'discount_amount' => $validated['discount_amount'],
+                            'gst_percentage' => $validated['gst_percentage'],
+                            'tax_amount' => $taxAmount,
+                            'total_amount' => $totalAmount,
+                            'notes' => $validated['notes'] ?? null,
+                            // Status remains whatever it is, usually draft if it was being worked on
+                        ]);
+
+                        // Clear items to replace them
+                        $newQuotation->items()->delete();
+                    }
+                    else {
+                        // Create new version
+                        $newQuotation = Quotation::create([
+                            'client_id' => $validated['client_id'] ?? $quotation->client_id,
+                            'lead_id' => $validated['lead_id'] ?? $quotation->lead_id,
+                            'quotation_number' => $quotation->quotation_number, // Same number, different ID/version
+                            'date' => $validated['date'],
+                            'valid_until' => $validated['valid_until'] ?? null,
+                            'subtotal' => $subtotal,
+                            'discount_amount' => $validated['discount_amount'],
+                            'gst_percentage' => $validated['gst_percentage'],
+                            'tax_amount' => $taxAmount,
+                            'total_amount' => $totalAmount,
+                            'status' => 'draft', // Reset to draft
+                            'version' => $nextVersion,
+                            'parent_id' => $quotation->parent_id ?? $quotation->id,
+                            'notes' => $validated['notes'] ?? null,
+                        ]);
+                    }
+
+                    // Add items for the new/updated version
                     foreach ($validated['items'] as $item) {
+                        $area = $item['area'] ?? 0;
+                        $units = $item['no_of_units'] ?? 1;
+                        $quantity = ($area > 0) ? ($area * $units) : ($item['quantity'] ?? 0);
+
                         $newQuotation->items()->create([
                             'description' => $item['description'],
                             'category' => $item['category'],
                             'type' => 'work',
-                            'quantity' => $item['quantity'],
+                            'unit' => $item['unit'] ?? null,
+                            'area' => $area,
+                            'no_of_units' => $units,
+                            'quantity' => $quantity,
                             'rate' => $item['rate'],
-                            'amount' => $item['quantity'] * $item['rate'],
+                            'amount' => $quantity * $item['rate'],
                         ]);
                     }
 
                     return redirect()->route('quotations.show', $newQuotation->id)
-                        ->with('success', 'Quotation version v' . $newQuotation->version . ' created successfully.');
+                        ->with('success', 'Quotation version v' . $newQuotation->version . ' saved successfully.');
                 }
                 else {
                     // Update existing draft
                     $quotation->update([
+                        'client_id' => $validated['client_id'] ?? $quotation->client_id,
+                        'lead_id' => $validated['lead_id'] ?? $quotation->lead_id,
                         'date' => $validated['date'],
                         'valid_until' => $validated['valid_until'] ?? null,
                         'subtotal' => $subtotal,
@@ -189,13 +275,20 @@ class QuotationController extends Controller
 
                     $quotation->items()->delete();
                     foreach ($validated['items'] as $item) {
+                        $area = $item['area'] ?? 0;
+                        $units = $item['no_of_units'] ?? 1;
+                        $quantity = ($area > 0) ? ($area * $units) : ($item['quantity'] ?? 0);
+
                         $quotation->items()->create([
                             'description' => $item['description'],
                             'category' => $item['category'],
                             'type' => 'work',
-                            'quantity' => $item['quantity'],
+                            'unit' => $item['unit'] ?? null,
+                            'area' => $area,
+                            'no_of_units' => $units,
+                            'quantity' => $quantity,
                             'rate' => $item['rate'],
-                            'amount' => $item['quantity'] * $item['rate'],
+                            'amount' => $quantity * $item['rate'],
                         ]);
                     }
 
@@ -225,46 +318,60 @@ class QuotationController extends Controller
      */
     public function convertToProject(Quotation $quotation)
     {
-        if ($quotation->status !== 'accepted') {
-            return back()->with('error', 'Only accepted quotations can be converted to projects.');
-        }
-
-        if ($quotation->client_id) {
-            return redirect()->route('clients.show', $quotation->client_id)
-                ->with('info', 'This quotation is already linked to a project.');
-        }
-
-        return DB::transaction(function () use ($quotation) {
-            $lead = $quotation->lead;
-
-            if (!$lead) {
-                return back()->with('error', 'No lead associated with this quotation.');
+        try {
+            if ($quotation->status !== 'accepted') {
+                return back()->with('error', 'Only accepted quotations can be converted to projects.');
             }
 
-            // Create Project (Client)
-            $client = Client::create([
-                'first_name' => explode(' ', $lead->name)[0],
-                'last_name' => str_contains($lead->name, ' ') ? substr($lead->name, strpos($lead->name, ' ') + 1) : '',
-                'mobile' => $lead->phone,
-                'email' => $lead->email,
-                'address' => $lead->address ?: $lead->location,
-                'status' => 'Sales', // Initial stage after conversion
-                'user_id' => $lead->assigned_to_id ?: auth()->id(),
-                'start_date' => now(),
-            ]);
+            if ($quotation->client_id) {
+                // If it's already linked to a client (project), just redirect there
+                return redirect()->route('clients.show', $quotation->client_id)
+                    ->with('info', 'This quotation is already linked to a project.');
+            }
 
-            // Auto-generate project number
-            $client->update(['file_number' => 'P-' . str_pad($client->id, 4, '0', STR_PAD_LEFT)]);
+            return DB::transaction(function () use ($quotation) {
+                $lead = $quotation->lead;
 
-            // Link all quotations of this lead to the new project
-            Quotation::where('lead_id', $lead->id)->update(['client_id' => $client->id]);
+                if (!$lead) {
+                    // If no lead, try to check if we can creating a client from scratch purely from quotation?
+                    // For now, fail but with clear message.
+                    return back()->with('error', 'Error: No Lead linked to this quotation. Please edit the quotation and assign a Lead first.');
+                }
 
-            // Mark lead as Won
-            $lead->update(['status' => 'Won']);
+                // Create Project (Client)
+                // Split name safely
+                $nameParts = explode(' ', $lead->name, 2);
+                $firstName = $nameParts[0];
+                $lastName = $nameParts[1] ?? '';
 
-            return redirect()->route('clients.show', $client->id)
-                ->with('success', 'Project created successfully from quotation!');
-        });
+                $client = Client::create([
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'mobile' => $lead->phone,
+                    'email' => $lead->email,
+                    'address' => $lead->address ?: $lead->location,
+                    'status' => 'Sales', // Initial stage after conversion
+                    'user_id' => $lead->assigned_to_id ?: auth()->id(),
+                    'start_date' => now(),
+                ]);
+
+                // Auto-generate project number
+                $client->update(['file_number' => 'P-' . str_pad($client->id, 4, '0', STR_PAD_LEFT)]);
+
+                // Link all quotations of this lead to the new project
+                Quotation::where('lead_id', $lead->id)->update(['client_id' => $client->id]);
+
+                // Mark lead as Won
+                $lead->update(['status' => 'Won']);
+
+                return redirect()->route('clients.show', $client->id)
+                    ->with('success', 'Project created successfully from quotation!');
+            });
+        }
+        catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Project Conversion Failed: ' . $e->getMessage());
+            return back()->with('error', 'Conversion Failed: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Request $request, Quotation $quotation)

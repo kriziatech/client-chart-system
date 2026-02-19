@@ -15,6 +15,8 @@ class QuotationItem extends Model
         'type',
         'category',
         'unit',
+        'area',
+        'no_of_units',
         'quantity',
         'rate',
         'amount'

@@ -10,10 +10,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('presentation_slides', function (Blueprint $table) {
-            if (!Schema::hasColumn('presentation_slides', 'chart_data')) {
-                $table->json('chart_data')->nullable()->after('content');
-            }
+        Schema::table('quotations', function (Blueprint $table) {
+            $table->string('project_type')->nullable()->after('client_id');
         });
     }
 
@@ -22,8 +20,8 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('presentation_slides', function (Blueprint $table) {
-            $table->dropColumn('chart_data');
+        Schema::table('quotations', function (Blueprint $table) {
+            $table->dropColumn('project_type');
         });
     }
 };

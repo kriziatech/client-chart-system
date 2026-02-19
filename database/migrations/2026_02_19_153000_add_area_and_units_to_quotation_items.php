@@ -10,10 +10,9 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('presentation_slides', function (Blueprint $table) {
-            if (!Schema::hasColumn('presentation_slides', 'chart_data')) {
-                $table->json('chart_data')->nullable()->after('content');
-            }
+        Schema::table('quotation_items', function (Blueprint $table) {
+            $table->decimal('area', 15, 2)->default(0)->after('unit');
+            $table->decimal('no_of_units', 15, 2)->default(1)->after('area');
         });
     }
 
@@ -22,8 +21,8 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('presentation_slides', function (Blueprint $table) {
-            $table->dropColumn('chart_data');
+        Schema::table('quotation_items', function (Blueprint $table) {
+            $table->dropColumn(['area', 'no_of_units']);
         });
     }
 };

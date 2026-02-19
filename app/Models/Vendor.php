@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Vendor extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\BelongsToTenant;
 
     protected $fillable = [
+        'company_id',
         'name',
         'email',
         'phone',

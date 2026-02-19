@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Lead extends Model
 {
-    use \App\Traits\Auditable;
+    use \App\Traits\Auditable, \App\Traits\BelongsToTenant;
 
     protected $fillable = [
+        'company_id',
         'offline_uuid',
         'name',
         'email',

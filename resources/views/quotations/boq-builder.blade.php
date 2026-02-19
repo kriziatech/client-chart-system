@@ -36,7 +36,7 @@
     </header>
 
     <main class="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
-        <form id="boqForm"
+        <form id="boqForm" @keydown.enter.prevent="$event.target.tagName !== 'TEXTAREA'"
             action="{{ isset($quotation) && $quotation ? route('quotations.update', $quotation->id) : route('quotations.store') }}"
             method="POST">
             @csrf
@@ -112,6 +112,18 @@
                                         @endforeach
                                     </select>
                                 </div>
+
+                                <!-- Project Type Selection -->
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Project Type</label>
+                                    <select name="project_type"
+                                        class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                                        <option value="RES" {{ (isset($quotation) && $quotation->project_type == 'RES')
+                                            ? 'selected' : '' }}>Residential</option>
+                                        <option value="COM" {{ (isset($quotation) && $quotation->project_type == 'COM')
+                                            ? 'selected' : '' }}>Commercial</option>
+                                    </select>
+                                </div>
                             </div>
                             <div>
                                 <label
@@ -148,87 +160,43 @@
                             </button>
                         </div>
 
-                        <div class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <!-- Desktop Header -->
-                            <div
-                                class="hidden md:grid grid-cols-12 gap-2 px-6 py-3 bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-700">
-                                <div class="col-span-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                    Category</div>
-                                <div class="col-span-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                    Description</div>
-                                <div
-                                    class="col-span-2 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">
-                                    Qty</div>
-                                <div class="col-span-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                    Rate (₹)</div>
-                                <div
-                                    class="col-span-2 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">
-                                    Total</div>
-                                <div class="col-span-1"></div>
-                            </div>
-
+                        <div class="space-y-4">
+                            <!-- Card Loop -->
                             <template x-for="(item, index) in items" :key="index">
                                 <div
-                                    class="p-4 md:p-3 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all border-b border-gray-100 dark:border-gray-700/50">
-                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
-                                        <!-- Category -->
-                                        <div class="md:col-span-2">
+                                    class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 p-5 relative group">
+
+                                    <!-- Header: Category & Total -->
+                                    <div
+                                        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                                        <div class="w-full md:w-1/3">
                                             <label
-                                                class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Category</label>
+                                                class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Category</label>
                                             <select :name="`items[${index}][category]`" x-model="item.category"
-                                                class="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-xs font-bold text-slate-900 dark:text-white focus:border-brand-500 outline-none appearance-none">
+                                                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 dark:text-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none transition-all">
                                                 <option value="Carpentry">Carpentry</option>
                                                 <option value="Electrical">Electrical</option>
                                                 <option value="Civil">Civil / Tiling</option>
                                                 <option value="Painting">Painting</option>
                                                 <option value="Plumbing">Plumbing</option>
                                                 <option value="False Ceiling">False Ceiling</option>
+                                                <option value="Labour Work">Labour Work</option>
                                                 <option value="Miscellaneous">Miscellaneous</option>
                                             </select>
                                         </div>
-
-                                        <!-- Description -->
-                                        <div class="md:col-span-3">
-                                            <label
-                                                class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Description</label>
-                                            <input type="text" :name="`items[${index}][description]`"
-                                                x-model="item.description" placeholder="Work detail..."
-                                                class="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-xs font-medium text-slate-900 dark:text-white focus:border-brand-500 outline-none">
-                                        </div>
-
-                                        <!-- Quantity -->
-                                        <div class="md:col-span-2">
-                                            <label
-                                                class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Qty</label>
-                                            <input type="number" step="0.01" :name="`items[${index}][quantity]`"
-                                                x-model="item.quantity" @input="calculateItemTotal(item)"
-                                                class="w-full bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 rounded-lg px-2 py-2 text-xs font-black text-slate-900 dark:text-white focus:border-brand-500 outline-none text-center shadow-inner">
-                                        </div>
-
-                                        <!-- Rate -->
-                                        <div class="md:col-span-2">
-                                            <label
-                                                class="block md:hidden text-[10px] font-black uppercase text-slate-400 mb-1">Rate
-                                                (₹)</label>
-                                            <div class="relative group">
-                                                <span
-                                                    class="absolute left-2 top-2 text-slate-400 font-bold text-[10px]">₹</span>
-                                                <input type="number" step="0.01" :name="`items[${index}][rate]`"
-                                                    x-model="item.rate" @input="calculateItemTotal(item)"
-                                                    class="w-full bg-white dark:bg-slate-950 border-2 border-slate-200 dark:border-slate-700 rounded-lg pl-6 pr-2 py-2 text-xs font-black text-slate-900 dark:text-white focus:border-brand-500 outline-none shadow-inner">
-                                            </div>
-                                        </div>
-
-                                        <!-- Amount -->
                                         <div
-                                            class="md:col-span-2 flex items-center justify-end font-black text-slate-900 dark:text-brand-400 text-xs tracking-tighter">
-                                            <span x-text="formatCurrency(item.amount)"></span>
-                                        </div>
-
-                                        <!-- Actions -->
-                                        <div class="md:col-span-1 flex justify-end">
-                                            <button type="button" @click="removeItem(index)"
-                                                class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
+                                            class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                                            <div class="text-right">
+                                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                                    Total Amount</p>
+                                                <p class="text-lg font-black text-emerald-600 dark:text-emerald-400">
+                                                    ₹<span
+                                                        x-text="item.amount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})"></span>
+                                                </p>
+                                            </div>
+                                            <button @click="removeItem(index)"
+                                                class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                                                title="Remove Item">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                     viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -237,6 +205,72 @@
                                                     </path>
                                                 </svg>
                                             </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Body: Description & Metrics -->
+                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                                        <!-- Description Column (Left) -->
+                                        <div class="md:col-span-7">
+                                            <label
+                                                class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                                Item Description <span
+                                                    class="text-xs font-normal normal-case text-gray-300 ml-1">(Use
+                                                    **text** for bold)</span>
+                                            </label>
+                                            <textarea :name="`items[${index}][description]`" x-model="item.description"
+                                                placeholder="Enter detailed description of the work item..." rows="4"
+                                                class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none resize-none transition-all"></textarea>
+                                        </div>
+
+                                        <!-- Metrics Column (Right) -->
+                                        <div class="md:col-span-5 grid grid-cols-2 gap-4">
+                                            <!-- Row 1: Unit & Nos -->
+                                            <div>
+                                                <label
+                                                    class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Unit</label>
+                                                <select :name="`items[${index}][unit]`" x-model="item.unit"
+                                                    class="w-full bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-xs font-bold text-gray-900 dark:text-white focus:border-brand-500 outline-none">
+                                                    <option value="sqft">Sq.ft</option>
+                                                    <option value="sqmt">Sq.mt</option>
+                                                    <option value="rft">Rft</option>
+                                                    <option value="rmt">Rmt</option>
+                                                    <option value="cum">Cu.m</option>
+                                                    <option value="cft">Cu.ft</option>
+                                                    <option value="nos">Nos</option>
+                                                    <option value="bags">Bags</option>
+                                                    <option value="kgs">Kgs</option>
+                                                    <option value="ltrs">Ltrs</option>
+                                                    <option value="box">Box</option>
+                                                    <option value="set">Set</option>
+                                                    <option value="ls">Lump Sum</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nos</label>
+                                                <input type="number" step="1" :name="`items[${index}][no_of_units]`"
+                                                    x-model="item.no_of_units" @input="calculateItemTotal(item)"
+                                                    class="w-full bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-black text-center text-gray-900 dark:text-white focus:border-brand-500 outline-none">
+                                            </div>
+
+                                            <!-- Row 2: Area & Rate -->
+                                            <div>
+                                                <label
+                                                    class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Area
+                                                    / Qty</label>
+                                                <input type="number" step="0.01" :name="`items[${index}][area]`"
+                                                    x-model="item.area" @input="calculateItemTotal(item)"
+                                                    class="w-full bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-black text-center text-gray-900 dark:text-white focus:border-brand-500 outline-none">
+                                            </div>
+                                            <div>
+                                                <label
+                                                    class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Rate
+                                                    (₹)</label>
+                                                <input type="number" step="0.01" :name="`items[${index}][rate]`"
+                                                    x-model="item.rate" @input="calculateItemTotal(item)"
+                                                    class="w-full bg-white dark:bg-gray-800 border-2 border-gray-100 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-black text-center text-emerald-600 dark:text-emerald-400 focus:border-emerald-500 outline-none">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -326,7 +360,9 @@ $initialItems = $quotation->items->map(function($i) {
 return [
 'description' => $i->description,
 'category' => $i->category,
-'quantity' => (float)$i->quantity,
+'unit' => $i->unit,
+'no_of_units' => (int)$i->no_of_units,
+'area' => (float)$i->area,
 'rate' => (float)$i->rate,
 'amount' => (float)$i->amount
 ];
@@ -357,7 +393,9 @@ $initialDiscount = $quotation->discount_amount;
                 this.items.push({
                     category: 'Carpentry',
                     description: '',
-                    quantity: 1,
+                    unit: 'sqft',
+                    no_of_units: 1,
+                    area: 0,
                     rate: 0,
                     amount: 0
                 });
@@ -369,7 +407,7 @@ $initialDiscount = $quotation->discount_amount;
             },
 
             calculateItemTotal(item) {
-                 item.amount = (parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0);
+                item.amount = (parseFloat(item.area) || 0) * (parseFloat(item.no_of_units) || 1) * (parseFloat(item.rate) || 0);
                 this.calculateFinalTotal();
             },
             calculateFinalTotal() {
@@ -379,14 +417,12 @@ $initialDiscount = $quotation->discount_amount;
                 this.totalAmount = afterDiscount + this.taxAmount;
             },
 
-           formatCurrency(value) {
+            formatCurrency(value) {
                 return new Intl.NumberFormat('en-IN', {
                     style: 'currency',
                     currency: 'INR',
-                    maximumFractionDigits: 0
+                    maximumFractionDigits: 2
                 }).format(value);
             }
-        };
-    }
-</script>
+      </script>
 @endsection
